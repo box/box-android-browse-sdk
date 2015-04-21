@@ -6,9 +6,9 @@ Quickstart
 --------------
 The SDK can be obtained by adding it as a maven dependency, cloning the source into your project, or by downloading one of the precompiled JARs from the releases page on GitHub.
 
-This SDK has the following dependencies and will need to be included if you use the JAR:
-* minimal-json v0.9.1 (for maven: com.eclipsesource.minimal-json:minimal-json:0.9.1)
-* box-content-sdk (for maven: )
+This SDK has the following dependencies and will need to be included in your project:
+* [minimal-json v0.9.1](https://github.com/ralfstx/minimal-json) (maven: `com.eclipsesource.minimal-json:minimal-json:0.9.1`)
+* [box-content-sdk](https://github.com/box/box-android-content-sdk) (maven: `coming soon`)
 
 Example:
 --------------
