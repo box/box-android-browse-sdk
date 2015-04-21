@@ -12,6 +12,7 @@ This SDK has the following dependencies and will need to be included if you use 
 
 Example:
 --------------
+```java
     // You will need a BoxSession and the BoxItem from the box-content-sdk 
     // Please refer to the documentation on the box-content-sdk for additional details.
     BoxSession session = new BoxSession(MainActivity.this);
@@ -48,3 +49,4 @@ Example:
             }
         }
     }
+```
