@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BoxBrowseSDK</string>
+    <string name="boxsdk_Problem_fetching_folder">Problem fetching folder.</string>
+</resources>
