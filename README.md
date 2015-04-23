@@ -2,25 +2,29 @@ Box Android Browse SDK
 ==============
 This SDK enables the ability to easily browse through Box storage to pick a folder/file.
 
-Quickstart
+Developer Setup
 --------------
 The SDK can be obtained by adding it as a maven dependency, cloning the source into your project, or by downloading one of the precompiled JARs from the releases page on GitHub.
 
-This SDK has the following dependencies and will need to be included if you use the JAR:
-* minimal-json v0.9.1 (for maven: com.eclipsesource.minimal-json:minimal-json:0.9.1)
-* box-content-sdk (for maven: )
+This SDK has the following dependencies and will need to be included in your project:
+* [minimal-json v0.9.1](https://github.com/ralfstx/minimal-json) (maven: `com.eclipsesource.minimal-json:minimal-json:0.9.1`)
+* [box-content-sdk](https://github.com/box/box-android-content-sdk) (maven: `coming soon`)
 
-Example:
+Quickstart
 --------------
-    // You will need a BoxSession and the BoxItem from the box-content-sdk 
-    // Please refer to the documentation on the box-content-sdk for additional details.
+You will need a BoxSession and the BoxItem from the [box-content-sdk](https://github.com/box/box-android-content-sdk). Please refer to the documentation of the box-content-sdk for additional details.
+```java
     BoxSession session = new BoxSession(MainActivity.this);
     BoxFolder folder = new BoxApiFolder(session).getInfo("<FOLDER_ID>").send();
-    
-    // To launch the activity to browse a given folder and pick a file:
+```
+####File Picker
+To launch the activity to browse a given folder and pick a file:
+```java
     startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(MainActivity.this, "<FOLDER_ID>", session), "<YOUR_REQUEST_CODE>");
+```
 
-    // To receive the result from the file picker after you picked a file, implement onActivityResult in your activity:
+To receive the result from the file picker after you picked a file, implement onActivityResult in your activity:
+```java
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode ==  "<YOUR_REQUEST_CODE>") {
@@ -32,11 +36,16 @@ Example:
             }
         }
     }
+```
 
-    // To launch the activity to browse a given folder and pick a folder:
+####Folder Picker
+To launch the activity to browse a given folder and pick a folder:
+```java
     startActivityForResult(BoxBrowseFolderActivity.getLaunchIntent(MainActivity.this, "<FOLDER_ID>", session),  "<YOUR_REQUEST_CODE>");
+```
 
-    // To receive the result from the file picker after you picked a folder, implement onActivityResult in your activity:
+To receive the result from the file picker after you picked a folder, implement onActivityResult in your activity:
+```java
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode ==  "<YOUR_REQUEST_CODE>") {
@@ -48,3 +57,18 @@ Example:
             }
         }
     }
+```
+
+Sample App
+--------------
+A sample app can be found in the [box-share-sample](../../tree/master/box-share-sample) folder.
+
+Copyright and License
+--------------
+Copyright 2015 Box, Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
