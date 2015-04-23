@@ -28,3 +28,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile project(':box-browse-sdk')
 }
+//apply from: '../maven_push.gradle'
