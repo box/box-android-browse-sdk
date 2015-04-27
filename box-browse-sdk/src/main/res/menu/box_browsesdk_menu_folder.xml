@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.box.androidsdk.browse.activities.BoxBrowseActivity">
+    <item
+        android:id="@+id/box_browsesdk_action_create_folder"
+        android:title="@string/box_browsesdk_create_folder"
+        android:icon="@drawable/ic_box_browsesdk_add_grey_24dp"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/box_browsesdk_action_search"
+        android:title="@string/box_browsesdk_action_search"
+        android:icon="@drawable/ic_box_browsesdk_search_grey_24dp"
+        app:showAsAction="always"
+        app:actionViewClass="com.box.androidsdk.browse.uidata.BoxSearchView"
+        />
+</menu>

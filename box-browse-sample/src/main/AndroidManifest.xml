@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.box.androidsdk.sample" >
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/box_browsesdk_title"
         android:theme="@style/AppTheme" >
         <activity
             android:name=".SampleBrowseActivity"
-            android:label="@string/app_name"
+            android:label="@string/box_browsesdk_title"
             android:configChanges="orientation|keyboard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,19 +19,8 @@
             </intent-filter>
         </activity>
 
-
         <activity
             android:name="com.box.androidsdk.content.auth.OAuthActivity"
-            android:label="BrowseTest" >
-        </activity>
-
-        <activity
-            android:name="com.box.androidsdk.browse.activities.BoxBrowseFileActivity"
-            android:label="BrowseTest" >
-        </activity>
-
-        <activity
-            android:name="com.box.androidsdk.browse.activities.BoxBrowseFolderActivity"
             android:label="BrowseTest" >
         </activity>
     </application>

@@ -1,0 +1,10 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="BoxDialogButton" parent="@android:style/Widget.Material.Button.Borderless">
+        <item name="android:textColor">@color/box_browsesdk_button_flat_selector</item>
+    </style>
+
+    <style name="BoxListItem">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+</resources>
