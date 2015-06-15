@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/box_browsesdk_horizontal_margin"
+    android:paddingTop="@dimen/box_browsesdk_horizontal_margin"
+    android:paddingRight="@dimen/box_browsesdk_horizontal_margin">
+    <TextView
+        style="@style/BoxDialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/box_browsesdk_create_folder"
+        android:layout_marginBottom="@dimen/box_browsesdk_vertical_margin"/>
+    <EditText
+        android:id="@+id/box_browsesdk_new_folder_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"/>
+</LinearLayout>

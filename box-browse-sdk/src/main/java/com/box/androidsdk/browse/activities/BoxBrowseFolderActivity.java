@@ -1,80 +1,187 @@
 package com.box.androidsdk.browse.activities;
 
-import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager.LayoutParams;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.adapters.BoxListItemAdapter;
-import com.box.androidsdk.browse.uidata.BoxListItem;
-import com.box.androidsdk.browse.uidata.ThumbnailManager;
+import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
+import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
+import com.box.androidsdk.browse.fragments.BoxCreateFolderFragment;
+import com.box.androidsdk.browse.fragments.BoxSearchFragment;
+import com.box.androidsdk.browse.uidata.BoxSearchView;
+import com.box.androidsdk.content.BoxApiFile;
+import com.box.androidsdk.content.BoxApiFolder;
+import com.box.androidsdk.content.BoxException;
+import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.requests.BoxRequestsFolder;
+import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.box.androidsdk.content.requests.BoxResponse;
+import com.box.androidsdk.content.utils.SdkUtils;
 
+import org.apache.http.HttpStatus;
 
-/**
- * This class is used to choose a particular folder from the user's account and when chosen will return a result with a BoxFolder in the extra
- * BoxBrowseFolderActivity.EXTRA_BOX_FOLDER.
- */
-public class BoxBrowseFolderActivity extends BoxBrowseFileActivity {
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener{
 
     /**
-     * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFolder} to the intent.
+     * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFolder} to the intent
      */
     public static final String EXTRA_BOX_FOLDER = "extraBoxFolder";
 
-    private final int FOLDER_PICKER_REQUEST_CODE = 8;
+    protected Button mSelectFolderButton;
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
+        setContentView(R.layout.box_browsesdk_activity_folder);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == FOLDER_PICKER_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // if someone further down the chain has chosen a folder then send result back.
-                setResult(resultCode, data);
-                finish();
-            }
+        mSelectFolderButton = (Button) findViewById(R.id.box_browsesdk_select_folder_button);
+        mSelectFolderButton.setOnClickListener(this);
+        initToolbar();
+        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
+            onBoxItemSelected(mItem);
         }
-        super.onActivityResult(requestCode, resultCode, data);
+        mSelectFolderButton.setEnabled(true);
+
     }
 
     @Override
-    protected void initializeViews() {
-        setContentView(R.layout.boxsdk_layout_folder_picker);
-        TextView customTitle = (TextView) this.findViewById(R.id.customTitle);
-        customTitle.setText(getTitle());
-        // to make dialog theme fill the full view.
-        getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+    public boolean handleOnItemClick(BoxItem item) {
+        onBoxItemSelected(item);
+        return false;
+    }
 
-        this.findViewById(R.id.btnChoose).setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_BOX_FOLDER, getCurrentFolder());
+        setResult(RESULT_OK, intent);
+        finish();
+    }
 
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra(EXTRA_BOX_FOLDER, mCurrentFolder);
-                setResult(RESULT_OK, intent);
-                finish();
+
+    @Override
+    public void handleBoxResponse(BoxResponse response) {
+        if (response.isSuccess()) {
+            if (response.getRequest() instanceof BoxRequestsFolder.CreateFolder) {
+                BoxBrowseFragment browseFrag = getTopBrowseFragment();
+                if (browseFrag != null) {
+                    browseFrag.onRefresh();
+                }
+
             }
-        });
+        } else {
+            int resId = R.string.box_browsesdk_network_error;
+            if (response.getException() instanceof BoxException) {
+                if (((BoxException) response.getException()).getResponseCode() == HttpStatus.SC_CONFLICT) {
+                    resId = R.string.box_browsesdk_create_folder_conflict;
+                } else {
+
+                }
+            }
+            Toast.makeText(this, resId, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
-    protected BoxListItemAdapter initializeBoxListItemAdapter(ThumbnailManager thumbNailManager) {
-        return new FolderPickerBoxListItemAdapter(this, thumbNailManager);
+    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
+        // Search will be limited to folders only.
+        searchRequest.limitType(BoxFolder.TYPE);
+        return super.onSearchRequested(searchRequest);
     }
 
     @Override
-    protected ListView getListView() {
-        return (ListView) this.findViewById(R.id.PickerListView);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.box_browsesdk_menu_folder, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.box_browsesdk_action_create_folder) {
+            BoxCreateFolderFragment.newInstance(getCurrentFolder(), mSession)
+                    .show(getFragmentManager(), TAG);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    /**
+     * Create an intent to launch an instance of this activity to browse folders.
+     *
+     * @param context current context.
+     * @param folder  folder to browse
+     * @param session a session, should be already authenticated.
+     * @return an intent to launch an instance of this activity.
+     */
+    public static Intent getLaunchIntent(Context context, final BoxFolder folder, final BoxSession session) {
+        if (folder == null || SdkUtils.isBlank(folder.getId()))
+            throw new IllegalArgumentException("A valid folder must be provided to browse");
+        if (session == null || session.getUser() == null || SdkUtils.isBlank(session.getUser().getId()))
+            throw new IllegalArgumentException("A valid user must be provided to browse");
+
+        Intent intent = new Intent(context, BoxBrowseFolderActivity.class);
+        intent.putExtra(EXTRA_ITEM, folder);
+        intent.putExtra(EXTRA_USER_ID, session.getUser().getId());
+        return intent;
+    }
+
+    @Override
+    public void onCreateFolder(String name) {
+        BoxApiFolder folderApi = new BoxApiFolder(mSession);
+        BoxRequestsFolder.CreateFolder req = folderApi.getCreateRequest(getCurrentFolder().getId(), name);
+        getApiExecutor(getApplication()).execute(req.toTask());
+    }
+
+
+    /**
+     * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     * @param context current context.
+     * @param session a session, should be already authenticated.
+     * @return a builder object to use to construct an instance of this class.
+     */
+    public static BoxBrowseFolderActivity.IntentBuilder createIntentBuilder(final Context context, final BoxSession session){
+        return new IntentBuilder(context, session);
+    }
+
+    /**
+     * An IntentBuilder used to create an intent to launch an instance of this class. Use this to add more
+     * complicated logic to your activity beyond the simple getLaunchIntent method.
+     */
+    public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder>{
+
+
+        protected IntentBuilder(final Context context, final BoxSession session){
+            super(context, session);
+        }
+
+        @Override
+        protected Intent createLaunchIntent() {
+            if (mFolder == null){
+                mFolder = BoxFolder.createFromId("0");
+            }
+            return getLaunchIntent(mContext, mFolder, mSession);
+        }
     }
 
     /**
@@ -85,10 +192,9 @@ public class BoxBrowseFolderActivity extends BoxBrowseFileActivity {
      * @param session  session.
      * @return an intent to launch an instance of this activity.
      */
+    @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderId, final BoxSession session) {
-        Intent intent = BoxBrowseActivity.getLaunchIntent(context, folderId, session);
-        intent.setClass(context, BoxBrowseFolderActivity.class);
-        return intent;
+        return createIntentBuilder(context, session).setStartingFolder(BoxFolder.createFromId(folderId)).createIntent();
     }
 
     /**
@@ -101,34 +207,13 @@ public class BoxBrowseFolderActivity extends BoxBrowseFileActivity {
      * @param session    session.
      * @return an intent to launch an instance of this activity.
      */
+    @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-        Intent intent = getLaunchIntent(context, folderId, session);
-        intent.putExtra(EXTRA_FOLDER_NAME, folderName);
-        return intent;
+        LinkedHashMap<String, Object> folderMap = new LinkedHashMap<String, Object>();
+        folderMap.put(BoxItem.FIELD_ID, folderId);
+        folderMap.put(BoxItem.FIELD_TYPE, BoxFolder.TYPE);
+        folderMap.put(BoxItem.FIELD_NAME, folderName);
+        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(folderMap)).createIntent();
     }
 
-    /**
-     * Adapter that disables clicking on files.
-     */
-    protected class FolderPickerBoxListItemAdapter extends BoxBrowseActivity.FolderNavigationBoxListItemAdapter {
-
-        public FolderPickerBoxListItemAdapter(Activity context, ThumbnailManager manager) {
-            super(context, manager);
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return getItem(position).getBoxItem() != null && getItem(position).getBoxItem() instanceof BoxFolder;
-        }
-
-        @Override
-        public synchronized void add(BoxListItem listItem) {
-            if (listItem.getType() == BoxListItem.TYPE_BOX_FILE_ITEM) {
-                // do not add files.
-                return;
-            }
-            super.add(listItem);
-        }
-
-    }
 }

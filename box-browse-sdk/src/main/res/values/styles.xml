@@ -1,0 +1,35 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="BrowseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/box_browsesdk_primary</item>
+        <item name="colorPrimaryDark">@color/box_browsesdk_primary_dark</item>
+        <item name="colorAccent">@color/box_browsesdk_accent</item>
+    </style>
+
+    <style name="BoxDialogTitle" parent="@style/TextAppearance.AppCompat.Title">
+    </style>
+
+    <style name="BoxLabelText" parent="@android:style/Widget.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Subhead</item>
+        <item name="android:textColor">@color/box_browsesdk_primary_text</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="BoxHintText" parent="@android:style/Widget.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android:textColor">@color/box_browsesdk_hint</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="BoxDialogButton" parent="@style/TextAppearance.AppCompat.Button">
+        <item name="android:textColor">@color/box_browsesdk_button_flat_selector</item>
+        <item name="android:background">@drawable/box_browsesdk_button_flat_selector</item>
+    </style>
+
+    <style name="BoxListItem">
+        <item name="android:background">@drawable/boxsdk_list_item_selector</item>
+    </style>
+
+</resources>

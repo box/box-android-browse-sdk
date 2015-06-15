@@ -1,0 +1,8 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="box_browsesdk_horizontal_margin">16dp</dimen>
+    <dimen name="box_browsesdk_vertical_margin">16dp</dimen>
+    <dimen name="box_browsesdk_button_corner_radius">4dp</dimen>
+    <dimen name="box_browsesdk_list_item_height">72dp</dimen>
+    <dimen name="box_browsesdk_persistent_footer_height">48dp</dimen>
+</resources>

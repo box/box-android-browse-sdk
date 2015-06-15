@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/boxItemMain"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/box_browsesdk_list_item_height"
+    android:background="@drawable/boxsdk_list_item_selector"
+    android:orientation="horizontal"
+    android:filterTouchesWhenObscured="true">
+    <FrameLayout
+        android:layout_width="36dip"
+        android:layout_height="36dip"
+        android:layout_marginLeft="@dimen/box_browsesdk_horizontal_margin"
+        android:layout_gravity="center_vertical"
+        android:adjustViewBounds="true" >
+        <ImageView
+            android:id="@+id/box_browsesdk_thumb_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_box_browsesdk_blank" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/box_browsesdk_horizontal_margin"
+        android:layout_gravity="center_vertical"
+        android:gravity="start"
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/box_browsesdk_name_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/BoxLabelText"
+            android:layout_gravity="start"
+            android:gravity="start"
+            android:baselineAlignBottom="true"
+            android:ellipsize="end"
+            android:singleLine="true"/>
+        <TextView
+            android:id="@+id/metaline_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:gravity="start"
+            style="@style/BoxHintText"
+            android:ellipsize="middle"
+            android:singleLine="true" />
+    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+</LinearLayout>
+

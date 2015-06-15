@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.box.androidsdk.share.activities.BoxCollaborationsActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/box_background"
+    android:filterTouchesWhenObscured="true">
+    <include layout="@layout/box_browsesdk_toolbar" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:background="@drawable/box_toolbar_dropshadow" />
+        <FrameLayout
+            android:id="@+id/box_browsesdk_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/box_browsesdk_persistent_footer_height">
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/box_browsesdk_persistent_footer_height"
+            android:layout_gravity="bottom">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+            <Button
+                android:id="@+id/box_browsesdk_select_folder_button"
+                style="@style/BoxDialogButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/box_browsesdk_horizontal_margin"
+                android:layout_gravity="center_vertical|end"
+                android:enabled="false"
+                android:text="@string/box_browsesdk_select_folder" />
+        </FrameLayout>
+    </FrameLayout>
+</LinearLayout>

@@ -1,4 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.box.androidsdk.browse">
+    <application>
+        <activity
+            android:name=".activities.BoxBrowseFileActivity"
+            android:label="@string/box_browsesdk_title"
+            android:theme="@style/BrowseTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".activities.BoxBrowseFolderActivity"
+            android:label="@string/box_browsesdk_title"
+            android:theme="@style/BrowseTheme" >
+        </activity>
+    </application>
 
 </manifest>
