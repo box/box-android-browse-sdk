@@ -60,7 +60,7 @@ To receive the result from the file picker after you picked a folder, implement 
 
 Sample App
 --------------
-A sample app can be found in the [box-share-sample](../../tree/master/box-share-sample) folder.
+A sample app can be found in the [box-share-sample](../../tree/master/box-browse-sample) folder.
 
 Copyright and License
 --------------
