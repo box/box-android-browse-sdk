@@ -6,7 +6,20 @@ Developer Setup
 --------------
 The SDK can be obtained by adding it as a maven dependency, cloning the source into your project, or by downloading one of the precompiled JARs from the releases page on GitHub.
 
-This SDK has the following dependencies and will need to be included in your project:
+Gradle: 
+```groovy 
+compile 'com.box:box-android-browse-sdk:1.1.0'
+```
+Maven: 
+```xml
+<dependency>
+  <groupId>com.box</groupId>
+  <artifactId>box-android-browse-sdk</artifactId>
+  <version>1.1.0</version>
+</dependency>
+```
+
+If not using Gradle or Maven, this SDK has the following dependencies and will need to be included in your project:
 * [box-android-sdk](https://github.com/box/box-android-sdk) (maven: `com.box:box-android-sdk:3.0.1`)
 
 Quickstart
