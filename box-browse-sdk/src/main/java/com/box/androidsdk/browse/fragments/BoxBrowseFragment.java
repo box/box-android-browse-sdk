@@ -46,6 +46,7 @@ import java.io.FileNotFoundException;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -452,6 +453,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
+            if (mItem == null) {
+                return;
+            }
+
             if (mItem.getIsError()) {
                 mItem.setIsError(false);
                 mApiExecutor.execute(mItem.getTask());
@@ -638,13 +643,18 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         final BoxItem item = holder.getItem().getBoxItem();
         holder.getNameView().setText(item.getName());
-        String description = item.getModifiedAt() != null ?
-                String.format(Locale.ENGLISH, "%s  • %s",
-                        DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase(),
-                        localFileSizeToDisplay(item.getSize())) :
-                localFileSizeToDisplay(item.getSize());
+        String description = "";
+        if (item != null) {
+            String modifiedAt = item.getModifiedAt() != null ?
+                    DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase() :
+                    "";
+            String size = item.getSize() != null ?
+                    localFileSizeToDisplay(item.getSize()) :
+                    "";
+            description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
+            mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
+        }
         holder.getMetaDescription().setText(description);
-        mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
         holder.getProgressBar().setVisibility(View.GONE);
         holder.getMetaDescription().setVisibility(View.VISIBLE);
         holder.getThumbView().setVisibility(View.VISIBLE);
