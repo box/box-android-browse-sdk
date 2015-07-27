@@ -160,7 +160,7 @@ public class ThumbnailManager {
         } else {
             String name = boxItem.getName();
             if (name != null) {
-                String ext = name.substring(name.lastIndexOf('.') + 1);
+                String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
                 if (ext.equals("aac")) {
                         return R.drawable.ic_box_browsesdk_aac;
                 } else if (ext.equals("ai")) {
