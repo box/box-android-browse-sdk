@@ -452,13 +452,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
-            if (mItem.getIsError()) {
+            if (mItem != null && mItem.getIsError()) {
                 mItem.setIsError(false);
                 mApiExecutor.execute(mItem.getTask());
                 setLoading();
             }
 
-            if (mListener != null) {
+            if (mListener != null && mItem != null) {
                 if (mListener.handleOnItemClick(mItem.getBoxItem())) {
                     FragmentActivity activity = getActivity();
                     if (activity == null) {
@@ -638,11 +638,18 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         final BoxItem item = holder.getItem().getBoxItem();
         holder.getNameView().setText(item.getName());
-        String description = item.getModifiedAt() != null ?
-                String.format(Locale.ENGLISH, "%s  • %s",
-                        DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase(),
-                        localFileSizeToDisplay(item.getSize())) :
+
+        String description = "";
+        if(item != null){
+            if(item.getModifiedAt() != null && item.getSize() != null){
+                description = String.format(Locale.ENGLISH, "%s  • %s",
+                                DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase(),
+                                localFileSizeToDisplay(item.getSize()));
+            } else if(item.getSize() != null){
                 localFileSizeToDisplay(item.getSize());
+            }
+        }
+
         holder.getMetaDescription().setText(description);
         mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
         holder.getProgressBar().setVisibility(View.GONE);
