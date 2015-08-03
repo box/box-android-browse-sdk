@@ -453,6 +453,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
+            if(mSwipeRefresh.isRefreshing()){
+                return;
+            }
             if (mItem == null) {
                 return;
             }
