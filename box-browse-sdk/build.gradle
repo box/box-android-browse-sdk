@@ -35,7 +35,7 @@ dependencies {
     // If using local dependency instead of maven, use the path pointing to the content sdk to replace
     // the maven dependency. e.g.:compile project(':box-android-content-sdk:box-content-sdk')
     compile 'com.android.support:recyclerview-v7:22.1.1'
-    compile 'com.box:box-android-sdk:3.0.1'
+    compile 'com.box:box-android-sdk:3.0.2'
 }
 
 //apply from: '../maven_push.gradle'
