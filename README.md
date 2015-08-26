@@ -8,14 +8,14 @@ The SDK can be obtained by adding it as a maven dependency, cloning the source i
 
 Gradle: 
 ```groovy 
-compile 'com.box:box-android-browse-sdk:1.1.0'
+compile 'com.box:box-android-browse-sdk:1.1.1'
 ```
 Maven: 
 ```xml
 <dependency>
-  <groupId>com.box</groupId>
-  <artifactId>box-android-browse-sdk</artifactId>
-  <version>1.1.0</version>
+    <groupId>com.box</groupId>
+    <artifactId>box-android-browse-sdk</artifactId>
+    <version>1.1.1</version>
 </dependency>
 ```
 
