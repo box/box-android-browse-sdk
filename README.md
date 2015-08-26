@@ -20,7 +20,7 @@ Maven:
 ```
 
 If not using Gradle or Maven, this SDK has the following dependencies and will need to be included in your project:
-* [box-android-sdk](https://github.com/box/box-android-sdk) (maven: `com.box:box-android-sdk:3.0.1`)
+* [box-android-sdk](https://github.com/box/box-android-sdk) (maven: `com.box:box-android-sdk:3.0.2`)
 
 Quickstart
 --------------
