@@ -71,6 +71,15 @@ To receive the result from the file picker after you picked a folder, implement 
     }
 ```
 
+####Manifest
+Please add the following to your manifest file:
+```xml
+	<activity
+        android:name="com.box.androidsdk.content.auth.OAuthActivity"
+        android:label="Authentication" >
+    </activity>
+```
+
 Sample App
 --------------
 A sample app can be found in the [box-share-sample](https://github.com/box/box-android-share-sdk) folder.
