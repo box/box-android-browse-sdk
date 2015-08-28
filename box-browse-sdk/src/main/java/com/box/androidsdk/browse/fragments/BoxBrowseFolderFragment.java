@@ -167,7 +167,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
                     // this call the collection is just BoxObjectItems and each does not appear to be an instance of BoxItem.
                     ArrayList<String> itemFields = new ArrayList<String>();
-                    String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED};
+                    String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED, BoxFolder.FIELD_PARENT};
                     BoxApiFolder api = new BoxApiFolder(mSession);
                     BoxListItems items = api.getItemsRequest(mFolderId).setLimit(limit).setOffset(offset).setFields(fields).send();
                     intent.putExtra(EXTRA_SUCCESS, true);
