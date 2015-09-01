@@ -31,10 +31,8 @@
             <Button
                 android:id="@+id/box_browsesdk_select_folder_button"
                 style="@style/BoxDialogButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/box_browsesdk_horizontal_margin"
-                android:layout_gravity="center_vertical|end"
                 android:enabled="false"
                 android:text="@string/box_browsesdk_select_folder" />
         </FrameLayout>
