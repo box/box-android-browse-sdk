@@ -3,20 +3,13 @@ package com.box.androidsdk.browse.activities;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.SearchView;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
@@ -136,6 +129,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
         searchView.setSession(mSession);
         searchView.setOnBoxSearchListener(this);
+
         return true;
     }
 
