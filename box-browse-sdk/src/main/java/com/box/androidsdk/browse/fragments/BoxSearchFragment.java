@@ -78,7 +78,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     public void search(BoxRequestsSearch.Search request){
         mSearchRequestHolder = new BoxSearchHolder(request);
+        setToolbar(mSearchRequestHolder.getQuery());
         setListItem(new BoxListItems());
+        mAdapter.removeAll();
         mAdapter.add(new BoxListItem(fetchInfo(), ACTION_FETCHED_INFO));
         mAdapter.notifyDataSetChanged();
 

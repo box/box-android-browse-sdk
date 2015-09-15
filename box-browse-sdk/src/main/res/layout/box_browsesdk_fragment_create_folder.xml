@@ -10,6 +10,7 @@
         style="@style/BoxDialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="@string/box_browsesdk_create_folder"
         android:layout_marginBottom="@dimen/box_browsesdk_vertical_margin"/>
     <EditText

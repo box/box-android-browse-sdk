@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.uidata;
 
 import android.content.Context;
 import android.database.MatrixCursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
@@ -27,12 +28,10 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
     private OnBoxSearchListener mBoxSearchListener;
     private String mLastQuery = null;
 
-   public BoxSearchView(final Context context){
+    public BoxSearchView(final Context context){
        super(context);
        initSearchView(context);
-   }
-
-
+    }
 
     public BoxSearchView(final Context context, final AttributeSet attrs){
         super(context, attrs);
@@ -43,6 +42,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
 
         setSuggestionsAdapter(new BoxSearchListAdapter(context, R.layout.abc_list_menu_item_layout, 0, mSession));
         ((BoxSearchListAdapter)getSuggestionsAdapter()).setOnBoxSearchListener(this);
+        findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
 
         if (mSession == null){
             // this widget cannot be used until a session has been set into it.
@@ -56,13 +56,13 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
 
             @Override
             public boolean onSuggestionClick(int position) {
-                if (mBoxSearchListener == null){
+                if (mBoxSearchListener == null) {
                     return false;
                 }
-                BoxSearchListAdapter.BoxSearchCursor cursor = (BoxSearchListAdapter.BoxSearchCursor)((BoxSearchListAdapter)getSuggestionsAdapter()).getItem(position);
-                if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_NORMAL ){
+                BoxSearchListAdapter.BoxSearchCursor cursor = (BoxSearchListAdapter.BoxSearchCursor) ((BoxSearchListAdapter) getSuggestionsAdapter()).getItem(position);
+                if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_NORMAL) {
                     mBoxSearchListener.onBoxItemSelected(cursor.getBoxItem());
-                } else if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_ADDITIONAL_RESULT){
+                } else if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_ADDITIONAL_RESULT) {
                     mBoxSearchListener.onMoreResultsRequested(mSearchApi.getSearchRequest(mLastQuery));
                 }
 
@@ -73,6 +73,9 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mLastQuery = query;
+                if (mBoxSearchListener != null) {
+                    mBoxSearchListener.onMoreResultsRequested(mSearchApi.getSearchRequest(mLastQuery));
+                }
                 return false;
             }
 
