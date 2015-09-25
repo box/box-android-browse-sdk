@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -22,9 +21,9 @@ import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.content.BoxFutureTask;
-import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.auth.BoxAuthentication;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
 
@@ -215,7 +214,9 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
        outState.putSerializable(EXTRA_ITEM, mItem);
-       outState.putString(EXTRA_USER_ID, mSession.getUser().getId());
+        if (mSession != null && mSession.getUser() != null) {
+            outState.putString(EXTRA_USER_ID, mSession.getUser().getId());
+        }
         super.onSaveInstanceState(outState);
     }
 
