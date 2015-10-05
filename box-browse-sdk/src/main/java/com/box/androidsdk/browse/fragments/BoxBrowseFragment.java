@@ -46,9 +46,9 @@ import java.io.FileNotFoundException;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -82,6 +82,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_LIMIT = "BoxBrowseFragment_Limit";
     protected static final String EXTRA_FOLDER = "BoxBrowseFragment_Folder";
     protected static final String EXTRA_COLLECTION = "BoxBrowseFragment_Collection";
+    private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
     protected BoxSession mSession;
@@ -96,6 +97,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected SwipeRefreshLayout mSwipeRefresh;
 
     protected LocalBroadcastManager mLocalBroadcastManager;
+
+
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -488,9 +491,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
-    protected class BoxItemAdapter extends RecyclerView.Adapter<BoxItemViewHolder> {
+    protected  class BoxItemAdapter extends RecyclerView.Adapter<BoxItemViewHolder> {
         protected ArrayList<BoxListItem> mListItems = new ArrayList<BoxListItem>();
         protected HashMap<String, BoxListItem> mItemsMap = new HashMap<String, BoxListItem>();
+
 
         @Override
         public BoxItemViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -546,14 +550,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
             int index = name.lastIndexOf(".");
             if (index > 0) {
-                String ext = name.substring(index + 1);
-                return (ext.equals("gif") ||
-                        ext.equals("bmp") ||
-                        ext.equals("jpeg") ||
-                        ext.equals("jpg") ||
-                        ext.equals("png") ||
-                        ext.equals("svg") ||
-                        ext.equals("tiff"));
+                return THUMBNAIL_MEDIA_EXTENSIONS.contains(name.substring(index + 1).toLowerCase());
             }
             return false;
         }
