@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -397,6 +399,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mNameView = (TextView) itemView.findViewById(R.id.box_browsesdk_name_text);
             mMetaDescription = (TextView) itemView.findViewById(R.id.metaline_description);
             mProgressBar = (ProgressBar) itemView.findViewById((R.id.spinner));
+            setAccentColor(getResources(), mProgressBar);
         }
 
         public void bindItem(BoxListItem item) {
@@ -780,5 +783,17 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
         return textSize;
     }
+
+    public static void setAccentColor(Resources res, ProgressBar progressBar) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            int accentColor = res.getColor(R.color.box_accent);
+            Drawable drawable = progressBar.getIndeterminateDrawable();
+            if (drawable != null) {
+                drawable.setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
+                drawable.invalidateSelf();
+            }
+        }
+    }
+
 
 }
