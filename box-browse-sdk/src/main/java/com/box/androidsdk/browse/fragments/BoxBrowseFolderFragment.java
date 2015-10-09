@@ -47,7 +47,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * @return A new instance of fragment BoxBrowseFragment.
      */
     public static BoxBrowseFolderFragment newInstance(BoxFolder folder, BoxSession session) {
-        return newInstance(folder.getId(), session.getUserId(), folder.getName());
+        return newInstance(folder.getId(), session.getUserId(), folder.getName(), DEFAULT_LIMIT);
     }
 
     /**
@@ -59,7 +59,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * @return A new instance of fragment BoxBrowseFragment.
      */
     public static BoxBrowseFolderFragment newInstance(String folderId, String userId) {
-        return newInstance(folderId, userId, null);
+        return newInstance(folderId, userId, null, DEFAULT_LIMIT);
     }
 
     @Override
@@ -107,14 +107,16 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * @param folderId   the id of the folder to browse
      * @param userId     the id of the user that the contents will be loaded for
      * @param folderName the name of the folder that will be shown in the action bar
+     * @param limit the number of items that the results will be limited to when retrieving folder items
      * @return A new instance of fragment BoxBrowseFragment.
      */
-    public static BoxBrowseFolderFragment newInstance(String folderId, String userId, String folderName) {
+    public static BoxBrowseFolderFragment newInstance(String folderId, String userId, String folderName, int limit) {
         BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ID, folderId);
         args.putString(ARG_USER_ID, userId);
         args.putString(ARG_NAME, folderName);
+        args.putInt(ARG_LIMIT, limit);
         fragment.setArguments(args);
         return fragment;
     }
@@ -128,10 +130,12 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
                 Intent intent = new Intent();
                 intent.setAction(ACTION_FETCHED_INFO);
                 intent.putExtra(EXTRA_ID, mFolderId);
+                intent.putExtra(EXTRA_LIMIT, mLimit);
                 try {
                     BoxRequestsFolder.GetFolderInfo req = new BoxApiFolder(mSession).getInfoRequest(mFolderId)
                             // TODO: Should clean-up to only include required fields
-                            .setFields(BoxFolder.ALL_FIELDS);
+                            .setFields(BoxFolder.ALL_FIELDS)
+                            .setLimit(mLimit);
                     BoxFolder bf = req.send();
                     if (bf != null) {
                         intent.putExtra(EXTRA_SUCCESS, true);
