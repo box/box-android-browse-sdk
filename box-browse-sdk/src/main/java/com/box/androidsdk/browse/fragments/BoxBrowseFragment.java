@@ -67,6 +67,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public static final String ARG_ID = "argId";
     public static final String ARG_USER_ID = "argUserId";
     public static final String ARG_NAME = "argName";
+    public static final String ARG_LIMIT = "argLimit";
 
     public static final String TAG = BoxBrowseFragment.class.getName();
     protected static final int DEFAULT_LIMIT = 1000;
@@ -85,6 +86,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     protected String mUserId;
     protected BoxSession mSession;
+    protected int mLimit = DEFAULT_LIMIT;
 
     private BoxListItems mBoxListItems;
 
@@ -163,6 +165,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mThumbnailManager = initializeThumbnailManager();
             mUserId = getArguments().getString(ARG_USER_ID);
             mSession = new BoxSession(getActivity(), mUserId);
+            mLimit = getArguments().getInt(ARG_LIMIT);
         }
         if (savedInstanceState != null) {
             setListItem((BoxListItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
@@ -325,14 +328,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         });
 
-        int limit = DEFAULT_LIMIT;
-        if (items.limit() != null && items.limit() > 0) {
-            limit = items.limit().intValue();
-        }
         if (mBoxListItems.size() < items.fullSize()) {
             // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-            mAdapter.add(new BoxListItem(fetchItems(mBoxListItems.size(), limit),
-                    ACTION_FETCHED_ITEMS));
+            mAdapter.add(new BoxListItem(fetchItems(mBoxListItems.size(), mLimit), ACTION_FETCHED_ITEMS));
         }
 
     }
