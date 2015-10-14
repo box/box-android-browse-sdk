@@ -1,0 +1,24 @@
+<resources>
+    <string name="box_browsesdk_title" description="Default title for the Browse SDK">Обзор</string>
+    <string name="box_browsesdk_problem_fetching_folder">Проблема при получении папки.</string>
+    <string name="box_browsesdk_problem_performing_search">Проблема при выполнении поиска.</string>
+    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">Невозможно просмотреть элементы в этой папке.</string>
+    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">Ошибка сети. Повторите попытку.</string>
+    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">Сеанс не прошел проверку подлинности</string>
+    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">Нет выбранных элементов</string>
+
+    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">Все файлы</string>
+
+    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Настройки</string>
+    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">Поиск</string>
+    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">Создать папку</string>
+    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">Выбрать эту папку</string>
+    <string name="box_browsesdk_dialog_ok">ОК</string>
+    <string name="box_browsesdk_dialog_cancel">Отмена</string>
+
+    <string name="box_browsesdk_create_folder_conflict">Папка с таким именем уже создана.</string>
+    <string name="box_browsesdk_error_retrieving_items">Ошибка при получении элементов</string>
+    <string name="box_browsesdk_tap_to_retry">Коснитесь, чтобы повторить попытку</string>
+    <string name="box_browsesdk_performing_search">Выполняется поиск…</string>
+    <string name="box_browsesdk_see_additional_results">Посмотреть другие результаты</string>
+</resources>
