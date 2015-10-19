@@ -14,5 +14,10 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+
+        // Include maven snapshots repository
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
     }
 }
