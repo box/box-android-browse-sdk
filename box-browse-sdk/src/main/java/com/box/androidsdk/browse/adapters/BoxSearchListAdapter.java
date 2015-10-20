@@ -1,29 +1,22 @@
 package com.box.androidsdk.browse.adapters;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.widget.ResourceCursorAdapter;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.support.v4.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.uidata.NavigationItem;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiSearch;
@@ -40,13 +33,8 @@ import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
-import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -381,7 +369,9 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             super(SEARCH_COLUMN_NAMES, boxList.size());
             mBoxList = boxList;
             initializeFromList(boxList);
-            addRow(new Object[]{-2, "","", TYPE_ADDITIONAL_RESULT});
+            if (boxList != null && boxList.size() >= BoxSearchListAdapter.DEFAULT_MAX_SUGGESTIONS) {
+                addRow(new Object[]{-2, "","", TYPE_ADDITIONAL_RESULT});
+            }
         }
 
         BoxSearchCursor(final BoxListItems boxList, final String query){
