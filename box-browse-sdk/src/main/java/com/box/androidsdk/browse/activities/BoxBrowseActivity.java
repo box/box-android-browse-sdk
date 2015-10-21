@@ -138,9 +138,12 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         if (!getIntent().getBooleanExtra(EXTRA_SHOULD_SEARCH_ALL, false)) {
             // if not specified by default search will only search the currently displayed folder.
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-            if (fragment instanceof BoxBrowseFolderFragment) {
-                searchRequest.limitAncestorFolderIds(new String[]{((BoxBrowseFolderFragment) fragment).getFolder().getId()});
-            } else {
+            if (fragment != null && fragment instanceof BoxBrowseFolderFragment) {
+                BoxFolder folder = ((BoxBrowseFolderFragment) fragment).getFolder();
+                if (folder != null) {
+                    searchRequest.limitAncestorFolderIds(new String[]{folder.getId()});
+                }
+            } else if (mItem != null) {
                 searchRequest.limitAncestorFolderIds(new String[]{mItem.getId()});
             }
         }
