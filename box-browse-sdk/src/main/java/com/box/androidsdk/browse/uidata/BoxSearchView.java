@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.inputmethod.EditorInfo;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.content.BoxApiSearch;
-import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxListItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
@@ -43,7 +43,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
         setSuggestionsAdapter(new BoxSearchListAdapter(context, R.layout.abc_list_menu_item_layout, 0, mSession));
         ((BoxSearchListAdapter)getSuggestionsAdapter()).setOnBoxSearchListener(this);
         findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
-
+        setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         if (mSession == null){
             // this widget cannot be used until a session has been set into it.
             this.setEnabled(false);
@@ -120,7 +120,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle){
-            setSession(new BoxSession(getContext(), ((Bundle)state).getString(EXTRA_USER_ID) ));
+            setSession(new BoxSession(getContext(), ((Bundle) state).getString(EXTRA_USER_ID)));
             super.onRestoreInstanceState(((Bundle) state).getParcelable(EXTRA_ORIGINAL_PARCELABLE));
         } else {
             super.onRestoreInstanceState(state);
