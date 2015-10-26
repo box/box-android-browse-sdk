@@ -85,6 +85,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_LIMIT = "BoxBrowseFragment_Limit";
     protected static final String EXTRA_FOLDER = "BoxBrowseFragment_Folder";
     protected static final String EXTRA_COLLECTION = "BoxBrowseFragment_Collection";
+    private static final String EXTRA_TITLE = "BoxBrowseFragment.Title";
     private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
@@ -101,6 +102,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected SwipeRefreshLayout mSwipeRefresh;
 
     protected LocalBroadcastManager mLocalBroadcastManager;
+    private String mTitle;
 
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -192,7 +194,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(EXTRA_COLLECTION, mBoxListItems);
+        outState.putSerializable(EXTRA_TITLE, mTitle);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            setToolbar(savedInstanceState.getString(EXTRA_TITLE));
+        }
     }
 
     private ThumbnailManager initializeThumbnailManager() {
@@ -205,10 +216,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void setToolbar(String name) {
+        mTitle = name;
         if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
             ActionBar toolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (toolbar != null) {
-                toolbar.setTitle(name);
+                toolbar.setTitle(mTitle);
             }
         }
     }
