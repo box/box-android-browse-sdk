@@ -35,11 +35,20 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private static final String OUT_BROWSE_FRAGMENT = "outBrowseFragment";
 
     private static final ConcurrentLinkedQueue<BoxResponse> RESPONSE_QUEUE = new ConcurrentLinkedQueue<BoxResponse>();
+    private static final String RESTORE_SEARCH = "restoreSearch";
+    private static final String SEARCH_QUERY = "searchQuery";
     private static ThreadPoolExecutor mApiExecutor;
     private MenuItem mSearchViewMenuItem;
+    private boolean mRestoreSearch;
+    private String mSearchQuery;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
+            mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
+        }
+
     }
 
 
@@ -126,12 +135,31 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
-        BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
+        final BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
         searchView.setSession(mSession);
         searchView.setOnBoxSearchListener(this);
+        if (mRestoreSearch) {
+            mSearchViewMenuItem.expandActionView();
+            searchView.setIconified(false);
+            searchView.setQuery(mSearchQuery, false);
+            mRestoreSearch = false;
+        }
 
         return true;
     }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mSearchViewMenuItem == null) {
+            return;
+        }
+        BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
+        outState.putBoolean(RESTORE_SEARCH, !searchView.isIconified());
+        outState.putString(SEARCH_QUERY, searchView.getQuery().toString());
+    }
+
 
     @Override
     public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
