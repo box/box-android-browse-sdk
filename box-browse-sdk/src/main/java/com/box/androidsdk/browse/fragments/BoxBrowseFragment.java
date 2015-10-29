@@ -86,6 +86,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_FOLDER = "BoxBrowseFragment_Folder";
     protected static final String EXTRA_COLLECTION = "BoxBrowseFragment_Collection";
     private static final String EXTRA_TITLE = "BoxBrowseFragment.Title";
+    private static final String EXTRA_CANCELED = "BoxBrowseFragment.Canceled";
     private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
@@ -177,6 +178,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (savedInstanceState != null) {
             setListItem((BoxListItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
         }
+        setRetainInstance(true);
     }
 
     @Override
@@ -530,16 +532,17 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
                 // Fetch thumbnails for media file types
                 if (item.getBoxItem() instanceof BoxFile && isMediaType(item.getBoxItem().getName())) {
-                    if (item.getTask() == null) {
+                    if (item.getTask() == null ) {
                         item.setTask(downloadThumbnail(item.getBoxItem().getId(),
                                 mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
                     } else if (item.getTask().isDone()) {
                         try {
                             Intent intent = (Intent) item.getTask().get();
-                            if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
+                            boolean canceled = intent.getBooleanExtra(EXTRA_CANCELED, false);
+                            if (intent.getBooleanExtra(EXTRA_SUCCESS, true) || canceled) {
                                 // if we were unable to get this thumbnail for any reason besides a 404 try it again.
                                 Object ex = intent.getSerializableExtra(EXTRA_EXCEPTION);
-                                if (ex != null && ex instanceof BoxException && ((BoxException) ex).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+                                if (canceled || ex != null && ex instanceof BoxException && ((BoxException) ex).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                                     item.setTask(downloadThumbnail(item.getBoxItem().getId(),
                                             mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
                                 }
@@ -729,6 +732,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                     if (holder.getItem() == null || holder.getItem().getBoxItem() == null || !(holder.getItem().getBoxItem() instanceof BoxFile)
                             || !holder.getItem().getBoxItem().getId().equals(fileId)) {
                         intent.putExtra(EXTRA_SUCCESS, false);
+                        intent.putExtra(EXTRA_CANCELED, true);
                         return intent;
                     }
 
