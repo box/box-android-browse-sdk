@@ -210,7 +210,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onPause() {
         mLocalBroadcastManager.unregisterReceiver(mBroadcastReceiver);
-        getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        getActivity().unregisterReceiver(mConnectivityReceiver);
         super.onPause();
     }
 
