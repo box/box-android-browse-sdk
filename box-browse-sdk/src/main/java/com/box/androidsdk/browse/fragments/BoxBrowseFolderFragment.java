@@ -1,18 +1,12 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.content.BoxApiFolder;
-import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
@@ -214,6 +208,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             return;
         }
         if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
+            checkConnectivity();
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }
@@ -225,6 +220,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
     }
 
+
     protected void onInfoFetched(Intent intent) {
         FragmentActivity activity = getActivity();
         if (activity == null || mAdapter == null) {
@@ -232,6 +228,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
 
         if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
+            checkConnectivity();
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }

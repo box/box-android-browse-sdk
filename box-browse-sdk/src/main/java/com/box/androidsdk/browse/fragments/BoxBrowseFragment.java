@@ -9,6 +9,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -104,6 +106,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     protected LocalBroadcastManager mLocalBroadcastManager;
     private String mTitle;
+    private boolean mWaitingForConnection;
+    private boolean mIsConnected;
 
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -124,6 +128,21 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                     mSwipeRefresh.setRefreshing(false);
                 }
 
+            }
+        }
+    };
+
+    private BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                mIsConnected = (networkInfo != null && networkInfo.isConnected());
+                if (mWaitingForConnection && mIsConnected) {
+                    mWaitingForConnection = false;
+                    onRefresh();
+                }
             }
         }
     };
@@ -183,6 +202,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     @Override
     public void onResume() {
+        getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, initializeIntentFilters());
         super.onResume();
     }
@@ -190,6 +210,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onPause() {
         mLocalBroadcastManager.unregisterReceiver(mBroadcastReceiver);
+        getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         super.onPause();
     }
 
@@ -299,6 +320,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (intent.getBooleanExtra(EXTRA_SUCCESS, true)) {
             mAdapter.remove(intent.getAction());
         } else {
+
             BoxListItem item = mAdapter.get(intent.getAction());
             if (item != null) {
                 item.setIsError(true);
@@ -311,12 +333,20 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 }
                 mAdapter.update(intent.getAction());
             }
+            checkConnectivity();
             return;
         }
+        checkConnectivity();
         displayBoxList((BoxListItems) intent.getSerializableExtra(EXTRA_COLLECTION));
         mSwipeRefresh.setRefreshing(false);
     }
 
+    /**
+     * Call on loading error and refresh if loss of connectivity is the suspect.
+     */
+    protected void checkConnectivity() {
+        mWaitingForConnection = !mIsConnected;
+    }
     /**
      * show in this fragment a box list of items.
      */
