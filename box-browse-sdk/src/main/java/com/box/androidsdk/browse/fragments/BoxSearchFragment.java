@@ -104,6 +104,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                 } catch (BoxException e) {
                     e.printStackTrace();
                     intent.putExtra(EXTRA_SUCCESS, false);
+                    checkConnectivity();
                 } finally {
                     mLocalBroadcastManager.sendBroadcast(intent);
                 }
@@ -137,6 +138,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                     intent.putExtra(EXTRA_COLLECTION, items);
                 } catch (BoxException e) {
                     intent.putExtra(EXTRA_SUCCESS, false);
+                    checkConnectivity();
                 } finally {
                     mLocalBroadcastManager.sendBroadcast(intent);
                 }
