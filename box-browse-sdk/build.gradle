@@ -33,9 +33,8 @@ repositories {
 }
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    // If using local dependency instead of maven, use the path pointing to the content sdk to replace
-    // the maven dependency. e.g.:compile project(':box-android-content-sdk:box-content-sdk')
-    compile 'com.box:box-android-sdk:3.0.3-SNAPSHOT'
+
+    compile 'com.box:box-android-sdk:3.0.3'
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.android.support:recyclerview-v7:22.1.1'
 }
