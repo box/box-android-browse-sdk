@@ -377,7 +377,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         });
 
-        if (mBoxListItems.size() < items.fullSize()) {
+        if (items.fullSize() != null && mBoxListItems.size() < items.fullSize()) {
             // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
             mAdapter.add(new BoxListItem(fetchItems(mBoxListItems.size(), mLimit), ACTION_FETCHED_ITEMS));
         }
