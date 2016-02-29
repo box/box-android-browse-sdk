@@ -13,7 +13,7 @@ import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxConfig;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxListItems;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
@@ -79,7 +79,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     public void search(BoxRequestsSearch.Search request){
         mSearchRequestHolder = new BoxSearchHolder(request);
         setToolbar(mSearchRequestHolder.getQuery());
-        setListItem(new BoxListItems());
+        setListItem(new BoxIteratorItems());
         mAdapter.removeAll();
         mAdapter.add(new BoxListItem(fetchInfo(), ACTION_FETCHED_INFO));
         mAdapter.notifyDataSetChanged();
@@ -95,7 +95,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                 Intent intent = new Intent();
                 intent.setAction(ACTION_FETCHED_INFO);
                 try {
-                    BoxListItems items = mSearchRequestHolder.createSearchRequest(mApiSearch).setLimit(DEFAULT_SEARCH_LIMIT).send();
+                    BoxIteratorItems items = mSearchRequestHolder.createSearchRequest(mApiSearch).setLimit(DEFAULT_SEARCH_LIMIT).send();
                     if (items != null) {
                         intent.putExtra(EXTRA_SUCCESS, true);
                         intent.putExtra(EXTRA_COLLECTION, items);
@@ -133,7 +133,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                         limitUsed = offset;
                     }
 
-                    BoxListItems items = mSearchRequestHolder.createSearchRequest(mApiSearch).setOffset(offset).setLimit(limitUsed).send();
+                    BoxIteratorItems items = mSearchRequestHolder.createSearchRequest(mApiSearch).setOffset(offset).setLimit(limitUsed).send();
                     intent.putExtra(EXTRA_SUCCESS, true);
                     intent.putExtra(EXTRA_COLLECTION, items);
                 } catch (BoxException e) {

@@ -27,8 +27,8 @@ import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxJsonObject;
-import com.box.androidsdk.content.models.BoxList;
-import com.box.androidsdk.content.models.BoxListItems;
+import com.box.androidsdk.content.models.BoxIterator;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
@@ -46,10 +46,10 @@ import java.util.concurrent.TimeUnit;
  * Adapter for navigation items.
  * 
  */
-public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFutureTask.OnCompletedListener<BoxListItems>{
+public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFutureTask.OnCompletedListener<BoxIteratorItems>{
 
 
-    private static BoxFutureTask<BoxList> mSearchTask;
+    private static BoxFutureTask<BoxIterator> mSearchTask;
     private static ThreadPoolExecutor mApiExecutor;
     private Handler mHandler;
     private ThumbnailManager mThumbnailManager;
@@ -73,7 +73,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
                 @Override
                 public void run() {
                     if (getCursor() != null) {
-                        changeCursor(new BoxSearchCursor(getCursor().getBoxList(), constraint.toString()));
+                        changeCursor(new BoxSearchCursor(getCursor().getBoxIterator(), constraint.toString()));
                     } else {
                         changeCursor(new BoxSearchCursor(null, constraint.toString()));
                     }
@@ -117,10 +117,10 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     }
 
     @Override
-    public void onCompleted(BoxResponse<BoxListItems> boxListBoxResponse) {
-        if (boxListBoxResponse.isSuccess()) {
+    public void onCompleted(BoxResponse<BoxIteratorItems> BoxIteratorBoxResponse) {
+        if (BoxIteratorBoxResponse.isSuccess()) {
 
-            Cursor cursor = new BoxSearchCursor(boxListBoxResponse.getResult());
+            Cursor cursor = new BoxSearchCursor(BoxIteratorBoxResponse.getResult());
             changeCursor(cursor);
         }
 
@@ -363,34 +363,34 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
         public static int TYPE_ADDITIONAL_RESULT = 2;
 
         private static final String[] SEARCH_COLUMN_NAMES = new String[]{"_id", "name", "path", "type"};
-        private final BoxListItems mBoxList;
+        private final BoxIteratorItems mBoxIterator;
 
-        BoxSearchCursor(final BoxListItems boxList){
-            super(SEARCH_COLUMN_NAMES, boxList.size());
-            mBoxList = boxList;
-            initializeFromList(boxList);
-            if (boxList != null && boxList.size() >= BoxSearchListAdapter.DEFAULT_MAX_SUGGESTIONS) {
+        BoxSearchCursor(final BoxIteratorItems BoxIterator){
+            super(SEARCH_COLUMN_NAMES, BoxIterator.size());
+            mBoxIterator = BoxIterator;
+            initializeFromList(BoxIterator);
+            if (BoxIterator != null && BoxIterator.size() >= BoxSearchListAdapter.DEFAULT_MAX_SUGGESTIONS) {
                 addRow(new Object[]{-2, "","", TYPE_ADDITIONAL_RESULT});
             }
         }
 
-        BoxSearchCursor(final BoxListItems boxList, final String query){
+        BoxSearchCursor(final BoxIteratorItems BoxIterator, final String query){
             super(SEARCH_COLUMN_NAMES);
-            mBoxList = boxList;
+            mBoxIterator = BoxIterator;
             addRow(new Object[]{"-1",  query,"", TYPE_QUERY});
-            initializeFromList(boxList);
+            initializeFromList(BoxIterator);
         }
 
         public BoxItem getBoxItem(){
-            return (BoxItem)mBoxList.get(mPos);
+            return (BoxItem)mBoxIterator.get(mPos);
         }
 
-        protected void initializeFromList(final BoxListItems boxList){
-            if (boxList == null){
+        protected void initializeFromList(final BoxIteratorItems BoxIterator){
+            if (BoxIterator == null){
                 return;
             }
             int i = 0;
-            for (BoxJsonObject item : boxList){
+            for (BoxJsonObject item : BoxIterator){
                 if (i >= DEFAULT_MAX_SUGGESTIONS){
                     break;
                 }
@@ -405,8 +405,8 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             return this.getInt(getColumnIndex("type"));
         }
 
-        public BoxListItems getBoxList(){
-            return mBoxList;
+        public BoxIteratorItems getBoxIterator(){
+            return mBoxIterator;
         }
 
         public String getName(){

@@ -40,10 +40,14 @@ import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxListItems;
+import com.box.androidsdk.content.models.BoxIterator;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -95,7 +99,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected BoxSession mSession;
     protected int mLimit = DEFAULT_LIMIT;
 
-    private BoxListItems mBoxListItems;
+    private BoxIteratorItems mBoxIteratorItems;
 
     protected OnFragmentInteractionListener mListener;
 
@@ -195,7 +199,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mLimit = getArguments().getInt(ARG_LIMIT);
         }
         if (savedInstanceState != null) {
-            setListItem((BoxListItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
+            setListItem((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
         }
         setRetainInstance(true);
     }
@@ -216,7 +220,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(EXTRA_COLLECTION, mBoxListItems);
+        outState.putSerializable(EXTRA_COLLECTION, mBoxIteratorItems);
         outState.putSerializable(EXTRA_TITLE, mTitle);
         super.onSaveInstanceState(outState);
     }
@@ -264,17 +268,17 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mAdapter = new BoxItemAdapter();
         mItemsView.setAdapter(mAdapter);
 
-        if (mBoxListItems == null) {
+        if (mBoxIteratorItems == null) {
             mAdapter.add(new BoxListItem(fetchInfo(), ACTION_FETCHED_INFO));
         } else {
-            displayBoxList(mBoxListItems);
+            displayBoxList(mBoxIteratorItems);
 
         }
         return rootView;
     }
 
-    protected void setListItem(final BoxListItems items) {
-        mBoxListItems = items;
+    protected void setListItem(final BoxIteratorItems items) {
+        mBoxIteratorItems = items;
     }
 
 
@@ -337,7 +341,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             return;
         }
         checkConnectivity();
-        displayBoxList((BoxListItems) intent.getSerializableExtra(EXTRA_COLLECTION));
+        displayBoxList((BoxIteratorItems) intent.getSerializableExtra(EXTRA_COLLECTION));
         mSwipeRefresh.setRefreshing(false);
     }
 
@@ -350,23 +354,24 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     /**
      * show in this fragment a box list of items.
      */
-    protected void displayBoxList(final BoxListItems items) {
+    protected void displayBoxList(final BoxIteratorItems items) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
             return;
         }
         // if we are trying to display the original list no need to add.
-        if (items == mBoxListItems) {
+        if (items == mBoxIteratorItems) {
 
-            //  mBoxListItems.addAll(items);
+            //  mBoxIteratorItems.addAll(items);
             if (mAdapter.getItemCount() < 1) {
                 mAdapter.addAll(items);
             }
         } else {
-            if (mBoxListItems == null) {
+            if (mBoxIteratorItems == null) {
                 setListItem(items);
             }
-            mBoxListItems.addAll(items);
+
+            addAllItems(mBoxIteratorItems, items);
             mAdapter.addAll(items);
         }
 
@@ -377,10 +382,29 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         });
 
-        if (items.fullSize() != null && mBoxListItems.size() < items.fullSize()) {
+        if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
             // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-            mAdapter.add(new BoxListItem(fetchItems(mBoxListItems.size(), mLimit), ACTION_FETCHED_ITEMS));
+            mAdapter.add(new BoxListItem(fetchItems(mBoxIteratorItems.size(), mLimit), ACTION_FETCHED_ITEMS));
         }
+
+    }
+
+    private BoxIteratorItems addAllItems(BoxIteratorItems target, BoxIteratorItems source){
+        JsonValue sourceArray = source.toJsonObject().get(BoxIterator.FIELD_ENTRIES);
+        JsonObject targetJsonObject = target.toJsonObject();
+        JsonValue targetArray = targetJsonObject.get(BoxIterator.FIELD_ENTRIES);
+        if (targetArray == null || targetArray.isNull()){
+            JsonArray jsonArray = new JsonArray();
+            targetJsonObject.set(BoxIterator.FIELD_ENTRIES, jsonArray);
+            target.createFromJson(targetJsonObject);
+            targetArray = jsonArray;
+        }
+        if (sourceArray != null) {
+            for (JsonValue value : sourceArray.asArray()) {
+                targetArray.asArray().add(value);
+            }
+        }
+        return target;
 
     }
 
@@ -626,7 +650,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
 
-        public void addAll(BoxListItems items) {
+        public void addAll(BoxIteratorItems items) {
             for (BoxItem item : items) {
                 if (!mItemsMap.containsKey(item.getId())) {
                     add(new BoxListItem(item, item.getId()));

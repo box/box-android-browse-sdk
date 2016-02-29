@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
-import android.util.Log;
+
 import android.view.inputmethod.EditorInfo;
 
 import com.box.androidsdk.browse.R;

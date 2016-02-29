@@ -1,6 +1,5 @@
 package com.box.androidsdk.browse.activities;
 
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +10,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.fragments.BoxCreateFolderFragment;
-import com.box.androidsdk.browse.fragments.BoxSearchFragment;
-import com.box.androidsdk.browse.uidata.BoxSearchView;
-import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxException;
-import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
@@ -27,12 +21,11 @@ import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonObject;
 
-import org.apache.http.HttpStatus;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.net.HttpURLConnection;
+
 
 public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener{
 
@@ -86,7 +79,7 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         } else {
             int resId = R.string.box_browsesdk_network_error;
             if (response.getException() instanceof BoxException) {
-                if (((BoxException) response.getException()).getResponseCode() == HttpStatus.SC_CONFLICT) {
+                if (((BoxException) response.getException()).getResponseCode() == HttpURLConnection.HTTP_CONFLICT) {
                     resId = R.string.box_browsesdk_create_folder_conflict;
                 } else {
 
@@ -209,11 +202,12 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
      */
     @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-        LinkedHashMap<String, Object> folderMap = new LinkedHashMap<String, Object>();
-        folderMap.put(BoxItem.FIELD_ID, folderId);
-        folderMap.put(BoxItem.FIELD_TYPE, BoxFolder.TYPE);
-        folderMap.put(BoxItem.FIELD_NAME, folderName);
-        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(folderMap)).createIntent();
+
+        BoxFolder folder = BoxFolder.createFromId(folderId);
+        JsonObject jsonObject = folder.toJsonObject();
+        jsonObject.add(BoxItem.FIELD_NAME, folderName);
+        folder = new BoxFolder(jsonObject);
+        return createIntentBuilder(context,session).setStartingFolder(folder).createIntent();
     }
 
 }

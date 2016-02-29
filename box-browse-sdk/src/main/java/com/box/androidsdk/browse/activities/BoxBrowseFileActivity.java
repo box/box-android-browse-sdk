@@ -15,9 +15,9 @@ import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearchView.OnBoxSearchListener{
     /**
@@ -174,11 +174,10 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
      */
     @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-        LinkedHashMap<String, Object> folderMap = new LinkedHashMap<String, Object>();
-        folderMap.put(BoxItem.FIELD_ID, folderId);
-        folderMap.put(BoxItem.FIELD_TYPE, BoxFolder.TYPE);
-        folderMap.put(BoxItem.FIELD_NAME, folderName);
-        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(folderMap)).createIntent();
+        BoxFolder folder = BoxFolder.createFromId(folderId);
+        JsonObject jsonObject = folder.toJsonObject().add(BoxItem.FIELD_NAME, folderName);
+
+        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(jsonObject)).createIntent();
     }
 
     /**

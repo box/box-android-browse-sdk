@@ -73,8 +73,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     protected BoxFolder getCurrentFolder() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         if (fragment instanceof BoxBrowseFolderFragment) {
+            System.out.println("xxx ((BoxBrowseFolderFragment) fragment).getFolder() " + fragment + " x " + ((BoxBrowseFolderFragment) fragment).getFolder());
             return ((BoxBrowseFolderFragment) fragment).getFolder();
         }
+        System.out.println("xxx mItem " + mItem);
+
         return (BoxFolder) mItem;
     }
 

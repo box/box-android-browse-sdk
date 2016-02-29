@@ -11,7 +11,7 @@ import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxListItems;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
@@ -26,7 +26,7 @@ import java.util.concurrent.FutureTask;
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
-    protected BoxFolder mFolder = null;
+    private BoxFolder mFolder = null;
     private static final String OUT_ITEM = "outItem";
 
     protected String mFolderId;
@@ -167,7 +167,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
                     ArrayList<String> itemFields = new ArrayList<String>();
                     String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED, BoxFolder.FIELD_PARENT};
                     BoxApiFolder api = new BoxApiFolder(mSession);
-                    BoxListItems items = api.getItemsRequest(mFolderId).setLimit(limit).setOffset(offset).setFields(fields).send();
+                    BoxIteratorItems items = api.getItemsRequest(mFolderId).setLimit(limit).setOffset(offset).setFields(fields).send();
                     intent.putExtra(EXTRA_SUCCESS, true);
                     intent.putExtra(EXTRA_COLLECTION, items);
                 } catch (BoxException e) {
@@ -214,12 +214,11 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
 
         mAdapter.remove(intent.getAction());
-        if (mFolderId.equals(intent.getStringExtra(EXTRA_ID))) {
+        if (mFolderId.equals(intent.getStringExtra(EXTRA_ID)) && intent.hasExtra(EXTRA_FOLDER)) {
             mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
             super.onItemsFetched(intent);
         }
     }
-
 
     protected void onInfoFetched(Intent intent) {
         FragmentActivity activity = getActivity();
@@ -235,6 +234,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
         if (mFolderId.equals(intent.getStringExtra(EXTRA_ID))) {
             mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
+
             if (mFolder != null && mFolder.getName() != null) {
                 getArguments().putString(ARG_NAME, mFolder.getName());
                 this.setToolbar(mFolder.getName());
