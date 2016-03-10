@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -27,6 +28,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -51,11 +54,13 @@ import com.eclipsesource.json.JsonValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -63,6 +68,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -93,6 +99,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_COLLECTION = "BoxBrowseFragment_Collection";
     private static final String EXTRA_TITLE = "BoxBrowseFragment.Title";
     private static final String EXTRA_CANCELED = "BoxBrowseFragment.Canceled";
+
+    protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "BoxBrowseFragment_SecondaryActionListener";
+    protected static final String EXTRA_MULTI_SELECT_HANDLER = "BoxBrowseFragment_Multi_Select_Handler";
+
+
     private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
@@ -102,6 +113,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private BoxIteratorItems mBoxIteratorItems;
 
     protected OnFragmentInteractionListener mListener;
+    protected OnFragmentInteractionListener mSecondaryActionListener;
+    protected MultiSelectHandler mMultiSelectHandler;
 
     protected BoxItemAdapter mAdapter;
     protected RecyclerView mItemsView;
@@ -200,6 +213,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
         if (savedInstanceState != null) {
             setListItem((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
+            if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)){
+                mSecondaryActionListener = (OnFragmentInteractionListener)savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
+            }
+            if (savedInstanceState.containsKey(EXTRA_MULTI_SELECT_HANDLER)){
+                mMultiSelectHandler = (MultiSelectHandler)savedInstanceState.getSerializable(EXTRA_MULTI_SELECT_HANDLER);
+            }
         }
         setRetainInstance(true);
     }
@@ -222,6 +241,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(EXTRA_COLLECTION, mBoxIteratorItems);
         outState.putSerializable(EXTRA_TITLE, mTitle);
+        if (mSecondaryActionListener instanceof Serializable) {
+            outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable)mSecondaryActionListener);
+        }
+        if (mMultiSelectHandler instanceof Serializable) {
+            outState.putSerializable(EXTRA_MULTI_SELECT_HANDLER, (Serializable)mMultiSelectHandler);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -281,14 +306,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mBoxIteratorItems = items;
     }
 
-
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
+            throw new ClassCastException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -304,11 +328,42 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mListener = null;
     }
 
+    protected OnFragmentInteractionListener getSecondaryActionListener(){
+        return mSecondaryActionListener;
+    }
+
+    /**
+     * Optionally set a secondary action to use on this fragment.
+     * @param listener listener to be called when a secondary action is clicked on an item. Must be serializable.
+     * @param <T> Serializable OnFragmentInteractionListener.
+     */
+    public <T extends OnFragmentInteractionListener & Serializable> void setSecondaryActionListener(T listener){
+        mSecondaryActionListener = listener;
+        mAdapter.notifyDataSetChanged();
+    }
+
+
+    public MultiSelectHandler getMultiSelectHandler(){
+        return mMultiSelectHandler;
+    }
+
+    /**
+     * Optionally set a multi select handler.
+     * @param handler handler to be called when multiple items are selected.
+     * @param <T> Serializable OnFragmentInteractionListener.
+     */
+    public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler){
+        mMultiSelectHandler = handler;
+        mAdapter.notifyDataSetChanged();
+    }
+
+
+
     protected void onInfoFetched(Intent intent) {
         onItemsFetched(intent);
     }
 
-    /**
+    /**P
      * Fetch the first information relevant to this fragment or what should be used for refreshing.
      *
      * @return A FutureTask that is tasked with fetching the first information relevant to this fragment or what should be used for refreshing.
@@ -448,7 +503,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
-    protected class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         BoxListItem mItem;
 
         View mView;
@@ -456,15 +511,28 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         TextView mNameView;
         TextView mMetaDescription;
         ProgressBar mProgressBar;
+        ImageButton mSecondaryAction;
+        CheckBox mItemCheckBox;
+
 
         public BoxItemViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
+            if (getMultiSelectHandler() != null){
+                itemView.setOnLongClickListener(this);
+            }
             mView = itemView;
             mThumbView = (ImageView) itemView.findViewById(R.id.box_browsesdk_thumb_image);
             mNameView = (TextView) itemView.findViewById(R.id.box_browsesdk_name_text);
             mMetaDescription = (TextView) itemView.findViewById(R.id.metaline_description);
             mProgressBar = (ProgressBar) itemView.findViewById((R.id.spinner));
+            mSecondaryAction = (ImageButton) itemView.findViewById(R.id.secondaryAction);
+            mItemCheckBox = (CheckBox)itemView.findViewById(R.id.boxItemCheckBox);
+            if (getSecondaryActionListener() != null){
+                mSecondaryAction.setVisibility(View.VISIBLE);
+                mSecondaryAction.setOnClickListener(new BoxItemClickListener(mItem, getSecondaryActionListener()));
+            }
+
             setAccentColor(getResources(), mProgressBar);
         }
 
@@ -499,6 +567,15 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mNameView.setText(activity.getResources().getString(R.string.boxsdk_Please_wait));
         }
 
+        public CheckBox getCheckBox() {
+            return mItemCheckBox;
+        }
+
+        public ImageButton getSecondaryAction() {
+            return mSecondaryAction;
+        }
+
+
         public BoxListItem getItem() {
             return mItem;
         }
@@ -523,8 +600,23 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             return mView;
         }
 
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (getMultiSelectHandler() != null){
+                getMultiSelectHandler().setMultiSelecting(true);
+                getMultiSelectHandler().toggle(mItem.getBoxItem());
+                return true;
+            }
+            return false;
+        }
+
         @Override
         public void onClick(View v) {
+            if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+                getMultiSelectHandler().toggle(mItem.getBoxItem());
+                return;
+            }
             if(mSwipeRefresh.isRefreshing()){
                 return;
             }
@@ -683,6 +775,25 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    private class BoxItemClickListener implements View.OnClickListener {
+
+        protected BoxListItem mBoxListItem;
+        protected OnFragmentInteractionListener mFragmentListener;
+
+        public BoxItemClickListener(BoxListItem listItem, OnFragmentInteractionListener listener){
+            mBoxListItem = listItem;
+            mFragmentListener = listener;
+        }
+
+
+        @Override
+        public void onClick(View v) {
+            mFragmentListener.handleOnItemClick(mBoxListItem.getBoxItem());
+        }
+
+    }
+
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an item being tapped to be communicated to the activity
@@ -697,6 +808,68 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
          */
         boolean handleOnItemClick(BoxItem item);
     }
+
+
+    public abstract class MultiSelectHandler {
+
+
+        HashSet<BoxItem> mSelectedItems = new HashSet<BoxItem>();
+        boolean mIsMultiSelecting;
+
+        public List<BoxItem> getSelectedBoxItem(){
+            ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
+            mSelectedItems.addAll(items);
+            return items;
+        }
+
+        public int getSize(){
+            return mSelectedItems.size();
+        }
+
+        public boolean isItemSelected(BoxItem item){
+            return mSelectedItems.contains(item);
+        }
+
+        /**
+         *
+         * @param boxItem box item the user may potentially select.
+         * @return true if this item can be selected by the user, false if it should be disabled.
+         */
+        public abstract boolean isSelectable(BoxItem boxItem);
+
+        /**
+         * Called when a user selects or deselects an item in the list.
+         * @param boxItem box item the user clicked while in multi select mode.
+         * @param wasSelected whether or not the the item the user clicked was selected.
+         * @param handler the handler that keeps track of which files were chosen.
+         */
+        public abstract void handleItemSelected(BoxItem boxItem, boolean wasSelected, MultiSelectHandler handler);
+
+        void toggle(BoxItem boxItem){
+            if (boxItem == null || !isSelectable(boxItem)) {
+                return;
+            }
+            boolean wasSelected = false;
+            if (isItemSelected(boxItem)) {
+                mSelectedItems.remove(boxItem);
+            } else {
+                mSelectedItems.add(boxItem);
+                wasSelected = true;
+            }
+            handleItemSelected(boxItem, wasSelected, this);
+        }
+
+        boolean isMultiSelecting(){
+            return mIsMultiSelecting;
+        }
+
+        void setMultiSelecting(boolean enabled){
+            mIsMultiSelecting = enabled;
+        }
+
+    }
+
+
 
     /**
      * Called when a {@link BoxListItem} is bound to a ViewHolder. Customizations of UI elements
@@ -738,6 +911,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             holder.getNameView().setTextColor(getResources().getColor(R.color.box_browsesdk_primary_text));
             holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
             holder.getThumbView().setAlpha(1f);
+        }
+        if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+            holder.getSecondaryAction().setVisibility(View.GONE);
+            holder.getCheckBox().setVisibility(View.VISIBLE);
+            holder.getCheckBox().setChecked(getMultiSelectHandler().isItemSelected(item));
         }
     }
 

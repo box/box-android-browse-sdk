@@ -20,7 +20,7 @@
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_box_browsesdk_blank" />
+            />
     </FrameLayout>
 
     <LinearLayout
