@@ -29,31 +29,42 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/secondaryAction"
+
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/secondaryContainer"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            style="@style/BoxListItem_SecondaryAction"
-            android:src="@drawable/ic_box_browsesdk_more_vert_black_24dp"
-            android:visibility="gone"
-            />
-        <CheckBox
-            android:id="@+id/boxItemCheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            style="@style/BoxListItem_SecondaryAction"
-            android:visibility="gone"
-            />
+            >
+            <CheckBox
+                android:id="@+id/boxItemCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:clickable="false"
+                style="@style/BoxListItem_SecondaryAction"
+                android:visibility="gone"
+                />
+            <ImageButton
+                android:id="@+id/secondaryAction"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                style="@style/BoxListItem_SecondaryAction"
+                android:src="@drawable/ic_box_browsesdk_more_vert_black_24dp"
+                android:visibility="gone"
+                />
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             style="@style/BoxListItem_Description"
             android:gravity="start"
-            android:layout_toLeftOf="@id/secondaryAction"
+            android:layout_toLeftOf="@id/secondaryContainer"
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
             android:orientation="vertical" >
