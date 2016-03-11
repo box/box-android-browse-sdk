@@ -245,7 +245,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable)mSecondaryActionListener);
         }
         if (mMultiSelectHandler instanceof Serializable) {
-            outState.putSerializable(EXTRA_MULTI_SELECT_HANDLER, (Serializable)mMultiSelectHandler);
+            outState.putSerializable(EXTRA_MULTI_SELECT_HANDLER, (Serializable) mMultiSelectHandler);
         }
         super.onSaveInstanceState(outState);
     }
@@ -339,10 +339,15 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      */
     public <T extends OnFragmentInteractionListener & Serializable> void setSecondaryActionListener(T listener){
         mSecondaryActionListener = listener;
-        mAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
-
+    /**
+     *
+     * @return the MultiSelectHandler set on this fragment. This is used in order to handle batch operations.
+     */
     public MultiSelectHandler getMultiSelectHandler(){
         return mMultiSelectHandler;
     }
@@ -354,7 +359,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      */
     public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler){
         mMultiSelectHandler = handler;
-        mAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -363,7 +370,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         onItemsFetched(intent);
     }
 
-    /**P
+    /**
      * Fetch the first information relevant to this fragment or what should be used for refreshing.
      *
      * @return A FutureTask that is tasked with fetching the first information relevant to this fragment or what should be used for refreshing.
@@ -512,6 +519,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         TextView mMetaDescription;
         ProgressBar mProgressBar;
         ImageButton mSecondaryAction;
+        BoxItemClickListener mSecondaryClickListener;
         CheckBox mItemCheckBox;
 
 
@@ -528,17 +536,15 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mProgressBar = (ProgressBar) itemView.findViewById((R.id.spinner));
             mSecondaryAction = (ImageButton) itemView.findViewById(R.id.secondaryAction);
             mItemCheckBox = (CheckBox)itemView.findViewById(R.id.boxItemCheckBox);
-            if (getSecondaryActionListener() != null){
-                mSecondaryAction.setVisibility(View.VISIBLE);
-                mSecondaryAction.setOnClickListener(new BoxItemClickListener(mItem, getSecondaryActionListener()));
-            }
-
+            mSecondaryClickListener = new BoxItemClickListener();
+            mSecondaryAction.setOnClickListener(mSecondaryClickListener);
             setAccentColor(getResources(), mProgressBar);
         }
 
         public void bindItem(BoxListItem item) {
             mItem = item;
             onBindBoxItemViewHolder(this);
+            mSecondaryClickListener.setListItem(item);
         }
 
         public void setError(BoxListItem item) {
@@ -778,17 +784,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private class BoxItemClickListener implements View.OnClickListener {
 
         protected BoxListItem mBoxListItem;
-        protected OnFragmentInteractionListener mFragmentListener;
 
-        public BoxItemClickListener(BoxListItem listItem, OnFragmentInteractionListener listener){
+        void setListItem(BoxListItem listItem){
             mBoxListItem = listItem;
-            mFragmentListener = listener;
         }
-
 
         @Override
         public void onClick(View v) {
-            mFragmentListener.handleOnItemClick(mBoxListItem.getBoxItem());
+            getSecondaryActionListener().handleOnItemClick(mBoxListItem.getBoxItem());
         }
 
     }
@@ -912,11 +915,19 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
             holder.getThumbView().setAlpha(1f);
         }
+        if (getSecondaryActionListener() != null){
+            holder.getSecondaryAction().setVisibility(View.VISIBLE);
+        } else {
+            holder.getSecondaryAction().setVisibility(View.GONE);
+
+        }
+
         if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
             holder.getSecondaryAction().setVisibility(View.GONE);
             holder.getCheckBox().setVisibility(View.VISIBLE);
             holder.getCheckBox().setChecked(getMultiSelectHandler().isItemSelected(item));
         }
+
     }
 
     /**

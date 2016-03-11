@@ -227,13 +227,13 @@ public class ThumbnailManager {
             BoxFolder boxFolder = (BoxFolder) boxItem;
             if (boxFolder.getHasCollaborations() == Boolean.TRUE) {
                 if (boxFolder.getIsExternallyOwned() == Boolean.TRUE) {
-                    return R.drawable.ic_box_browsesdk_locked;
+                    return R.drawable.ic_box_browsesdk_folder_external;
                 }
                 return R.drawable.ic_box_browsesdk_folder_shared;
             }
-            return R.drawable.ic_box_browsesdk_personal;
+            return R.drawable.ic_box_browsesdk_folder_personal;
         } else if (boxItem instanceof BoxBookmark) {
-            return R.drawable.ic_box_browsesdk_linked;
+            return R.drawable.ic_box_browsesdk_web_link;
         } else {
             String name = boxItem.getName();
             if (name != null) {
