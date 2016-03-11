@@ -4,6 +4,8 @@
     </style>
 
     <style name="BoxListItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,78 @@ public class ThumbnailManager {
     /** Executor that we will submit our set thumbnail tasks to. */
     private ThreadPoolExecutor thumbnailManagerExecutor;
 
+    private final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
+
+    protected static final String[] DOCUMENTS_EXTENSIONS_ARRAY = {"csv", "doc", "docx", "gdoc", "gsheet", "htm", "html", "msg", "odp", "odt", "ods", "pdf",
+            "ppt", "pptx", "rtf", "tsv", "wpd", "xhtml", "xls", "xlsm", "xlsx", "xml", "xsd", "xsl"};
+    protected static final String[] PRESENTATION_EXTENSIONS_ARRAY = {"ppt", "pptx"};
+    protected static final String[] SPREADSHEET_EXTENSIONS_ARRAY = {"csv", "gsheet", "xls", "xlsm", "xlsx", "xsd", "xsl"};
+    protected static final String[] WORD_EXTENSIONS_ARRAY = {"doc", "docx"};
+
+    protected static final String[] AUDIO_EXTENSIONS_ARRAY = {"aac", "aif", "aifc", "aiff", "amr", "au", "flac", "m4a", "mp3", "ra", "wav", "wma"};
+    protected static final String[] CODE_EXTENSIONS_ARRAY = {"h", "c", "cp", "cpp", "c++", "cc", "cxx", "m", "strings", "hpp", "h++", "hxx", "mm", "java", "jav", "scala",
+            "clj", "coffee", "cl", "css", "diff", "erl", "go", "groovy", "hs", "lhs", "hx", "asp", "aspx", "ejs", "jsp", "html", "htm", "js", "jscript", "javascript", "json",
+            "ts", "less", "lua", "markdown", "mdown", "md", "mysql", "sql", "nt", "ocaml", "pas", "pp", "lpr", "dpr", "pascal", "pl", "php", "pig", "plsql", "properties", "ini",
+            "py", "r", "rpm", "rst", "rb", "rs", "scheme", "sh", "siv", "sieve", "st", "smarty", "rq", "stex", "tiddlywiki", "vb", "frm", "cs", "vbs", "vm", "v", "vh", "xml",
+            "xhtml", "xquery", "xq", "xqy", "yml", "yaml", "z80"};
+    protected static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif"};
+    protected static final String[] VIDEO_EXTENSIONS_ARRAY = {"3g2", "3gp", "avi", "m2v", "m2ts", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ogg", "mts",
+            "qt", "wmv"};
+    protected static final String[] COMPRESSED_EXTENSIONS_ARRAY = {"zip", "rar", "gz", "tar", "7z", "arc", "ace", "tbz"};
+    protected static final String[] INDESIGN_EXTENSIONS_ARRAY = {"indd", "indl", "indt", "indb", "inx", "idml", "pmd"};
+    protected static final String[] OBJ_EXTENSIONS_ARRAY = {"obj", "3ds", "x3d"};
+    protected static final String[] PHOTOSHOP_EXTENSIONS_ARRAY = {"psd", "psb"};
+    protected static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
+
+
+    static {
+        for (String ext : IMAGE_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_image);
+        }
+        for (String ext : DOCUMENTS_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_doc);
+        }
+        for (String ext : PRESENTATION_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_presentation);
+        }
+        for (String ext : SPREADSHEET_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_spreadsheet);
+        }
+        for (String ext : WORD_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_word);
+        }
+        for (String ext : AUDIO_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_audio);
+        }
+        for (String ext : COMPRESSED_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_compressed);
+        }
+        for (String ext : CODE_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_code);
+        }
+        for (String ext : VIDEO_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_movie);
+        }
+        for (String ext : INDESIGN_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_indesign);
+        }
+        for (String ext : OBJ_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_obj);
+        }
+        for (String ext : PHOTOSHOP_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_photoshop);
+        }
+        for (String ext : VECTOR_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_vector);
+        }
+        DEFAULT_ICON_RESORCE_MAP.put("ico", R.drawable.ic_box_browsesdk_icon);
+
+        DEFAULT_ICON_RESORCE_MAP.put("boxnote", R.drawable.ic_box_browsesdk_box_note);
+        DEFAULT_ICON_RESORCE_MAP.put("ai", R.drawable.ic_box_browsesdk_illustrator);
+        DEFAULT_ICON_RESORCE_MAP.put("pdf", R.drawable.ic_box_browsesdk_pdf);
+
+    }
+
     /**
      * Constructor.
      * 
@@ -71,6 +144,10 @@ public class ThumbnailManager {
             throw new FileNotFoundException();
         }
         mHandler = new Handler(Looper.getMainLooper());
+    }
+
+    private void populateDefaultResourceMap(){
+
     }
 
     /**
@@ -154,188 +231,19 @@ public class ThumbnailManager {
                 }
                 return R.drawable.ic_box_browsesdk_folder_shared;
             }
-            return R.drawable.ic_box_browsesdk_folder;
+            return R.drawable.ic_box_browsesdk_folder_personal;
         } else if (boxItem instanceof BoxBookmark) {
-            return R.drawable.ic_box_browsesdk_weblink;
+            return R.drawable.ic_box_browsesdk_web_link;
         } else {
             String name = boxItem.getName();
             if (name != null) {
                 String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
-                if (ext.equals("aac")) {
-                        return R.drawable.ic_box_browsesdk_aac;
-                } else if (ext.equals("ai")) {
-                        return R.drawable.ic_box_browsesdk_ai;
-                } else if (ext.equals("aiff")) {
-                        return R.drawable.ic_box_browsesdk_aiff;
-                } else if (ext.equals("aspx")) {
-                        return R.drawable.ic_box_browsesdk_aspx;
-                } else if (ext.equals("avi")) {
-                        return R.drawable.ic_box_browsesdk_avi;
-                } else if (ext.equals("blank")) {
-                        return R.drawable.ic_box_browsesdk_blank;
-                } else if (ext.equals("bmp")) {
-                        return R.drawable.ic_box_browsesdk_bmp;
-                } else if (ext.equals("boxnote")) {
-                        return R.drawable.ic_box_browsesdk_boxnote;
-                } else if (ext.equals("c")) {
-                        return R.drawable.ic_box_browsesdk_c;
-                } else if (ext.equals("cpp")) {
-                        return R.drawable.ic_box_browsesdk_cpp;
-                } else if (ext.equals("css")) {
-                        return R.drawable.ic_box_browsesdk_css;
-                } else if (ext.equals("csv")) {
-                        return R.drawable.ic_box_browsesdk_csv;
-                } else if (ext.equals("db")) {
-                        return R.drawable.ic_box_browsesdk_db;
-                } else if (ext.equals("dcm")) {
-                        return R.drawable.ic_box_browsesdk_dcm;
-                } else if (ext.equals("doc")) {
-                        return R.drawable.ic_box_browsesdk_doc;
-                } else if (ext.equals("docx")) {
-                        return R.drawable.ic_box_browsesdk_docx;
-                } else if (ext.equals("dot")) {
-                        return R.drawable.ic_box_browsesdk_dot;
-                } else if (ext.equals("dotx")) {
-                        return R.drawable.ic_box_browsesdk_dotx;
-                } else if (ext.equals("eps")) {
-                        return R.drawable.ic_box_browsesdk_eps;
-                } else if (ext.equals("flv")) {
-                        return R.drawable.ic_box_browsesdk_flv;
-                } else if (ext.equals("gdoc")) {
-                        return R.drawable.ic_box_browsesdk_gdoc;
-                } else if (ext.equals("gdraw")) {
-                        return R.drawable.ic_box_browsesdk_gdraw;
-                } else if (ext.equals("generic")) {
-                        return R.drawable.ic_box_browsesdk_generic;
-                } else if (ext.equals("gif")) {
-                        return R.drawable.ic_box_browsesdk_gif;
-                } else if (ext.equals("gsheet")) {
-                        return R.drawable.ic_box_browsesdk_gsheet;
-                } else if (ext.equals("gslide")) {
-                        return R.drawable.ic_box_browsesdk_gslide;
-                } else if (ext.equals("htm")) {
-                        return R.drawable.ic_box_browsesdk_htm;
-                } else if (ext.equals("html")) {
-                        return R.drawable.ic_box_browsesdk_html;
-                } else if (ext.equals("indd")) {
-                        return R.drawable.ic_box_browsesdk_indd;
-                } else if (ext.equals("java")) {
-                        return R.drawable.ic_box_browsesdk_java;
-                } else if (ext.equals("jpeg")) {
-                        return R.drawable.ic_box_browsesdk_jpeg;
-                } else if (ext.equals("jpg")) {
-                        return R.drawable.ic_box_browsesdk_jpg;
-                } else if (ext.equals("js")) {
-                        return R.drawable.ic_box_browsesdk_js;
-                } else if (ext.equals("key")) {
-                        return R.drawable.ic_box_browsesdk_key;
-                } else if (ext.equals("link")) {
-                        return R.drawable.ic_box_browsesdk_link;
-                } else if (ext.equals("m3u")) {
-                        return R.drawable.ic_box_browsesdk_m3u;
-                } else if (ext.equals("m4a")) {
-                        return R.drawable.ic_box_browsesdk_m4a;
-                } else if (ext.equals("m4v")) {
-                        return R.drawable.ic_box_browsesdk_m4v;
-                } else if (ext.equals("markdown")) {
-                        return R.drawable.ic_box_browsesdk_markdown;
-                } else if (ext.equals("md")) {
-                        return R.drawable.ic_box_browsesdk_md;
-                } else if (ext.equals("mdown")) {
-                        return R.drawable.ic_box_browsesdk_mdown;
-                } else if (ext.equals("mid")) {
-                        return R.drawable.ic_box_browsesdk_mid;
-                } else if (ext.equals("mov")) {
-                        return R.drawable.ic_box_browsesdk_mov;
-                } else if (ext.equals("mp3")) {
-                        return R.drawable.ic_box_browsesdk_mp3;
-                } else if (ext.equals("mp4")) {
-                        return R.drawable.ic_box_browsesdk_mp4;
-                } else if (ext.equals("mpeg")) {
-                        return R.drawable.ic_box_browsesdk_mpeg;
-                } else if (ext.equals("mpg")) {
-                        return R.drawable.ic_box_browsesdk_mpg;
-                } else if (ext.equals("numbers")) {
-                        return R.drawable.ic_box_browsesdk_numbers;
-                } else if (ext.equals("obj")) {
-                        return R.drawable.ic_box_browsesdk_obj;
-                } else if (ext.equals("odp")) {
-                        return R.drawable.ic_box_browsesdk_odp;
-                } else if (ext.equals("ods")) {
-                        return R.drawable.ic_box_browsesdk_ods;
-                } else if (ext.equals("odt")) {
-                        return R.drawable.ic_box_browsesdk_odt;
-                } else if (ext.equals("otp")) {
-                        return R.drawable.ic_box_browsesdk_otp;
-                } else if (ext.equals("ots")) {
-                        return R.drawable.ic_box_browsesdk_ots;
-                } else if (ext.equals("ott")) {
-                        return R.drawable.ic_box_browsesdk_ott;
-                } else if (ext.equals("pages")) {
-                        return R.drawable.ic_box_browsesdk_pages;
-                } else if (ext.equals("pdf")) {
-                        return R.drawable.ic_box_browsesdk_pdf;
-                } else if (ext.equals("php")) {
-                        return R.drawable.ic_box_browsesdk_php;
-                } else if (ext.equals("png")) {
-                        return R.drawable.ic_box_browsesdk_png;
-                } else if (ext.equals("pot")) {
-                        return R.drawable.ic_box_browsesdk_pot;
-                } else if (ext.equals("potx")) {
-                        return R.drawable.ic_box_browsesdk_potx;
-                } else if (ext.equals("ppt")) {
-                        return R.drawable.ic_box_browsesdk_ppt;
-                } else if (ext.equals("pptx")) {
-                        return R.drawable.ic_box_browsesdk_pptx;
-                } else if (ext.equals("psd")) {
-                        return R.drawable.ic_box_browsesdk_psd;
-                } else if (ext.equals("qt")) {
-                        return R.drawable.ic_box_browsesdk_qt;
-                } else if (ext.equals("rar")) {
-                        return R.drawable.ic_box_browsesdk_rar;
-                } else if (ext.equals("rtf")) {
-                        return R.drawable.ic_box_browsesdk_rtf;
-                } else if (ext.equals("scala")) {
-                        return R.drawable.ic_box_browsesdk_scala;
-                } else if (ext.equals("sql")) {
-                        return R.drawable.ic_box_browsesdk_sql;
-                } else if (ext.equals("svg")) {
-                        return R.drawable.ic_box_browsesdk_svg;
-                } else if (ext.equals("tgz")) {
-                        return R.drawable.ic_box_browsesdk_tgz;
-                } else if (ext.equals("tiff")) {
-                        return R.drawable.ic_box_browsesdk_tiff;
-                } else if (ext.equals("txt")) {
-                        return R.drawable.ic_box_browsesdk_txt;
-                } else if (ext.equals("wav")) {
-                        return R.drawable.ic_box_browsesdk_wav;
-                } else if (ext.equals("webba")) {
-                        return R.drawable.ic_box_browsesdk_webba;
-                } else if (ext.equals("weblink")) {
-                        return R.drawable.ic_box_browsesdk_weblink;
-                } else if (ext.equals("wma")) {
-                        return R.drawable.ic_box_browsesdk_wma;
-                } else if (ext.equals("wmv")) {
-                        return R.drawable.ic_box_browsesdk_wmv;
-                } else if (ext.equals("wpl")) {
-                        return R.drawable.ic_box_browsesdk_wpl;
-                } else if (ext.equals("xhtml")) {
-                        return R.drawable.ic_box_browsesdk_xhtml;
-                } else if (ext.equals("xls")) {
-                        return R.drawable.ic_box_browsesdk_xls;
-                } else if (ext.equals("xlsx")) {
-                        return R.drawable.ic_box_browsesdk_xlsx;
-                } else if (ext.equals("xlt")) {
-                        return R.drawable.ic_box_browsesdk_xlt;
-                } else if (ext.equals("xltx")) {
-                        return R.drawable.ic_box_browsesdk_xltx;
-                } else if (ext.equals("xml")) {
-                        return R.drawable.ic_box_browsesdk_xml;
-                } else if (ext.equals("zip")) {
-                        return R.drawable.ic_box_browsesdk_zip;
+                Integer resId = DEFAULT_ICON_RESORCE_MAP.get(ext);
+                if (resId != null){
+                    return resId;
                 }
             }
-            return R.drawable.ic_box_browsesdk_blank;
+            return R.drawable.ic_box_browsesdk_other;
         }
     }
 

@@ -29,7 +29,25 @@
     </style>
 
     <style name="BoxListItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
         <item name="android:background">@drawable/boxsdk_list_item_selector</item>
+    </style>
+
+    <style name="BoxListItem_Description">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
+        <item name="android:layout_marginLeft">@dimen/box_browsesdk_list_item_description_margin</item>
+        <item name="android:layout_marginRight">@dimen/box_browsesdk_horizontal_margin</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="BoxListItem_SecondaryAction">
+        <item name="android:background">@drawable/boxsdk_list_item_selector</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:paddingRight">@dimen/box_browsesdk_horizontal_margin</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.box.androidsdk.browse.uidata;
 
 import android.content.Intent;
+import android.view.View;
 
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;

@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/boxItemMain"
-    android:layout_width="fill_parent"
-    android:layout_height="@dimen/box_browsesdk_list_item_height"
     style="@style/BoxListItem"
     android:orientation="horizontal"
     android:filterTouchesWhenObscured="true">
     <FrameLayout
-        android:layout_width="36dip"
-        android:layout_height="36dip"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginLeft="@dimen/box_browsesdk_horizontal_margin"
         android:layout_gravity="center_vertical"
         android:adjustViewBounds="true" >
@@ -20,40 +18,64 @@
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_box_browsesdk_blank" />
+            />
         <ProgressBar
             android:id="@+id/spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone" />
     </FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/box_browsesdk_horizontal_margin"
-        android:layout_marginRight="@dimen/box_browsesdk_horizontal_margin"
-        android:layout_gravity="center_vertical"
-        android:gravity="start"
-        android:orientation="vertical" >
-        <TextView
-            android:id="@+id/box_browsesdk_name_text"
+        <ImageButton
+            android:id="@+id/secondaryAction"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/BoxLabelText"
-            android:layout_gravity="start"
-            android:gravity="start"
-            android:baselineAlignBottom="true"
-            android:ellipsize="end"
-            android:singleLine="true"/>
-        <TextView
-            android:id="@+id/metaline_description"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            style="@style/BoxListItem_SecondaryAction"
+            android:src="@drawable/ic_box_browsesdk_more_vert_black_24dp"
+            android:visibility="gone"
+            />
+        <CheckBox
+            android:id="@+id/boxItemCheckBox"
             android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            style="@style/BoxListItem_SecondaryAction"
+            android:visibility="gone"
+            />
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
+            style="@style/BoxListItem_Description"
             android:gravity="start"
-            style="@style/BoxHintText"
-            android:ellipsize="middle"
-            android:singleLine="true" />
-    </LinearLayout>
-</LinearLayout>
+            android:layout_toLeftOf="@id/secondaryAction"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical" >
+            <TextView
+                android:id="@+id/box_browsesdk_name_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/BoxLabelText"
+                android:layout_gravity="start"
+                android:gravity="start"
+                android:baselineAlignBottom="true"
+                android:ellipsize="end"
+                android:singleLine="true"/>
+            <TextView
+                android:id="@+id/metaline_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:gravity="start"
+                style="@style/BoxHintText"
+                android:ellipsize="middle"
+                android:singleLine="true" />
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

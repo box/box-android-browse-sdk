@@ -36,8 +36,8 @@ dependencies {
 
 //    compile 'com.box:box-android-sdk:3.0.3'
     compile project(':box-content-sdk')
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
 }
 
 apply from: '../maven_push.gradle'
