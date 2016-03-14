@@ -28,6 +28,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -166,6 +167,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     private static ThreadPoolExecutor mApiExecutor;
     private static ThreadPoolExecutor mThumbnailExecutor;
+    private View mRootView;
 
     protected ThreadPoolExecutor getApiExecutor() {
         if (mApiExecutor == null || mApiExecutor.isShutdown()) {
@@ -280,14 +282,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.box_browsesdk_fragment_browse, container, false);
-        mSwipeRefresh = (SwipeRefreshLayout) rootView.findViewById(R.id.box_browsesdk_swipe_reresh);
+        mRootView = inflater.inflate(R.layout.box_browsesdk_fragment_browse, container, false);
+        mSwipeRefresh = (SwipeRefreshLayout) mRootView.findViewById(R.id.box_browsesdk_swipe_reresh);
         mSwipeRefresh.setOnRefreshListener(this);
         mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
         // This is a work around to show the loading circle because SwipeRefreshLayout.onMeasure must be called before setRefreshing to show the animation
         mSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
 
-        mItemsView = (RecyclerView) rootView.findViewById(R.id.box_browsesdk_items_recycler_view);
+        mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
         mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mAdapter = new BoxItemAdapter();
@@ -299,7 +301,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             displayBoxList(mBoxIteratorItems);
 
         }
-        return rootView;
+        return mRootView;
     }
 
     protected void setListItem(final BoxIteratorItems items) {
@@ -644,14 +646,18 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                     }
 
                     if (mItem.getBoxItem() instanceof BoxFolder) {
-                        BoxFolder folder = (BoxFolder) mItem.getBoxItem();
-                        FragmentTransaction trans = activity.getSupportFragmentManager().beginTransaction();
+                        // Find fragment container id
+                        ViewGroup fragmentContainer = (ViewGroup) mRootView.getParent();
+                        if (fragmentContainer != null) {
+                            BoxFolder folder = (BoxFolder) mItem.getBoxItem();
+                            FragmentTransaction trans = activity.getSupportFragmentManager().beginTransaction();
 
-                        // All fragments will always navigate into folders
-                        BoxBrowseFolderFragment browseFolderFragment = BoxBrowseFolderFragment.newInstance(folder, mSession);
-                        trans.replace(R.id.box_browsesdk_fragment_container, browseFolderFragment)
-                                .addToBackStack(TAG)
-                                .commit();
+                            // All fragments will always navigate into folders
+                            BoxBrowseFolderFragment browseFolderFragment = BoxBrowseFolderFragment.newInstance(folder, mSession);
+                            trans.replace(fragmentContainer.getId(), browseFolderFragment)
+                                    .addToBackStack(TAG)
+                                    .commit();
+                        }
                     }
                 }
             }
@@ -804,7 +810,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public interface OnFragmentInteractionListener {
 
         /**
-         * Called whenever an item in the RecyclerView is clicked
+         * Called whenever an item in the RecyclerView is clicked and allows the activity to intercept
+         * and override the behavior
          *
          * @param item the item that was clicked
          * @return whether the click event should continue to be handled by the fragment
