@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/box_background"
-    android:filterTouchesWhenObscured="true">
+    android:background="@color/box_background">
     <include layout="@layout/box_browsesdk_toolbar" />
     <FrameLayout
         android:layout_width="match_parent"

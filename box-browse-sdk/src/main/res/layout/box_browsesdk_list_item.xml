@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/boxItemMain"
     style="@style/BoxListItem"
-    android:orientation="horizontal"
-    android:filterTouchesWhenObscured="true">
+    android:orientation="horizontal">
     <FrameLayout
         android:layout_width="24dp"
         android:layout_height="24dp"
