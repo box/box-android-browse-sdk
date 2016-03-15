@@ -1,6 +1,5 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -56,6 +54,7 @@ import com.eclipsesource.json.JsonValue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -69,7 +68,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -294,6 +292,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mAdapter = new BoxItemAdapter();
         mItemsView.setAdapter(mAdapter);
+        if (getMultiSelectHandler() != null){
+            getMultiSelectHandler().setItemAdapter(mAdapter);
+        }
 
         if (mBoxIteratorItems == null) {
             mAdapter.add(new BoxListItem(fetchInfo(), ACTION_FETCHED_INFO));
@@ -362,11 +363,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler){
         mMultiSelectHandler = handler;
         if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
+            mMultiSelectHandler.setItemAdapter(mAdapter);
         }
     }
-
-
 
     protected void onInfoFetched(Intent intent) {
         onItemsFetched(intent);
@@ -545,8 +544,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         public void bindItem(BoxListItem item) {
             mItem = item;
-            onBindBoxItemViewHolder(this);
             mSecondaryClickListener.setListItem(item);
+            onBindBoxItemViewHolder(this);
         }
 
         public void setError(BoxListItem item) {
@@ -612,8 +611,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public boolean onLongClick(View v) {
             if (getMultiSelectHandler() != null){
-                getMultiSelectHandler().setMultiSelecting(true);
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
+                getMultiSelectHandler().setEnabled(!getMultiSelectHandler().isEnabled());
                 return true;
             }
             return false;
@@ -621,8 +620,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
-            if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+            if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
+                onBindBoxItemViewHolder(this);
                 return;
             }
             if(mSwipeRefresh.isRefreshing()){
@@ -820,11 +820,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
 
-    public abstract class MultiSelectHandler {
+    public static abstract class MultiSelectHandler {
 
 
         HashSet<BoxItem> mSelectedItems = new HashSet<BoxItem>();
         boolean mIsMultiSelecting;
+        transient WeakReference<BoxItemAdapter> mItemAdapter;
 
         public List<BoxItem> getSelectedBoxItem(){
             ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
@@ -837,6 +838,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         public boolean isItemSelected(BoxItem item){
+            boolean selected = mSelectedItems.contains(item);
             return mSelectedItems.contains(item);
         }
 
@@ -869,12 +871,26 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             handleItemSelected(boxItem, wasSelected, this);
         }
 
-        boolean isMultiSelecting(){
+        void setItemAdapter(BoxItemAdapter adapter){
+            mItemAdapter = new WeakReference<BoxItemAdapter>(adapter);
+        }
+
+
+        boolean isEnabled(){
             return mIsMultiSelecting;
         }
 
-        void setMultiSelecting(boolean enabled){
+        public void setEnabled(boolean enabled){
+            if (mIsMultiSelecting == enabled){
+                return;
+            }
             mIsMultiSelecting = enabled;
+            if (enabled == false){
+                mSelectedItems.clear();
+            }
+            if (mItemAdapter != null && mItemAdapter.get() != null) {
+                mItemAdapter.get().notifyDataSetChanged();
+            }
         }
 
     }
@@ -929,10 +945,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         }
 
-        if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+        if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
             holder.getSecondaryAction().setVisibility(View.GONE);
             holder.getCheckBox().setVisibility(View.VISIBLE);
+            holder.getCheckBox().setEnabled(getMultiSelectHandler().isSelectable(item));
             holder.getCheckBox().setChecked(getMultiSelectHandler().isItemSelected(item));
+        } else {
+            holder.getCheckBox().setVisibility(View.GONE);
         }
 
     }

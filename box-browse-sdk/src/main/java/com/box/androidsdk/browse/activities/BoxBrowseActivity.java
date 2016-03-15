@@ -22,7 +22,6 @@ import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
-
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -112,6 +111,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
         trans.commit();
     }
+
 
     @Override
     public void onBoxItemSelected(BoxItem boxItem) {
