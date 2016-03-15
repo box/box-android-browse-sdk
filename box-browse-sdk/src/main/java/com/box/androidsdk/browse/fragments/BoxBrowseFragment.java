@@ -1,6 +1,5 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -69,7 +67,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -613,7 +610,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         public boolean onLongClick(View v) {
             if (getMultiSelectHandler() != null){
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
-                getMultiSelectHandler().setMultiSelecting(!getMultiSelectHandler().isMultiSelecting());
+                getMultiSelectHandler().setEnabled(!getMultiSelectHandler().isEnabled());
                 return true;
             }
             return false;
@@ -621,7 +618,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
-            if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+            if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
                 onBindBoxItemViewHolder(this);
                 return;
@@ -872,11 +869,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
 
-        boolean isMultiSelecting(){
+        boolean isEnabled(){
             return mIsMultiSelecting;
         }
 
-        public void setMultiSelecting(boolean enabled){
+        public void setEnabled(boolean enabled){
             if (mIsMultiSelecting == enabled){
                 return;
             }
@@ -941,7 +938,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         }
 
-        if (getMultiSelectHandler() != null && getMultiSelectHandler().isMultiSelecting()){
+        if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
             holder.getSecondaryAction().setVisibility(View.GONE);
             holder.getCheckBox().setVisibility(View.VISIBLE);
             holder.getCheckBox().setEnabled(getMultiSelectHandler().isSelectable(item));
