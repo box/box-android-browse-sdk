@@ -30,6 +30,7 @@ import java.util.concurrent.FutureTask;
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     protected BoxFolder mFolder = null;
+    protected BoxApiFolder mFolderApi = null;
     private static final String OUT_ITEM = "outItem";
 
 
@@ -147,19 +148,15 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
                 Intent intent = new Intent();
                 intent.setAction(ACTION_FETCHED_INFO);
                 intent.putExtra(EXTRA_ID, mFolder.getId());
-                intent.putExtra(EXTRA_LIMIT, mLimit);
                 try {
-                    BoxRequestsFolder.GetFolderInfo req = new BoxApiFolder(mSession).getInfoRequest(mFolder.getId())
-                            // TODO: Should clean-up to only include required fields
-                            .setFields(BoxFolder.ALL_FIELDS)
-                            .setLimit(mLimit);
+                    BoxRequestsFolder.GetFolderWithAllItems req = getFolderApi().getFolderWithAllItems(mFolder.getId())
+                            .setFields(BoxFolder.ALL_FIELDS);
                     BoxFolder bf = req.send();
                     if (bf != null) {
                         intent.putExtra(EXTRA_SUCCESS, true);
                         intent.putExtra(EXTRA_FOLDER, bf);
                         intent.putExtra(EXTRA_COLLECTION, bf.getItemCollection());
                     }
-
                 } catch (BoxException e) {
                     e.printStackTrace();
                     intent.putExtra(EXTRA_SUCCESS, false);
@@ -171,8 +168,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             }
         });
     }
-
-
 
     public FutureTask<Intent> fetchItems(final int offset, final int limit) {
         return new FutureTask<Intent>(new Callable<Intent>() {
@@ -189,8 +184,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
                     // this call the collection is just BoxObjectItems and each does not appear to be an instance of BoxItem.
                     ArrayList<String> itemFields = new ArrayList<String>();
                     String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED, BoxFolder.FIELD_PARENT};
-                    BoxApiFolder api = new BoxApiFolder(mSession);
-                    BoxIteratorItems items = api.getItemsRequest(mFolder.getId()).setLimit(limit).setOffset(offset).setFields(fields).send();
+                    BoxIteratorItems items = getFolderApi().getItemsRequest(mFolder.getId()).setLimit(limit).setOffset(offset).setFields(fields).send();
                     intent.putExtra(EXTRA_SUCCESS, true);
                     intent.putExtra(EXTRA_COLLECTION, items);
                 } catch (BoxException e) {
@@ -264,6 +258,13 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             }
             super.onInfoFetched(intent);
         }
+    }
+
+    public BoxApiFolder getFolderApi() {
+        if (mFolderApi == null) {
+            mFolderApi = new BoxApiFolder(mSession);
+        }
+        return mFolderApi;
     }
 
     /**

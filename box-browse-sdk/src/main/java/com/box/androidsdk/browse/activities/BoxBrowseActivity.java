@@ -18,10 +18,15 @@ import com.box.androidsdk.browse.fragments.BoxSearchFragment;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -71,13 +76,15 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     protected BoxFolder getCurrentFolder() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-        if (fragment instanceof BoxBrowseFolderFragment) {
-            System.out.println("xxx ((BoxBrowseFolderFragment) fragment).getFolder() " + fragment + " x " + ((BoxBrowseFolderFragment) fragment).getFolder());
-            return ((BoxBrowseFolderFragment) fragment).getFolder();
+        BoxFolder curFolder = fragment instanceof BoxBrowseFolderFragment ?
+                    ((BoxBrowseFolderFragment) fragment).getFolder() :
+                    (BoxFolder) mItem;
+        JsonObject jsonObject = curFolder.toJsonObject();
+        JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
+        if (obj != null && !obj.isNull()) {
+            obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
         }
-        System.out.println("xxx mItem " + mItem);
-
-        return (BoxFolder) mItem;
+        return new BoxFolder(jsonObject);
     }
 
     @Override

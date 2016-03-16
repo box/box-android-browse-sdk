@@ -60,7 +60,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         args.putString(ARG_USER_ID, session.getUserId());
         args.putSerializable(OUT_ITEM, holder);
         fragment.setArguments(args);
-
         return fragment;
     }
 
@@ -79,7 +78,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     public void search(BoxRequestsSearch.Search request){
         mSearchRequestHolder = new BoxSearchHolder(request);
         setToolbar(mSearchRequestHolder.getQuery());
-        setListItem(new BoxIteratorItems());
+        mBoxIteratorItems = new BoxIteratorItems();
         mAdapter.removeAll();
         mAdapter.add(new BoxListItem(fetchInfo(), ACTION_FETCHED_INFO));
         mAdapter.notifyDataSetChanged();
@@ -146,6 +145,16 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                 return intent;
             }
         });
+    }
+
+    @Override
+    protected void updateItems(BoxIteratorItems items) {
+        super.updateItems(items);
+
+        if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
+            // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
+            mAdapter.add(new BoxListItem(fetchItems(mBoxIteratorItems.size(), DEFAULT_LIMIT), ACTION_FETCHED_ITEMS));
+        }
     }
 
     @Override

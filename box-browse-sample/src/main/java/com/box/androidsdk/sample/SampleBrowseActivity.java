@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ import com.box.androidsdk.content.models.BoxFolder;
 import java.io.File;
 
 
-public class SampleBrowseActivity extends ActionBarActivity {
+public class SampleBrowseActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_FILE_PICKER = 1;
     private static final int REQUEST_CODE_FOLDER_PICKER = 2;

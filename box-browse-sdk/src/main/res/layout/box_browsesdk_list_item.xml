@@ -53,7 +53,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 style="@style/BoxListItem_SecondaryAction"
-                android:src="@drawable/ic_box_browsesdk_more_vert_black_24dp"
+                android:src="@drawable/ic_box_browsesdk_more_vert_grey_24dp"
                 android:visibility="gone"
                 />
         </FrameLayout>
