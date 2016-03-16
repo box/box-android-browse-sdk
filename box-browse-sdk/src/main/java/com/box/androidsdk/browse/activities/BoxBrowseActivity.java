@@ -79,12 +79,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         BoxFolder curFolder = fragment instanceof BoxBrowseFolderFragment ?
                     ((BoxBrowseFolderFragment) fragment).getFolder() :
                     (BoxFolder) mItem;
-        JsonObject jsonObject = curFolder.toJsonObject();
-        JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
-        if (obj != null && !obj.isNull()) {
-            obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
-        }
-        return new BoxFolder(jsonObject);
+        return curFolder;
     }
 
     @Override

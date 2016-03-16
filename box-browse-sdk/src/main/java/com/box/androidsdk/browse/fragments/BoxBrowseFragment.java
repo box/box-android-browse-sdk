@@ -215,7 +215,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
-            mBoxIteratorItems = (BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION);
+            setListItems((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
             if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)){
                 mSecondaryActionListener = (OnFragmentInteractionListener)savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
             }
@@ -311,6 +311,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         } else {
             updateItems(mBoxIteratorItems);
         }
+    }
+
+    protected void setListItems(final BoxIteratorItems items) {
+        mBoxIteratorItems = items;
     }
 
     @Override
@@ -442,7 +446,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         } else {
             if (mBoxIteratorItems == null) {
-                mBoxIteratorItems = items;
+                setListItems(items);
             }
 
             addAllItems(mBoxIteratorItems, items);
