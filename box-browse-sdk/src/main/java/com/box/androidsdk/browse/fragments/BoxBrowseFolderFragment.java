@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.BoxException;
@@ -17,6 +18,7 @@ import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -44,6 +46,20 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     /**
      * Use this factory method to create a new instance of the Browse fragment
+     * with default configurations, and pass it a BoxItemFilter for filtering the items
+     * being displayed
+     *
+     * @param folder  the folder to browse
+     * @param session the session that the contents will be loaded for
+     * @return A new instance of fragment BoxBrowseFragment.
+     */
+    public static  <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
+            BoxFolder folder, BoxSession session, E filter ) {
+        return newInstance(folder.getId(), session.getUserId(), folder.getName(), DEFAULT_LIMIT, filter);
+    }
+
+    /**
+     * Use this factory method to create a new instance of the Browse fragment
      * with default configurations
      *
      * @param folderId the id of the folder to browse
@@ -53,6 +69,22 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     public static BoxBrowseFolderFragment newInstance(String folderId, String userId) {
         return newInstance(folderId, userId, null, DEFAULT_LIMIT);
     }
+
+    /**
+     * Use this factory method to create a new instance of the Browse fragment
+     * with default configurations, and pass it a BoxItemFilter for filtering the items
+     * being displayed
+     *
+     * @param folderId the id of the folder to browse
+     * @param userId   the id of the user that the contents will be loaded for
+     * @return A new instance of fragment BoxBrowseFragment.
+     */
+    public static <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
+            String folderId, String userId, E filter) {
+        return newInstance(folderId, userId, null, DEFAULT_LIMIT, filter);
+    }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,12 +135,29 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * @return A new instance of fragment BoxBrowseFragment.
      */
     public static BoxBrowseFolderFragment newInstance(String folderId, String userId, String folderName, int limit) {
+        return newInstance(folderId, userId, folderName, limit, null);
+    }
+
+    /**
+     * Use this factory method to create a new instance of the Browse fragment
+     * with default configurations
+     *
+     * @param folderId   the id of the folder to browse
+     * @param userId     the id of the user that the contents will be loaded for
+     * @param folderName the name of the folder that will be shown in the action bar
+     * @param limit the number of items that the results will be limited to when retrieving folder items
+     * @param filter A BoxItemFilter to filter the items displayed by this fragment.
+     * @return A new instance of fragment BoxBrowseFragment.
+     */
+    public  static <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
+            String folderId, String userId, String folderName, int limit, E filter ) {
         BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ID, folderId);
         args.putString(ARG_USER_ID, userId);
         args.putString(ARG_NAME, folderName);
         args.putInt(ARG_LIMIT, limit);
+        args.putSerializable(ARG_BOX_ITEM_FILTER, filter);
         fragment.setArguments(args);
         return fragment;
     }
