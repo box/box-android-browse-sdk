@@ -26,11 +26,10 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
-
 import java.net.HttpURLConnection;
 
 
-public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener{
+public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener {
 
     /**
      * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFolder} to the intent
@@ -38,6 +37,70 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
     public static final String EXTRA_BOX_FOLDER = "extraBoxFolder";
 
     protected Button mSelectFolderButton;
+
+    /**
+     * Create an intent to launch an instance of this activity to browse folders.
+     *
+     * @param context current context.
+     * @param folder  folder to browse
+     * @param session a session, should be already authenticated.
+     * @return an intent to launch an instance of this activity.
+     */
+    public static Intent getLaunchIntent(Context context, final BoxFolder folder, final BoxSession session) {
+        if (folder == null || SdkUtils.isBlank(folder.getId()))
+            throw new IllegalArgumentException("A valid folder must be provided to browse");
+        if (session == null || session.getUser() == null || SdkUtils.isBlank(session.getUser().getId()))
+            throw new IllegalArgumentException("A valid user must be provided to browse");
+
+        Intent intent = new Intent(context, BoxBrowseFolderActivity.class);
+        intent.putExtra(EXTRA_ITEM, folder);
+        intent.putExtra(EXTRA_USER_ID, session.getUser().getId());
+        return intent;
+    }
+
+    /**
+     * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     *
+     * @param context current context.
+     * @param session a session, should be already authenticated.
+     * @return a builder object to use to construct an instance of this class.
+     */
+    public static BoxBrowseFolderActivity.IntentBuilder createIntentBuilder(final Context context, final BoxSession session) {
+        return new IntentBuilder(context, session);
+    }
+
+    /**
+     * Create an intent to launch an instance of this activity to navigate folders.
+     *
+     * @param context  current context.
+     * @param folderId folder id to navigate.
+     * @param session  session.
+     * @return an intent to launch an instance of this activity.
+     */
+    @Deprecated
+    public static Intent getLaunchIntent(Context context, final String folderId, final BoxSession session) {
+        return createIntentBuilder(context, session).setStartingFolder(BoxFolder.createFromId(folderId)).createIntent();
+    }
+
+    /**
+     * Create an intent to launch an instance of this activity to navigate folders. This version will immediately show the given name in the navigation spinner
+     * to before information about it has been fetched from the server.
+     *
+     * @param context    current context.
+     * @param folderName Name to show in the navigation spinner. Should be name of the folder.
+     * @param folderId   folder id to navigate.
+     * @param session    session.
+     * @return an intent to launch an instance of this activity.
+     */
+    @Deprecated
+    public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
+
+        BoxFolder folder = BoxFolder.createFromId(folderId);
+        JsonObject jsonObject = folder.toJsonObject();
+        jsonObject.add(BoxItem.FIELD_NAME, folderName);
+        folder = new BoxFolder(jsonObject);
+        return createIntentBuilder(context, session).setStartingFolder(folder).createIntent();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +110,7 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         mSelectFolderButton = (Button) findViewById(R.id.box_browsesdk_select_folder_button);
         mSelectFolderButton.setOnClickListener(this);
         initToolbar();
-        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
+        if (getSupportFragmentManager().getBackStackEntryCount() < 1) {
             onBoxItemSelected(mItem);
         }
         mSelectFolderButton.setEnabled(true);
@@ -64,16 +127,17 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
     public void onClick(View v) {
         Intent intent = new Intent();
         BoxFolder curFolder = getCurrentFolder();
-        JsonObject jsonObject = curFolder.toJsonObject();
-        JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
-        if (obj != null && !obj.isNull()) {
-            obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
+        if (curFolder != null) {
+            JsonObject jsonObject = curFolder.toJsonObject();
+            JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
+            if (obj != null && !obj.isNull()) {
+                obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
+            }
+            intent.putExtra(EXTRA_BOX_FOLDER, new BoxFolder(jsonObject));
         }
-        intent.putExtra(EXTRA_BOX_FOLDER, new BoxFolder(jsonObject));
         setResult(RESULT_OK, intent);
         finish();
     }
-
 
     @Override
     public void handleBoxResponse(BoxResponse response) {
@@ -127,27 +191,6 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         }
     }
 
-
-    /**
-     * Create an intent to launch an instance of this activity to browse folders.
-     *
-     * @param context current context.
-     * @param folder  folder to browse
-     * @param session a session, should be already authenticated.
-     * @return an intent to launch an instance of this activity.
-     */
-    public static Intent getLaunchIntent(Context context, final BoxFolder folder, final BoxSession session) {
-        if (folder == null || SdkUtils.isBlank(folder.getId()))
-            throw new IllegalArgumentException("A valid folder must be provided to browse");
-        if (session == null || session.getUser() == null || SdkUtils.isBlank(session.getUser().getId()))
-            throw new IllegalArgumentException("A valid user must be provided to browse");
-
-        Intent intent = new Intent(context, BoxBrowseFolderActivity.class);
-        intent.putExtra(EXTRA_ITEM, folder);
-        intent.putExtra(EXTRA_USER_ID, session.getUser().getId());
-        return intent;
-    }
-
     @Override
     public void onCreateFolder(String name) {
         BoxApiFolder folderApi = new BoxApiFolder(mSession);
@@ -155,68 +198,24 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         getApiExecutor(getApplication()).execute(req.toTask());
     }
 
-
-    /**
-     * Create a builder object that can be used to construct an intent to launch an instance of this activity.
-     * @param context current context.
-     * @param session a session, should be already authenticated.
-     * @return a builder object to use to construct an instance of this class.
-     */
-    public static BoxBrowseFolderActivity.IntentBuilder createIntentBuilder(final Context context, final BoxSession session){
-        return new IntentBuilder(context, session);
-    }
-
     /**
      * An IntentBuilder used to create an intent to launch an instance of this class. Use this to add more
      * complicated logic to your activity beyond the simple getLaunchIntent method.
      */
-    public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder>{
+    public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder> {
 
 
-        protected IntentBuilder(final Context context, final BoxSession session){
+        protected IntentBuilder(final Context context, final BoxSession session) {
             super(context, session);
         }
 
         @Override
         protected Intent createLaunchIntent() {
-            if (mFolder == null){
+            if (mFolder == null) {
                 mFolder = BoxFolder.createFromId("0");
             }
             return getLaunchIntent(mContext, mFolder, mSession);
         }
-    }
-
-    /**
-     * Create an intent to launch an instance of this activity to navigate folders.
-     *
-     * @param context  current context.
-     * @param folderId folder id to navigate.
-     * @param session  session.
-     * @return an intent to launch an instance of this activity.
-     */
-    @Deprecated
-    public static Intent getLaunchIntent(Context context, final String folderId, final BoxSession session) {
-        return createIntentBuilder(context, session).setStartingFolder(BoxFolder.createFromId(folderId)).createIntent();
-    }
-
-    /**
-     * Create an intent to launch an instance of this activity to navigate folders. This version will immediately show the given name in the navigation spinner
-     * to before information about it has been fetched from the server.
-     *
-     * @param context    current context.
-     * @param folderName Name to show in the navigation spinner. Should be name of the folder.
-     * @param folderId   folder id to navigate.
-     * @param session    session.
-     * @return an intent to launch an instance of this activity.
-     */
-    @Deprecated
-    public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-
-        BoxFolder folder = BoxFolder.createFromId(folderId);
-        JsonObject jsonObject = folder.toJsonObject();
-        jsonObject.add(BoxItem.FIELD_NAME, folderName);
-        folder = new BoxFolder(jsonObject);
-        return createIntentBuilder(context,session).setStartingFolder(folder).createIntent();
     }
 
 }

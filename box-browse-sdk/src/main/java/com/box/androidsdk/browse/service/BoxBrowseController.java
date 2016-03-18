@@ -5,7 +5,9 @@ import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
+import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 
@@ -16,6 +18,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/***
+ * Default implementation for the {@link BrowseController}.
+ */
 public class BoxBrowseController implements BrowseController {
     private static final String TAG = BoxBrowseController.class.getName();
 
@@ -26,6 +31,7 @@ public class BoxBrowseController implements BrowseController {
     private final BoxApiFile mFileApi;
     private final BoxApiFolder mFolderApi;
     private final BoxApiSearch mSearchApi;
+    private BoxFutureTask.OnCompletedListener mListener;
 
 
     public BoxBrowseController(BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {
@@ -35,41 +41,14 @@ public class BoxBrowseController implements BrowseController {
     }
 
     @Override
-    public FutureTask getFolderWithAllItems(String folderId, BoxFutureTask.OnCompletedListener listener) {
-        BoxFutureTask task = mFolderApi
-                .getFolderWithAllItems(folderId)
-                .setFields(BoxFolder.ALL_FIELDS)
-                .toTask()
-                .addOnCompletedListener(listener);
-        return task;
-    }
-
-    @Override
-    public FutureTask getFolderItems(String folderId, final int offset, final int limit, BoxFutureTask.OnCompletedListener listener) {
-        BoxFutureTask task = mFolderApi
-                .getItemsRequest(folderId)
-                .setLimit(limit)
-                .setOffset(offset)
-                .toTask()
-                .addOnCompletedListener(listener);
-        return task;
+    public BoxRequestsFolder.GetFolderWithAllItems getFolderWithAllItems(String folderId) {
+        return mFolderApi.getFolderWithAllItems(folderId)
+                .setFields(BoxFolder.ALL_FIELDS);
     }
 
     @Override
     public BoxRequestsSearch.Search getSearchRequest(String query) {
         return mSearchApi.getSearchRequest(query);
-    }
-
-    public FutureTask getSearchResults(String query, int offset, int limit, BoxFutureTask.OnCompletedListener listener) {
-        BoxFutureTask task = mSearchApi.getSearchRequest(query)
-                .setOffset(offset)
-                .setLimit(limit)
-                .toTask()
-                .addOnCompletedListener(listener);
-//        for (Map.Entry<String, String> entry : map.entrySet()) {
-//            search.limitValueForKey(entry.getKey(), entry.getValue());
-//        }
-        return task;
     }
 
     @Override
@@ -84,24 +63,28 @@ public class BoxBrowseController implements BrowseController {
         return null;
     }
 
-
-    public FutureTask getFileThumbnail(String fileId, File downloadLocation, int width, int height, BoxFutureTask.OnCompletedListener listener) {
-        BoxFutureTask task = null;
-        try {
-            task = mFileApi.getDownloadThumbnailRequest(downloadLocation, fileId)
-                    .setMinHeight(height)
-                    .setMinWidth(width)
-                    .toTask()
-                    .addOnCompletedListener(listener);
-        } catch (IOException e) {
-            BoxLogUtils.e(TAG, e.getMessage());
+    @Override
+    public void execute(BoxRequest request) {
+        if (request == null) {
+            return;
         }
-        return task;
+
+        BoxFutureTask task = request.toTask();
+        if (mListener != null) {
+            task.addOnCompletedListener(mListener);
+        }
+
+        // Thumbnail request should be executed in their own executor pool
+        ThreadPoolExecutor executor = request instanceof BoxRequestsFile.DownloadThumbnail ?
+                getThumbnailExecutor() :
+                getApiExecutor();
+        executor.submit(task);
     }
 
     @Override
-    public void execute(FutureTask task) {
-        getApiExecutor().submit(task);
+    public BrowseController setCompletedListener(BoxFutureTask.OnCompletedListener listener) {
+        mListener = listener;
+        return this;
     }
 
     protected ThreadPoolExecutor getApiExecutor() {
@@ -116,8 +99,7 @@ public class BoxBrowseController implements BrowseController {
      *
      * @return executor
      */
-    @Override
-    public ThreadPoolExecutor getThumbnailExecutor() {
+    protected ThreadPoolExecutor getThumbnailExecutor() {
         if (mThumbnailExecutor == null || mThumbnailExecutor.isShutdown()) {
             mThumbnailExecutor = new ThreadPoolExecutor(1, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         }

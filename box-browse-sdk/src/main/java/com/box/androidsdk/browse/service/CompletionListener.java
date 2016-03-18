@@ -27,6 +27,8 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
     public static final String EXTRA_FOLDER = "com.box.androidsdk.browse.FOLDER";
     public static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
 
+    private static final String TAG = CompletionListener.class.getName();
+
     private final LocalBroadcastManager mBroadcastManager;
 
     public CompletionListener(LocalBroadcastManager broadcastManager) {
@@ -45,12 +47,6 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
                     intent.putExtra(EXTRA_ID, folder.getId());
                     intent.putExtra(EXTRA_FOLDER, folder);
                     intent.putExtra(EXTRA_COLLECTION, folder.getItemCollection());
-                } else if (response.getRequest() instanceof BoxRequestsFolder.GetFolderItems) {
-                    BoxFolder folder = (BoxFolder) response.getResult();
-                    intent.putExtra(EXTRA_ID, folder.getId());
-                    intent.putExtra(EXTRA_OFFSET, folder.getItemCollection().offset());
-                    intent.putExtra(EXTRA_LIMIT, folder.getItemCollection().limit());
-                    intent.putExtra(EXTRA_COLLECTION, folder.getItemCollection());
                 } else if (response.getRequest() instanceof BoxRequestsSearch.Search) {
                     BoxIteratorItems items = (BoxIteratorItems) response.getResult();
                     intent.putExtra(EXTRA_OFFSET, items.offset());
@@ -67,8 +63,9 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
                     }
                 }
             }
-            BoxLogUtils.d("CompletionListener", "Broadcasting " + intent.getAction());
             mBroadcastManager.sendBroadcast(intent);
+        } else {
+            BoxLogUtils.e(TAG, response.getException());
         }
     }
 

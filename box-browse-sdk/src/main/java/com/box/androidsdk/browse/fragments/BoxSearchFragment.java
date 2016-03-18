@@ -12,7 +12,6 @@ import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.content.BoxApiSearch;
-import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
@@ -26,26 +25,11 @@ import java.io.File;
  */
 public class BoxSearchFragment extends BoxBrowseFragment {
 
-    private static final int DEFAULT_SEARCH_LIMIT = 100;
+    // The api throws a 400 bad request if the offset is not in multiples of 100
+    private static final int DEFAULT_SEARCH_LIMIT = 200;
     private static final String OUT_ITEM = "outItem";
 
     private static BoxRequestsSearch.Search mRequest;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
-            mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
-            setToolbar(mRequest.getQuery());
-        }
-    }
-
-    @Override
-    public IntentFilter getIntentFilter() {
-        IntentFilter filter = super.getIntentFilter();
-        filter.addAction(BoxRequestsSearch.Search.class.getName());
-        return filter;
-    }
 
     /**
      * Use this factory method to create a new instance of the Browse fragment
@@ -75,6 +59,21 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return BoxSearchFragment.newInstance(session, (new BoxApiSearch(session)).getSearchRequest(query));
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
+            mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
+            setToolbar(mRequest.getQuery());
+        }
+    }
+
+    @Override
+    public IntentFilter getIntentFilter() {
+        IntentFilter filter = super.getIntentFilter();
+        filter.addAction(BoxRequestsSearch.Search.class.getName());
+        return filter;
+    }
 
     public void search(BoxRequestsSearch.Search request) {
         setToolbar(request.getQuery());
@@ -87,9 +86,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
-        BoxFutureTask task = mRequest.toTask()
-                .addOnCompletedListener(mCompletionListener);
-        mController.execute(task);
+        mRequest.setLimit(DEFAULT_SEARCH_LIMIT)
+            .setOffset(0);
+        mController.execute(mRequest);
     }
 
     @Override
@@ -97,12 +96,10 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         super.updateItems(items);
         if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
             // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-            BoxFutureTask<BoxIteratorItems> incrementalSearchTask = mRequest
+            BoxRequestsSearch.Search incrementalSearchTask = mRequest
                     .setOffset(mBoxIteratorItems.size())
-                    .setLimit(DEFAULT_SEARCH_LIMIT)
-                    .toTask()
-                    .addOnCompletedListener(mCompletionListener);
-            mAdapter.add(new BoxListItem(incrementalSearchTask, ACTION_FETCHED_OFFSET_ITEMS));
+                    .setLimit(DEFAULT_SEARCH_LIMIT);
+            mAdapter.add(new BoxListItem(incrementalSearchTask, BoxRequestsSearch.Search.class.getName()));
         }
     }
 
@@ -120,8 +117,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
     }
 
-    protected void onOffsetItemsFetched(Intent intent) {
-        super.onOffsetItemsFetched(intent);
+    @Override
+    protected void onItemsFetched(Intent intent) {
+        super.onItemsFetched(intent);
         FragmentActivity activity = getActivity();
         if (activity == null) {
             return;

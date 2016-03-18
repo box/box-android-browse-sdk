@@ -35,8 +35,9 @@ public class SampleBrowseActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_browse);
-        BoxConfig.CLIENT_ID = "your-client-id";
-        BoxConfig.CLIENT_SECRET = "your-client-secret";
+        BoxConfig.IS_LOG_ENABLED = true;
+        BoxConfig.CLIENT_ID = "7ri5uru2bwc6dxj3yeb4nxfbbxm6i6sj";
+        BoxConfig.CLIENT_SECRET = "QXy3Xuf3vym2IQa83x0CF3w9UDvTcmqW";
         initUI();
 
         session = new BoxSession(this);

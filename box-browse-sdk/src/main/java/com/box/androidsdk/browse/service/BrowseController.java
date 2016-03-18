@@ -1,51 +1,55 @@
 package com.box.androidsdk.browse.service;
 
-import android.content.Intent;
-
-import com.box.androidsdk.content.BoxApiFile;
-import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
+import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
 
+/***
+ * Controller interface for the Box Browse SDK. This defines all of the requests that will be used by the SDK.
+ */
 public interface BrowseController {
-
 
     /***
      * Retrieves a folder with all its items. The response will be returned through the provided listener
-     *  @param folderId
-     * @param listener*/
-    FutureTask getFolderWithAllItems(String folderId, BoxFutureTask.OnCompletedListener listener);
+     *
+     * @param folderId
+     */
+    BoxRequestsFolder.GetFolderWithAllItems getFolderWithAllItems(String folderId);
 
     /***
-     * Retrieves a folder's items. The response will be returned through the provided listener
-     * @param folderId
-     * @param offset
-     * @param limit
-     * @param listener
+     * Retrieves search results for the given query
+     *
+     * @param query
+     * @return
      */
-    FutureTask getFolderItems(String folderId, int offset, int limit, BoxFutureTask.OnCompletedListener listener);
-
     BoxRequestsSearch.Search getSearchRequest(String query);
-
-    BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, int width, int height);
 
     /***
      * Retrieves a thumbnail for a file. The response will be returned through the provided listener
-     *  @param fileId
-     * @param downloadLocation
+     *
+     * @param fileId
+     * @param downloadFile
      * @param width
      * @param height
-     * @param listener
      */
-    FutureTask getFileThumbnail(String fileId, File downloadLocation, int width, int height, BoxFutureTask.OnCompletedListener listener);
+    BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, int width, int height);
 
-    void execute(FutureTask task);
+    /***
+     * Executes the request using the appropriate executor
+     *
+     * @param request
+     */
+    void execute(BoxRequest request);
 
-    ThreadPoolExecutor getThumbnailExecutor();
+    /***
+     * Sets the default compeltion listener that will be used after the completion of a BoxRequest
+     *
+     * @param listener
+     * @return
+     */
+    BrowseController setCompletedListener(BoxFutureTask.OnCompletedListener listener);
 }

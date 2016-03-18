@@ -8,8 +8,6 @@ import android.widget.Toast;
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.CompletionListener;
-import com.box.androidsdk.content.BoxApiFolder;
-import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
@@ -23,9 +21,8 @@ import java.io.Serializable;
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
-    protected BoxFolder mFolder = null;
-    protected BoxApiFolder mFolderApi = null;
     private static final String OUT_ITEM = "outItem";
+    protected BoxFolder mFolder = null;
 
 
 
@@ -92,18 +89,16 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
     }
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null){
-            mFolder = (BoxFolder)savedInstanceState.getSerializable(OUT_ITEM);
+        if (savedInstanceState != null) {
+            mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
         }
         if (getArguments() != null) {
-            String folderId = getArguments().getString(ARG_ID, BoxConstants.ROOT_FOLDER_ID);
+            String folderId = getArguments().getString(ARG_ID);
             String folderName = getArguments().getString(ARG_NAME);
-            if (mFolder == null){
+            if (mFolder == null && !SdkUtils.isBlank(folderId)) {
                 mFolder = BoxFolder.createFromIdAndName(folderId, folderName);
             }
 
@@ -116,7 +111,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     @Override
     public void onResume() {
-        if (getArguments() != null){
+        if (getArguments() != null) {
             String folderName = getArguments().getString(ARG_NAME);
             setToolbar(folderName);
         }
@@ -125,19 +120,15 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
-        mController.execute(mController.getFolderWithAllItems(mFolder.getId(), mCompletionListener));
+        mController.execute(mController.getFolderWithAllItems(mFolder.getId()));
     }
 
     /**
-     *
      * @return the current folder this fragment is meant to display.
      */
-    public BoxFolder getFolder(){
+    public BoxFolder getFolder() {
         return mFolder;
     }
-
-
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -157,25 +148,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         super.onSaveInstanceState(outState);
     }
 
-
-    protected void onOffsetItemsFetched(Intent intent) {
-        FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        if (!intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false)) {
-            checkConnectivity();
-            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        mAdapter.remove(intent.getAction());
-        if (mFolder.getId().equals(intent.getStringExtra(CompletionListener.EXTRA_ID)) && intent.hasExtra(CompletionListener.EXTRA_FOLDER)) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
-            super.onOffsetItemsFetched(intent);
-        }
-    }
-
     protected void onItemsFetched(Intent intent) {
         FragmentActivity activity = getActivity();
         if (activity == null || mAdapter == null) {
@@ -189,7 +161,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
 
         if (mFolder.getId().equals(intent.getStringExtra(CompletionListener.EXTRA_ID))) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
+            mFolder = (BoxFolder) intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
 
             if (mFolder != null && mFolder.getName() != null) {
                 getArguments().putString(ARG_NAME, mFolder.getName());
@@ -199,18 +171,11 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
     }
 
-    public BoxApiFolder getFolderApi() {
-        if (mFolderApi == null) {
-            mFolderApi = new BoxApiFolder(mSession);
-        }
-        return mFolderApi;
-    }
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an item being tapped to be communicated to the activity
      */
-    public interface OnFragmentInteractionListener extends BoxBrowseFragment.OnFragmentInteractionListener{
+    public interface OnFragmentInteractionListener extends BoxBrowseFragment.OnFragmentInteractionListener {
 
         /**
          * Called whenever an item in the RecyclerView is tapped

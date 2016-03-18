@@ -67,7 +67,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.FutureTask;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -84,30 +83,22 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     public static final String TAG = BoxBrowseFragment.class.getName();
     protected static final int DEFAULT_LIMIT = 1000;
-
-    protected static final String ACTION_FETCHED_OFFSET_ITEMS = "com.box.androidsdk.browse.FETCHED_OFFSET_ITEMS";
-    protected static final String ACTION_FETCHED_ITEMS = "com.box.androidsdk.browse.FETCHED_ITEMS";
-    protected static final String ACTION_DOWNLOADED_FILE_THUMBNAIL = "com.box.androidsdk.browse.DOWNLOADED_THUMBNAIL";
-    private static final String EXTRA_TITLE = "BoxBrowseFragment.Title";
-    private static final String EXTRA_CANCELED = "BoxBrowseFragment.Canceled";
-
-    protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "BoxBrowseFragment_SecondaryActionListener";
-    protected static final String EXTRA_MULTI_SELECT_HANDLER = "BoxBrowseFragment_Multi_Select_Handler";
+    
     protected static final String ARG_BOX_ITEM_FILTER = "BoxBrowseFilter";
+    protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "com.box.androidsdk.browse.SECONDARYACTIONLISTENER";
+    protected static final String EXTRA_MULTI_SELECT_HANDLER = "com.box.androidsdk.browse.MULTI_SELECT_HANDLER";
+    private static final String EXTRA_TITLE = "com.box.androidsdk.browse.TITLE";
     private static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
 
-
-    private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
+    private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[]{"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
     protected BoxSession mSession;
-    protected BoxApiFile mFileApi;
     protected BoxIteratorItems mBoxIteratorItems;
 
     protected OnFragmentInteractionListener mListener;
     protected OnFragmentInteractionListener mSecondaryActionListener;
     protected MultiSelectHandler mMultiSelectHandler;
-    protected CompletionListener mCompletionListener;
 
     protected BoxItemAdapter mAdapter;
     protected RecyclerView mItemsView;
@@ -123,7 +114,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-        handleResponse(intent);
+            handleResponse(intent);
         }
     };
 
@@ -151,12 +142,20 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         // Required empty public constructor
     }
 
+    public static void setAccentColor(Resources res, ProgressBar progressBar) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            int accentColor = res.getColor(R.color.box_accent);
+            Drawable drawable = progressBar.getIndeterminateDrawable();
+            if (drawable != null) {
+                drawable.setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
+                drawable.invalidateSelf();
+            }
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Initialize broadcast managers
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
-        mCompletionListener = new CompletionListener(mLocalBroadcastManager);
         if (getArguments() != null) {
             mUserId = getArguments().getString(ARG_USER_ID);
             mThumbnailManager = initializeThumbnailManager();
@@ -167,14 +166,20 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
         if (savedInstanceState != null) {
             setListItems((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
-            if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)){
-                mSecondaryActionListener = (OnFragmentInteractionListener)savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
+            if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)) {
+                mSecondaryActionListener = (OnFragmentInteractionListener) savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
             }
-            if (savedInstanceState.containsKey(EXTRA_MULTI_SELECT_HANDLER)){
-                mMultiSelectHandler = (MultiSelectHandler)savedInstanceState.getSerializable(EXTRA_MULTI_SELECT_HANDLER);
+            if (savedInstanceState.containsKey(EXTRA_MULTI_SELECT_HANDLER)) {
+                mMultiSelectHandler = (MultiSelectHandler) savedInstanceState.getSerializable(EXTRA_MULTI_SELECT_HANDLER);
             }
         }
-        mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession));
+
+        // Initialize controller and listeners
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
+                .setCompletedListener(new CompletionListener(mLocalBroadcastManager));
+
+        // TODO: Do we really need this?
         setRetainInstance(true);
     }
 
@@ -197,7 +202,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         outState.putSerializable(EXTRA_COLLECTION, mBoxIteratorItems);
         outState.putSerializable(EXTRA_TITLE, mTitle);
         if (mSecondaryActionListener instanceof Serializable) {
-            outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable)mSecondaryActionListener);
+            outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable) mSecondaryActionListener);
         }
         if (mMultiSelectHandler instanceof Serializable) {
             outState.putSerializable(EXTRA_MULTI_SELECT_HANDLER, (Serializable) mMultiSelectHandler);
@@ -233,7 +238,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void handleResponse(Intent intent) {
-        System.out.println("Response received " + intent.getAction());
         if (intent.getAction().equals(BoxRequestsFile.DownloadThumbnail.class.getName())) {
             onDownloadedThumbnail(intent);
         } else if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
@@ -241,8 +245,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             if (mSwipeRefresh != null) {
                 mSwipeRefresh.setRefreshing(false);
             }
-        } else if (intent.getAction().equals(BoxRequestsFolder.GetFolderItems.class.getName())) {
-            onOffsetItemsFetched(intent);
         }
     }
 
@@ -262,7 +264,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mProgress = (ProgressBar) mRootView.findViewById(R.id.box_browsesdk_progress_bar);
         mAdapter = new BoxItemAdapter();
         mItemsView.setAdapter(mAdapter);
-        if (getMultiSelectHandler() != null){
+        if (getMultiSelectHandler() != null) {
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
 
@@ -303,16 +305,17 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mListener = null;
     }
 
-    protected OnFragmentInteractionListener getSecondaryActionListener(){
+    protected OnFragmentInteractionListener getSecondaryActionListener() {
         return mSecondaryActionListener;
     }
 
     /**
      * Optionally set a secondary action to use on this fragment.
+     *
      * @param listener listener to be called when a secondary action is clicked on an item. Must be serializable.
-     * @param <T> Serializable OnFragmentInteractionListener.
+     * @param <T>      Serializable OnFragmentInteractionListener.
      */
-    public <T extends OnFragmentInteractionListener & Serializable> void setSecondaryActionListener(T listener){
+    public <T extends OnFragmentInteractionListener & Serializable> void setSecondaryActionListener(T listener) {
         mSecondaryActionListener = listener;
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
@@ -320,19 +323,19 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     /**
-     *
      * @return the MultiSelectHandler set on this fragment. This is used in order to handle batch operations.
      */
-    public MultiSelectHandler getMultiSelectHandler(){
+    public MultiSelectHandler getMultiSelectHandler() {
         return mMultiSelectHandler;
     }
 
     /**
      * Optionally set a multi select handler.
+     *
      * @param handler handler to be called when multiple items are selected.
-     * @param <T> Serializable OnFragmentInteractionListener.
+     * @param <T>     Serializable OnFragmentInteractionListener.
      */
-    public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler){
+    public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler) {
         mMultiSelectHandler = handler;
         if (mAdapter != null) {
             mMultiSelectHandler.setItemAdapter(mAdapter);
@@ -347,30 +350,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void onItemsFetched(Intent intent) {
-        onOffsetItemsFetched(intent);
-    }
-
-    /**
-     * Handle showing a collection in the given intent.
-     *
-     * @param intent an intent that contains a collection in EXTRA_COLLECTION.
-     */
-    protected void onOffsetItemsFetched(Intent intent) {
         if (intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, true)) {
             mAdapter.remove(intent.getAction());
         } else {
             BoxListItem item = mAdapter.get(intent.getAction());
             if (item != null) {
-                item.setIsError(true);
-                if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
-                    // TODO: Remove?
-//                    item.setTask(fetchInfo());
-                }
-//                else if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
-//                    int limit = intent.getIntExtra(CompletionListener.EXTRA_LIMIT, DEFAULT_LIMIT);
-//                    int offset = intent.getIntExtra(CompletionListener.EXTRA_OFFSET, 0);
-//                    item.setTask(fetchItems(offset, limit));
-//                }
+                item.setState(BoxListItem.State.ERROR);
                 mAdapter.update(intent.getAction());
             }
             checkConnectivity();
@@ -419,11 +404,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         });
     }
 
-    private BoxIteratorItems addAllItems(BoxIteratorItems target, BoxIteratorItems source){
+    private BoxIteratorItems addAllItems(BoxIteratorItems target, BoxIteratorItems source) {
         JsonValue sourceArray = source.toJsonObject().get(BoxIterator.FIELD_ENTRIES);
         JsonObject targetJsonObject = target.toJsonObject();
         JsonValue targetArray = targetJsonObject.get(BoxIterator.FIELD_ENTRIES);
-        if (targetArray == null || targetArray.isNull()){
+        if (targetArray == null || targetArray.isNull()) {
             JsonArray jsonArray = new JsonArray();
             targetJsonObject.set(BoxIterator.FIELD_ENTRIES, jsonArray);
             target.createFromJson(targetJsonObject);
@@ -454,6 +439,237 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         filter.addAction(BoxRequestsFolder.GetFolderWithAllItems.class.getName());
         filter.addAction(BoxRequestsFile.DownloadThumbnail.class.getName());
         return filter;
+    }
+
+    /**
+     * Called when a {@link BoxListItem} is bound to a ViewHolder. Customizations of UI elements
+     * should be done by overriding this method. If extending from a {@link BoxBrowseActivity}
+     * a custom BoxBrowseFolder fragment can be returned in
+     * {@link BoxBrowseActivity#createBrowseFolderFragment(BoxItem, BoxSession)}
+     *
+     * @param holder the BoxItemHolder
+     */
+    protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
+        if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
+            return;
+        }
+
+        final BoxItem item = holder.getItem().getBoxItem();
+        holder.getNameView().setText(item.getName());
+        String description = "";
+        if (item != null) {
+            String modifiedAt = item.getModifiedAt() != null ?
+                    DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase() :
+                    "";
+            String size = item.getSize() != null ?
+                    localFileSizeToDisplay(item.getSize()) :
+                    "";
+            description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
+            mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
+        }
+        holder.getMetaDescription().setText(description);
+        holder.getProgressBar().setVisibility(View.GONE);
+        holder.getMetaDescription().setVisibility(View.VISIBLE);
+        holder.getThumbView().setVisibility(View.VISIBLE);
+        if (!holder.getItem().getIsEnabled()) {
+            holder.getView().setEnabled(false);
+            holder.getNameView().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
+            holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_disabled_hint));
+            holder.getThumbView().setAlpha(0.26f);
+        } else {
+            holder.getView().setEnabled(true);
+            holder.getNameView().setTextColor(getResources().getColor(R.color.box_browsesdk_primary_text));
+            holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
+            holder.getThumbView().setAlpha(1f);
+        }
+        if (getSecondaryActionListener() != null) {
+            holder.getSecondaryAction().setVisibility(View.VISIBLE);
+        } else {
+            holder.getSecondaryAction().setVisibility(View.GONE);
+
+        }
+
+        if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()) {
+            holder.getSecondaryAction().setVisibility(View.GONE);
+            holder.getCheckBox().setVisibility(View.VISIBLE);
+            holder.getCheckBox().setEnabled(getMultiSelectHandler().isSelectable(item));
+            holder.getCheckBox().setChecked(getMultiSelectHandler().isItemSelected(item));
+        } else {
+            holder.getCheckBox().setVisibility(View.GONE);
+        }
+
+    }
+
+    /**
+     * Defines the conditions for when a BoxItem should be shown as enabled
+     *
+     * @param item the BoxItem that should be enabled or not
+     * @return whether or not the BoxItem should be enabled
+     */
+    public boolean isItemEnabled(BoxItem item) {
+        return true;
+    }
+
+    /**
+     * Defines the conditions for when a BoxItem should be shown in the adapter
+     *
+     * @param item the BoxItem that should be visible or not
+     * @return whether or not the BoxItem should be visible
+     */
+    public boolean isItemVisible(BoxItem item) {
+        return true;
+    }
+
+    /**
+     * Download the thumbnail for a given file.
+     *
+     * @param fileId file id to download thumbnail for.
+     * @return A FutureTask that is tasked with fetching information on the given folder.
+     */
+    protected BoxRequestsFile.DownloadThumbnail getDownloadThumbnailTask(final String fileId, final File downloadLocation, final BoxItemViewHolder holder) {
+        if (downloadLocation.exists() && downloadLocation.length() > 0) {
+            return null;
+        }
+
+        if (holder.getItem() == null || holder.getItem().getBoxItem() == null || !(holder.getItem().getBoxItem() instanceof BoxFile)
+                || !holder.getItem().getBoxItem().getId().equals(fileId)) {
+            return null;
+        }
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
+        if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        }
+
+        return mController.getThumbnailRequest(fileId, downloadLocation, thumbSize, thumbSize);
+    }
+
+    /**
+     * Java version of routine to turn a long into a short user readable string.
+     * <p/>
+     * This routine is used if the JNI native C version is not available.
+     *
+     * @param numSize the number of bytes in the file.
+     * @return String Short human readable String e.g. 2.5 MB
+     */
+    private String localFileSizeToDisplay(final double numSize) {
+        final int constKB = 1024;
+        final int constMB = constKB * constKB;
+        final int constGB = constMB * constKB;
+        final double floatKB = 1024.0f;
+        final double floatMB = floatKB * floatKB;
+        final double floatGB = floatMB * floatKB;
+        final String BYTES = "B";
+        String textSize = "0 bytes";
+        String strSize = Double.toString(numSize);
+        double size;
+
+        if (numSize < constKB) {
+            textSize = strSize + " " + BYTES;
+        } else if ((numSize >= constKB) && (numSize < constMB)) {
+            size = numSize / floatKB;
+            textSize = String.format(Locale.ENGLISH, "%4.1f KB", size);
+        } else if ((numSize >= constMB) && (numSize < constGB)) {
+            size = numSize / floatMB;
+            textSize = String.format(Locale.ENGLISH, "%4.1f MB", size);
+        } else if (numSize >= constGB) {
+            size = numSize / floatGB;
+            textSize = String.format(Locale.ENGLISH, "%4.1f GB", size);
+        }
+        return textSize;
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an item being tapped to be communicated to the activity
+     */
+    public interface OnFragmentInteractionListener {
+
+        /**
+         * Called whenever an item in the RecyclerView is clicked and allows the activity to intercept
+         * and override the behavior
+         *
+         * @param item the item that was clicked
+         * @return whether the click event should continue to be handled by the fragment
+         */
+        boolean handleOnItemClick(BoxItem item);
+    }
+
+    public static abstract class MultiSelectHandler {
+
+
+        HashSet<BoxItem> mSelectedItems = new HashSet<BoxItem>();
+        boolean mIsMultiSelecting;
+        transient WeakReference<BoxItemAdapter> mItemAdapter;
+
+        public List<BoxItem> getSelectedBoxItem() {
+            ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
+            mSelectedItems.addAll(items);
+            return items;
+        }
+
+        public int getSize() {
+            return mSelectedItems.size();
+        }
+
+        public boolean isItemSelected(BoxItem item) {
+            boolean selected = mSelectedItems.contains(item);
+            return mSelectedItems.contains(item);
+        }
+
+        /**
+         * @param boxItem box item the user may potentially select.
+         * @return true if this item can be selected by the user, false if it should be disabled.
+         */
+        public abstract boolean isSelectable(BoxItem boxItem);
+
+        /**
+         * Called when a user selects or deselects an item in the list.
+         *
+         * @param boxItem     box item the user clicked while in multi select mode.
+         * @param wasSelected whether or not the the item the user clicked was selected.
+         * @param handler     the handler that keeps track of which files were chosen.
+         */
+        public abstract void handleItemSelected(BoxItem boxItem, boolean wasSelected, MultiSelectHandler handler);
+
+        void toggle(BoxItem boxItem) {
+            if (boxItem == null || !isSelectable(boxItem)) {
+                return;
+            }
+            boolean wasSelected = false;
+            if (isItemSelected(boxItem)) {
+                mSelectedItems.remove(boxItem);
+            } else {
+                mSelectedItems.add(boxItem);
+                wasSelected = true;
+            }
+            handleItemSelected(boxItem, wasSelected, this);
+        }
+
+        void setItemAdapter(BoxItemAdapter adapter) {
+            mItemAdapter = new WeakReference<BoxItemAdapter>(adapter);
+        }
+
+
+        boolean isEnabled() {
+            return mIsMultiSelecting;
+        }
+
+        public void setEnabled(boolean enabled) {
+            if (mIsMultiSelecting == enabled) {
+                return;
+            }
+            mIsMultiSelecting = enabled;
+            if (enabled == false) {
+                mSelectedItems.clear();
+            }
+            if (mItemAdapter != null && mItemAdapter.get() != null) {
+                mItemAdapter.get().notifyDataSetChanged();
+            }
+        }
+
     }
 
     private class BoxItemDividerDecoration extends RecyclerView.ItemDecoration {
@@ -499,7 +715,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         public BoxItemViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
-            if (getMultiSelectHandler() != null){
+            if (getMultiSelectHandler() != null) {
                 itemView.setOnLongClickListener(this);
             }
             mView = itemView;
@@ -508,7 +724,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mMetaDescription = (TextView) itemView.findViewById(R.id.metaline_description);
             mProgressBar = (ProgressBar) itemView.findViewById((R.id.spinner));
             mSecondaryAction = (ImageButton) itemView.findViewById(R.id.secondaryAction);
-            mItemCheckBox = (CheckBox)itemView.findViewById(R.id.boxItemCheckBox);
+            mItemCheckBox = (CheckBox) itemView.findViewById(R.id.boxItemCheckBox);
             mSecondaryClickListener = new BoxItemClickListener();
             mSecondaryAction.setOnClickListener(mSecondaryClickListener);
             setAccentColor(getResources(), mProgressBar);
@@ -582,7 +798,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public boolean onLongClick(View v) {
-            if (getMultiSelectHandler() != null){
+            if (getMultiSelectHandler() != null) {
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
                 getMultiSelectHandler().setEnabled(!getMultiSelectHandler().isEnabled());
                 return true;
@@ -592,21 +808,21 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onClick(View v) {
-            if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
+            if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()) {
                 getMultiSelectHandler().toggle(mItem.getBoxItem());
                 onBindBoxItemViewHolder(this);
                 return;
             }
-            if(mSwipeRefresh.isRefreshing()){
+            if (mSwipeRefresh.isRefreshing()) {
                 return;
             }
             if (mItem == null) {
                 return;
             }
 
-            if (mItem.getIsError()) {
-                mItem.setIsError(false);
-                mController.execute(mItem.getTask());
+            if (mItem.getState() == BoxListItem.State.ERROR) {
+                mItem.setState(BoxListItem.State.SUBMITTED);
+                mController.execute(mItem.getRequest());
                 setLoading();
             }
 
@@ -638,7 +854,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
-    protected  class BoxItemAdapter extends RecyclerView.Adapter<BoxItemViewHolder> {
+    protected class BoxItemAdapter extends RecyclerView.Adapter<BoxItemViewHolder> {
         protected ArrayList<BoxListItem> mListItems = new ArrayList<BoxListItem>();
         protected HashMap<String, BoxListItem> mItemsMap = new HashMap<String, BoxListItem>();
 
@@ -652,11 +868,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public void onBindViewHolder(BoxItemViewHolder boxItemHolder, int i) {
             BoxListItem item = mListItems.get(i);
-            if (item.getIsError()) {
+            if (item.getState() == BoxListItem.State.ERROR) {
                 boxItemHolder.setError(item);
                 return;
-            } else if (item.getType() == BoxListItem.TYPE_FUTURE_TASK) {
-                mController.execute(item.getTask());
+            } else if (item.getType() == BoxListItem.TYPE_FUTURE_TASK && item.getState() == BoxListItem.State.CREATED) {
+                item.setState(BoxListItem.State.SUBMITTED);
+                mController.execute(item.getRequest());
                 boxItemHolder.setLoading();
                 return;
             } else {
@@ -664,9 +881,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
                 // Fetch thumbnails for media file types
                 if (item.getBoxItem() instanceof BoxFile && isMediaType(item.getBoxItem().getName())) {
-                    if (item.getTask() == null ) {
-                        item.setTask(getDownloadThumbnailTask(item.getBoxItem().getId(), mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
-                    } else if (item.getTask().isDone()) {
+                    if (item.getRequest() == null) {
+                        item.setRequest(getDownloadThumbnailTask(item.getBoxItem().getId(), mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
+                    } else if (item.getState() == BoxListItem.State.ERROR) {
                         // TODO: Baymax - restore?
 //                        try {
 //                            Intent intent = (Intent) item.getTask().get();
@@ -686,8 +903,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 }
             }
 
-            if (item.getTask() != null && !item.getTask().isDone()) {
-                mController.getThumbnailExecutor().execute(item.getTask());
+            if (item.getState() != BoxListItem.State.SUBMITTED && item.getRequest() != null) {
+                mController.execute(item.getRequest());
             }
         }
 
@@ -769,7 +986,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         protected BoxListItem mBoxListItem;
 
-        void setListItem(BoxListItem listItem){
+        void setListItem(BoxListItem listItem) {
             mBoxListItem = listItem;
         }
 
@@ -778,249 +995,5 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             getSecondaryActionListener().handleOnItemClick(mBoxListItem.getBoxItem());
         }
 
-    }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an item being tapped to be communicated to the activity
-     */
-    public interface OnFragmentInteractionListener {
-
-        /**
-         * Called whenever an item in the RecyclerView is clicked and allows the activity to intercept
-         * and override the behavior
-         *
-         * @param item the item that was clicked
-         * @return whether the click event should continue to be handled by the fragment
-         */
-        boolean handleOnItemClick(BoxItem item);
-    }
-
-
-    public static abstract class MultiSelectHandler {
-
-
-        HashSet<BoxItem> mSelectedItems = new HashSet<BoxItem>();
-        boolean mIsMultiSelecting;
-        transient WeakReference<BoxItemAdapter> mItemAdapter;
-
-        public List<BoxItem> getSelectedBoxItem(){
-            ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
-            mSelectedItems.addAll(items);
-            return items;
-        }
-
-        public int getSize(){
-            return mSelectedItems.size();
-        }
-
-        public boolean isItemSelected(BoxItem item){
-            boolean selected = mSelectedItems.contains(item);
-            return mSelectedItems.contains(item);
-        }
-
-        /**
-         *
-         * @param boxItem box item the user may potentially select.
-         * @return true if this item can be selected by the user, false if it should be disabled.
-         */
-        public abstract boolean isSelectable(BoxItem boxItem);
-
-        /**
-         * Called when a user selects or deselects an item in the list.
-         * @param boxItem box item the user clicked while in multi select mode.
-         * @param wasSelected whether or not the the item the user clicked was selected.
-         * @param handler the handler that keeps track of which files were chosen.
-         */
-        public abstract void handleItemSelected(BoxItem boxItem, boolean wasSelected, MultiSelectHandler handler);
-
-        void toggle(BoxItem boxItem){
-            if (boxItem == null || !isSelectable(boxItem)) {
-                return;
-            }
-            boolean wasSelected = false;
-            if (isItemSelected(boxItem)) {
-                mSelectedItems.remove(boxItem);
-            } else {
-                mSelectedItems.add(boxItem);
-                wasSelected = true;
-            }
-            handleItemSelected(boxItem, wasSelected, this);
-        }
-
-        void setItemAdapter(BoxItemAdapter adapter){
-            mItemAdapter = new WeakReference<BoxItemAdapter>(adapter);
-        }
-
-
-        boolean isEnabled(){
-            return mIsMultiSelecting;
-        }
-
-        public void setEnabled(boolean enabled){
-            if (mIsMultiSelecting == enabled){
-                return;
-            }
-            mIsMultiSelecting = enabled;
-            if (enabled == false){
-                mSelectedItems.clear();
-            }
-            if (mItemAdapter != null && mItemAdapter.get() != null) {
-                mItemAdapter.get().notifyDataSetChanged();
-            }
-        }
-
-    }
-
-    /**
-     * Called when a {@link BoxListItem} is bound to a ViewHolder. Customizations of UI elements
-     * should be done by overriding this method. If extending from a {@link BoxBrowseActivity}
-     * a custom BoxBrowseFolder fragment can be returned in
-     * {@link BoxBrowseActivity#createBrowseFolderFragment(BoxItem, BoxSession)}
-     *
-     * @param holder the BoxItemHolder
-     */
-    protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-        if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
-            return;
-        }
-
-        final BoxItem item = holder.getItem().getBoxItem();
-        holder.getNameView().setText(item.getName());
-        String description = "";
-        if (item != null) {
-            String modifiedAt = item.getModifiedAt() != null ?
-                    DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase() :
-                    "";
-            String size = item.getSize() != null ?
-                    localFileSizeToDisplay(item.getSize()) :
-                    "";
-            description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
-            mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
-        }
-        holder.getMetaDescription().setText(description);
-        holder.getProgressBar().setVisibility(View.GONE);
-        holder.getMetaDescription().setVisibility(View.VISIBLE);
-        holder.getThumbView().setVisibility(View.VISIBLE);
-        if (!holder.getItem().getIsEnabled()) {
-            holder.getView().setEnabled(false);
-            holder.getNameView().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
-            holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_disabled_hint));
-            holder.getThumbView().setAlpha(0.26f);
-        } else {
-            holder.getView().setEnabled(true);
-            holder.getNameView().setTextColor(getResources().getColor(R.color.box_browsesdk_primary_text));
-            holder.getMetaDescription().setTextColor(getResources().getColor(R.color.box_browsesdk_hint));
-            holder.getThumbView().setAlpha(1f);
-        }
-        if (getSecondaryActionListener() != null){
-            holder.getSecondaryAction().setVisibility(View.VISIBLE);
-        } else {
-            holder.getSecondaryAction().setVisibility(View.GONE);
-
-        }
-
-        if (getMultiSelectHandler() != null && getMultiSelectHandler().isEnabled()){
-            holder.getSecondaryAction().setVisibility(View.GONE);
-            holder.getCheckBox().setVisibility(View.VISIBLE);
-            holder.getCheckBox().setEnabled(getMultiSelectHandler().isSelectable(item));
-            holder.getCheckBox().setChecked(getMultiSelectHandler().isItemSelected(item));
-        } else {
-            holder.getCheckBox().setVisibility(View.GONE);
-        }
-
-    }
-
-    /**
-     * Defines the conditions for when a BoxItem should be shown as enabled
-     *
-     * @param item the BoxItem that should be enabled or not
-     * @return whether or not the BoxItem should be enabled
-     */
-    public boolean isItemEnabled(BoxItem item) {
-        return true;
-    }
-
-    /**
-     * Defines the conditions for when a BoxItem should be shown in the adapter
-     *
-     * @param item the BoxItem that should be visible or not
-     * @return whether or not the BoxItem should be visible
-     */
-    public boolean isItemVisible(BoxItem item) {
-        return true;
-    }
-
-    /**
-     * Download the thumbnail for a given file.
-     *
-     * @param fileId file id to download thumbnail for.
-     * @return A FutureTask that is tasked with fetching information on the given folder.
-     */
-    protected FutureTask getDownloadThumbnailTask(final String fileId, final File downloadLocation, final BoxItemViewHolder holder) {
-        if (downloadLocation.exists() && downloadLocation.length() > 0) {
-            return null; // This will crash
-        }
-
-        if (holder.getItem() == null || holder.getItem().getBoxItem() == null || !(holder.getItem().getBoxItem() instanceof BoxFile)
-            || !holder.getItem().getBoxItem().getId().equals(fileId)) {
-            return null;
-        }
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
-        if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
-            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-        } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
-            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-        }
-
-        return mController.getFileThumbnail(fileId, downloadLocation, thumbSize, thumbSize, mCompletionListener);
-    }
-
-    /**
-     * Java version of routine to turn a long into a short user readable string.
-     * <p/>
-     * This routine is used if the JNI native C version is not available.
-     *
-     * @param numSize the number of bytes in the file.
-     * @return String Short human readable String e.g. 2.5 MB
-     */
-    private String localFileSizeToDisplay(final double numSize) {
-        final int constKB = 1024;
-        final int constMB = constKB * constKB;
-        final int constGB = constMB * constKB;
-        final double floatKB = 1024.0f;
-        final double floatMB = floatKB * floatKB;
-        final double floatGB = floatMB * floatKB;
-        final String BYTES = "B";
-        String textSize = "0 bytes";
-        String strSize = Double.toString(numSize);
-        double size;
-
-        if (numSize < constKB) {
-            textSize = strSize + " " + BYTES;
-        } else if ((numSize >= constKB) && (numSize < constMB)) {
-            size = numSize / floatKB;
-            textSize = String.format(Locale.ENGLISH, "%4.1f KB", size);
-        } else if ((numSize >= constMB) && (numSize < constGB)) {
-            size = numSize / floatMB;
-            textSize = String.format(Locale.ENGLISH, "%4.1f MB", size);
-        } else if (numSize >= constGB) {
-            size = numSize / floatGB;
-            textSize = String.format(Locale.ENGLISH, "%4.1f GB", size);
-        }
-        return textSize;
-    }
-
-    public static void setAccentColor(Resources res, ProgressBar progressBar) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            int accentColor = res.getColor(R.color.box_accent);
-            Drawable drawable = progressBar.getIndeterminateDrawable();
-            if (drawable != null) {
-                drawable.setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
-                drawable.invalidateSelf();
-            }
-        }
     }
 }

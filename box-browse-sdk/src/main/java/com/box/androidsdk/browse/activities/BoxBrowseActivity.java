@@ -83,7 +83,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         BoxFolder curFolder = fragment instanceof BoxBrowseFolderFragment ?
                     ((BoxBrowseFolderFragment) fragment).getFolder() :
-                    (BoxFolder) mItem;
+                    null;
         return curFolder;
     }
 
