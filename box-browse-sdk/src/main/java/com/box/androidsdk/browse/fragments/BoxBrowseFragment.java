@@ -26,7 +26,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,6 +34,7 @@ import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.activities.BoxBrowseActivity;
+import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
@@ -101,6 +101,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "BoxBrowseFragment_SecondaryActionListener";
     protected static final String EXTRA_MULTI_SELECT_HANDLER = "BoxBrowseFragment_Multi_Select_Handler";
+    protected static final String ARG_BOX_ITEM_FILTER = "BoxBrowseFilter";
 
 
     private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
@@ -166,6 +167,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private static ThreadPoolExecutor mApiExecutor;
     private static ThreadPoolExecutor mThumbnailExecutor;
     private View mRootView;
+    private BoxItemFilter mBoxItemFilter;
 
     protected ThreadPoolExecutor getApiExecutor() {
         if (mApiExecutor == null || mApiExecutor.isShutdown()) {
@@ -210,6 +212,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mUserId = getArguments().getString(ARG_USER_ID);
             mSession = new BoxSession(getActivity(), mUserId);
             mLimit = getArguments().getInt(ARG_LIMIT);
+            mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
             setListItem((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
@@ -365,6 +368,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (mAdapter != null) {
             mMultiSelectHandler.setItemAdapter(mAdapter);
         }
+    }
+
+    /**
+     * @return BoxItemFilter set on this fragment: passed during creation in the intent
+     */
+    public BoxItemFilter getItemFilter() {
+        return mBoxItemFilter;
     }
 
     protected void onInfoFetched(Intent intent) {
@@ -653,7 +663,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                             FragmentTransaction trans = activity.getSupportFragmentManager().beginTransaction();
 
                             // All fragments will always navigate into folders
-                            BoxBrowseFolderFragment browseFolderFragment = BoxBrowseFolderFragment.newInstance(folder, mSession);
+                            BoxBrowseFolderFragment browseFolderFragment = new BoxBrowseFolderFragment
+                                    .Builder((BoxFolder) folder, mSession).buildInstance();
+
                             trans.replace(fragmentContainer.getId(), browseFolderFragment)
                                     .addToBackStack(TAG)
                                     .commit();
@@ -766,12 +778,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         public synchronized void add(BoxListItem listItem) {
+
             if (listItem.getBoxItem() != null) {
                 // If the item should not be visible, skip adding the item
                 if (!isItemVisible(listItem.getBoxItem())) {
                     return;
                 }
-
+                //Filter out item if necessary
+                if (mBoxItemFilter != null  && !mBoxItemFilter.accept(listItem.getBoxItem())) {
+                    return;
+                }
                 listItem.setIsEnabled(isItemEnabled(listItem.getBoxItem()));
             }
             mListItems.add(listItem);
