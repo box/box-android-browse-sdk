@@ -36,8 +36,8 @@ public class SampleBrowseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_browse);
         BoxConfig.IS_LOG_ENABLED = true;
-        BoxConfig.CLIENT_ID = "7ri5uru2bwc6dxj3yeb4nxfbbxm6i6sj";
-        BoxConfig.CLIENT_SECRET = "QXy3Xuf3vym2IQa83x0CF3w9UDvTcmqW";
+        BoxConfig.CLIENT_ID = "your-client-id";
+        BoxConfig.CLIENT_SECRET = "your-client-secret";
         initUI();
 
         session = new BoxSession(this);
@@ -66,7 +66,9 @@ public class SampleBrowseActivity extends AppCompatActivity {
             case REQUEST_CODE_FOLDER_PICKER:
                 if (resultCode == Activity.RESULT_OK) {
                     BoxFolder boxFolder = (BoxFolder) data.getSerializableExtra(BoxBrowseFolderActivity.EXTRA_BOX_FOLDER);
-                    Toast.makeText(this, String.format("Folder picked, id: %s; name: %s", boxFolder.getId(), boxFolder.getName()), Toast.LENGTH_LONG).show();
+                    if (boxFolder != null) {
+                        Toast.makeText(this, String.format("Folder picked, id: %s; name: %s", boxFolder.getId(), boxFolder.getName()), Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     // No folder selected
                 }

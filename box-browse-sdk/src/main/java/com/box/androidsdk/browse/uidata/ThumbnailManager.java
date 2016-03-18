@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,6 +23,7 @@ import com.box.androidsdk.browse.R;
 import com.box.androidsdk.content.models.BoxBookmark;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.utils.SdkUtils;
 
 
 /**
@@ -59,7 +61,7 @@ public class ThumbnailManager {
             "ts", "less", "lua", "markdown", "mdown", "md", "mysql", "sql", "nt", "ocaml", "pas", "pp", "lpr", "dpr", "pascal", "pl", "php", "pig", "plsql", "properties", "ini",
             "py", "r", "rpm", "rst", "rb", "rs", "scheme", "sh", "siv", "sieve", "st", "smarty", "rq", "stex", "tiddlywiki", "vb", "frm", "cs", "vbs", "vm", "v", "vh", "xml",
             "xhtml", "xquery", "xq", "xqy", "yml", "yaml", "z80"};
-    protected static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif"};
+
     protected static final String[] VIDEO_EXTENSIONS_ARRAY = {"3g2", "3gp", "avi", "m2v", "m2ts", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ogg", "mts",
             "qt", "wmv"};
     protected static final String[] COMPRESSED_EXTENSIONS_ARRAY = {"zip", "rar", "gz", "tar", "7z", "arc", "ace", "tbz"};
@@ -68,10 +70,12 @@ public class ThumbnailManager {
     protected static final String[] PHOTOSHOP_EXTENSIONS_ARRAY = {"psd", "psb"};
     protected static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
 
+    protected static final ArrayList<String> IMAGE_EXTENSIONS = new ArrayList<String>();
 
     static {
-        for (String ext : IMAGE_EXTENSIONS_ARRAY){
+        for (String ext : new String[] {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif"}){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_image);
+            IMAGE_EXTENSIONS.add(ext);
         }
         for (String ext : DOCUMENTS_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_doc);
@@ -313,6 +317,17 @@ public class ThumbnailManager {
         }
     }
 
+    public static boolean isThumbnailAvailable(BoxItem item) {
+        if (item == null || SdkUtils.isBlank(item.getName())) {
+            return false;
+        }
+
+        int index = item.getName().lastIndexOf(".");
+        if (index > 0) {
+            return IMAGE_EXTENSIONS.contains(item.getName().substring(index + 1).toLowerCase());
+        }
+        return false;
+    }
   
 
     /**

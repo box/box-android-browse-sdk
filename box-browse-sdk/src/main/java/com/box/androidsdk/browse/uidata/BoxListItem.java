@@ -9,24 +9,16 @@ import com.box.androidsdk.content.requests.BoxRequest;
  * This class will contain an item or a task that will be displayed in a list.
  */
 public final class BoxListItem {
-    public enum State {
-        CREATED,
-        SUBMITTED,
-        ERROR
-    }
-
     public static final int TYPE_BOX_FOLDER_ITEM = 0;
     public static final int TYPE_BOX_FILE_ITEM = 1;
     public static final int TYPE_FUTURE_TASK = 2;
-
-
+    private Exception mException;
     private BoxItem mBoxItem;
     private BoxRequest mRequest;
     private int mType;
     private String mIdentifier;
     private State mState = State.CREATED;
     private boolean mIsEnabled = true;
-
     /**
      * Constructor.
      *
@@ -41,7 +33,6 @@ public final class BoxListItem {
         }
         setIdentifier(identifier);
     }
-
     /**
      * Constructor.
      *
@@ -51,6 +42,14 @@ public final class BoxListItem {
         mRequest = request;
         mType = TYPE_FUTURE_TASK;
         setIdentifier(identifier);
+    }
+
+    public Exception getException() {
+        return mException;
+    }
+
+    public void setException(Exception exception) {
+        mException = exception;
     }
 
     /**
@@ -147,6 +146,12 @@ public final class BoxListItem {
      */
     private void setIdentifier(final String identifier) {
         mIdentifier = identifier;
+    }
+
+    public enum State {
+        CREATED,
+        SUBMITTED,
+        ERROR
     }
 
 }

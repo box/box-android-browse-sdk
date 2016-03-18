@@ -9,12 +9,14 @@ import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
+import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
 import java.io.File;
@@ -25,7 +27,7 @@ import java.io.File;
  */
 public class BoxSearchFragment extends BoxBrowseFragment {
 
-    // The api throws a 400 bad request if the offset is not in multiples of 100
+    // NOTE: The api throws a 400 bad request if the offset is not in multiples of the limit
     private static final int DEFAULT_SEARCH_LIMIT = 200;
     private static final String OUT_ITEM = "outItem";
 
@@ -99,7 +101,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             BoxRequestsSearch.Search incrementalSearchTask = mRequest
                     .setOffset(mBoxIteratorItems.size())
                     .setLimit(DEFAULT_SEARCH_LIMIT);
-            mAdapter.add(new BoxListItem(incrementalSearchTask, BoxRequestsSearch.Search.class.getName()));
+            mAdapter.add(new BoxListItem(incrementalSearchTask, ACTION_FUTURE_TASK));
         }
     }
 
@@ -110,24 +112,37 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     @Override
-    protected void handleResponse(Intent intent) {
+    protected void handleResponse(BoxResponseIntent intent) {
         super.handleResponse(intent);
         if (intent.getAction().equals(BoxRequestsSearch.Search.class.getName())) {
             onItemsFetched(intent);
         }
     }
 
-    @Override
-    protected void onItemsFetched(Intent intent) {
-        super.onItemsFetched(intent);
-        FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        if (!intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false)) {
+    private void onItemsFetched(BoxResponseIntent intent) {
+        if (!intent.isSuccess()) {
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_performing_search), Toast.LENGTH_LONG).show();
             return;
         }
+
+        checkConnectivity();
+
+        if (!intent.isSuccess()) {
+            // This logic removes the incremental loading item which is currently only used in the search fragment
+            BoxListItem item = mAdapter.get(intent.getAction());
+            if (item != null) {
+                item.setState(BoxListItem.State.ERROR);
+                mAdapter.update(intent.getAction());
+            }
+            return;
+        }
+
+        mAdapter.remove(intent.getAction());
+        if (intent.getResult() instanceof BoxIteratorItems) {
+            BoxIteratorItems collection = (BoxIteratorItems) intent.getResult();
+            updateItems(collection);
+        }
+        mSwipeRefresh.setRefreshing(false);
     }
 
     @Override

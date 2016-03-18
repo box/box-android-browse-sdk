@@ -1,22 +1,23 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
-import com.box.androidsdk.browse.service.CompletionListener;
+import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.Serializable;
 
 /**
- * Use the {@link Builder#buildInstance()} to
+ * Use the {@link Builder#build()} to
  * create an instance of this fragment.
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
@@ -24,69 +25,11 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     private static final String OUT_ITEM = "outItem";
     protected BoxFolder mFolder = null;
 
-
-
-
-
-    /**
-     * Builder for constructing an instance of BoxBrowseFolderFragment
-     */
-    public static class Builder {
-        Bundle mArgs = new Bundle();
-
-
-        /**
-         * @param folderId id of the folder to browse
-         * @param userId id of the user that the contents will be loaded for
-         */
-        public Builder(String folderId, String userId) {
-            mArgs.putString(ARG_ID, folderId);
-            mArgs.putString(ARG_USER_ID, userId);
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
-
-        }
-
-        /**
-         *
-         * @param folder the BoxFolder to Browse
-         * @param session the session that the contents will be loaded for
-         */
-        public Builder(BoxFolder folder, BoxSession session) {
-            mArgs.putString(ARG_ID, folder.getId());
-            mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
-        }
-
-        /**
-         * Set the name of the folder that will be shown as title in the toolbar
-         * @param folderName
-         */
-        public void setFolderName(String folderName) {
-            mArgs.putString(ARG_NAME, folderName);
-        }
-
-        /**
-         * Set the number of items that the results will be limited to when retrieving folder items
-         * @param limit
-         */
-        public void setLimit(int limit) {
-            mArgs.putInt(ARG_LIMIT, limit);
-        }
-
-        /**
-         *  Set the BoxItemFilter for filtering the items being displayed
-         * @param filter
-         * @param <E>
-         */
-        public <E extends Serializable & BoxItemFilter>  void setBoxItemFilter(E filter) {
-            mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
-        }
-
-        public BoxBrowseFolderFragment buildInstance() {
-            BoxBrowseFolderFragment folderFragment = new BoxBrowseFolderFragment();
-            folderFragment.setArguments(mArgs);
-            return folderFragment;
-        }
+    @Override
+    protected IntentFilter getIntentFilter() {
+        IntentFilter filter = super.getIntentFilter();
+        filter.addAction(BoxRequestsFolder.GetFolderWithAllItems.class.getName());
+        return filter;
     }
 
     @Override
@@ -119,6 +62,17 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     @Override
+    protected void handleResponse(BoxResponseIntent intent) {
+        super.handleResponse(intent);
+        if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
+            onItemsFetched(intent);
+            if (mSwipeRefresh != null) {
+                mSwipeRefresh.setRefreshing(false);
+            }
+        }
+    }
+
+    @Override
     protected void loadItems() {
         mController.execute(mController.getFolderWithAllItems(mFolder.getId()));
     }
@@ -148,26 +102,27 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         super.onSaveInstanceState(outState);
     }
 
-    protected void onItemsFetched(Intent intent) {
+    private void onItemsFetched(BoxResponseIntent intent) {
         FragmentActivity activity = getActivity();
         if (activity == null || mAdapter == null) {
             return;
         }
 
-        if (!intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false)) {
+        if (!intent.isSuccess()) {
             checkConnectivity();
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (mFolder.getId().equals(intent.getStringExtra(CompletionListener.EXTRA_ID))) {
-            mFolder = (BoxFolder) intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
+        BoxFolder responseFolder = (BoxFolder) intent.getResult();
+        if (responseFolder != null && mFolder.getId().equals(responseFolder.getId())) {
+            mFolder = responseFolder;
 
-            if (mFolder != null && mFolder.getName() != null) {
+            if (mFolder != null) {
                 getArguments().putString(ARG_NAME, mFolder.getName());
                 this.setToolbar(mFolder.getName());
+                updateItems(mFolder.getItemCollection());
             }
-            super.onItemsFetched(intent);
         }
     }
 
@@ -184,6 +139,69 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
          * @return whether the tap event should continue to be handled by the fragment
          */
         boolean handleOnItemClick(BoxItem item);
+    }
+
+    /**
+     * Builder for constructing an instance of BoxBrowseFolderFragment
+     */
+    public static class Builder {
+        Bundle mArgs = new Bundle();
+
+
+        /**
+         * @param folderId id of the folder to browse
+         * @param userId   id of the user that the contents will be loaded for
+         */
+        public Builder(String folderId, String userId) {
+            mArgs.putString(ARG_ID, folderId);
+            mArgs.putString(ARG_USER_ID, userId);
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+
+        }
+
+        /**
+         * @param folder  the BoxFolder to Browse
+         * @param session the session that the contents will be loaded for
+         */
+        public Builder(BoxFolder folder, BoxSession session) {
+            mArgs.putString(ARG_ID, folder.getId());
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+        }
+
+        /**
+         * Set the name of the folder that will be shown as title in the toolbar
+         *
+         * @param folderName
+         */
+        public void setFolderName(String folderName) {
+            mArgs.putString(ARG_NAME, folderName);
+        }
+
+        /**
+         * Set the number of items that the results will be limited to when retrieving folder items
+         *
+         * @param limit
+         */
+        public void setLimit(int limit) {
+            mArgs.putInt(ARG_LIMIT, limit);
+        }
+
+        /**
+         * Set the BoxItemFilter for filtering the items being displayed
+         *
+         * @param filter
+         * @param <E>
+         */
+        public <E extends Serializable & BoxItemFilter> void setBoxItemFilter(E filter) {
+            mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
+        }
+
+        public BoxBrowseFolderFragment build() {
+            BoxBrowseFolderFragment folderFragment = new BoxBrowseFolderFragment();
+            folderFragment.setArguments(mArgs);
+            return folderFragment;
+        }
     }
 
 }

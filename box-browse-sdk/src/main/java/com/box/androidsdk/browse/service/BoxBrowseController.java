@@ -1,5 +1,8 @@
 package com.box.androidsdk.browse.service;
 
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
@@ -52,11 +55,22 @@ public class BoxBrowseController implements BrowseController {
     }
 
     @Override
-    public BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, int width, int height) {
+    public BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, Resources resources) {
+        if (downloadFile.exists() && downloadFile.length() > 0) {
+            return null;
+        }
+
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
+        if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        }
         try {
             return mFileApi.getDownloadThumbnailRequest(downloadFile, fileId)
-                    .setMinWidth(width)
-                    .setMinHeight(height);
+                    .setMinWidth(thumbSize)
+                    .setMinHeight(thumbSize);
         } catch (IOException e) {
             BoxLogUtils.e(TAG, e.getMessage());
         }

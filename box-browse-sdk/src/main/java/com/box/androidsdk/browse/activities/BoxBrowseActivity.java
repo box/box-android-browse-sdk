@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -138,7 +137,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * @return Browsing fragment that will be used to show the BoxItems
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
-        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).buildInstance();
+        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
     }
 
 
