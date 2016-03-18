@@ -131,7 +131,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * @return Browsing fragment that will be used to show the BoxItems
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
-        return BoxBrowseFolderFragment.newInstance((BoxFolder) folder, mSession);
+        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).buildInstance();
     }
 
 

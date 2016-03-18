@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
- * Use the {@link BoxBrowseFolderFragment#newInstance} factory method to
+ * Use the {@link Builder#buildInstance()} to
  * create an instance of this fragment.
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
@@ -32,56 +32,69 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     protected BoxFolder mFolder = null;
     private static final String OUT_ITEM = "outItem";
 
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folder  the folder to browse
-     * @param session the session that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(BoxFolder folder, BoxSession session) {
-        return newInstance(folder.getId(), session.getUserId(), folder.getName(), DEFAULT_LIMIT);
-    }
+
+
+
 
     /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations, and pass it a BoxItemFilter for filtering the items
-     * being displayed
-     *
-     * @param folder  the folder to browse
-     * @param session the session that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
+     * Builder for constructing an instance of BoxBrowseFolderFragment
      */
-    public static  <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
-            BoxFolder folder, BoxSession session, E filter ) {
-        return newInstance(folder.getId(), session.getUserId(), folder.getName(), DEFAULT_LIMIT, filter);
-    }
+    public static class Builder {
+        Bundle mArgs = new Bundle();
 
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folderId the id of the folder to browse
-     * @param userId   the id of the user that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(String folderId, String userId) {
-        return newInstance(folderId, userId, null, DEFAULT_LIMIT);
-    }
 
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations, and pass it a BoxItemFilter for filtering the items
-     * being displayed
-     *
-     * @param folderId the id of the folder to browse
-     * @param userId   the id of the user that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
-            String folderId, String userId, E filter) {
-        return newInstance(folderId, userId, null, DEFAULT_LIMIT, filter);
+        /**
+         * @param folderId id of the folder to browse
+         * @param userId id of the user that the contents will be loaded for
+         */
+        public Builder(String folderId, String userId) {
+            mArgs.putString(ARG_ID, folderId);
+            mArgs.putString(ARG_USER_ID, userId);
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+
+        }
+
+        /**
+         *
+         * @param folder the BoxFolder to Browse
+         * @param session the session that the contents will be loaded for
+         */
+        public Builder(BoxFolder folder, BoxSession session) {
+            mArgs.putString(ARG_ID, folder.getId());
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+        }
+
+        /**
+         * Set the name of the folder that will be shown as title in the toolbar
+         * @param folderName
+         */
+        public void setFolderName(String folderName) {
+            mArgs.putString(ARG_NAME, folderName);
+        }
+
+        /**
+         * Set the number of items that the results will be limited to when retrieving folder items
+         * @param limit
+         */
+        public void setLimit(int limit) {
+            mArgs.putInt(ARG_LIMIT, limit);
+        }
+
+        /**
+         *  Set the BoxItemFilter for filtering the items being displayed
+         * @param filter
+         * @param <E>
+         */
+        public <E extends Serializable & BoxItemFilter>  void setBoxItemFilter(E filter) {
+            mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
+        }
+
+        public BoxBrowseFolderFragment buildInstance() {
+            BoxBrowseFolderFragment folderFragment = new BoxBrowseFolderFragment();
+            folderFragment.setArguments(mArgs);
+            return folderFragment;
+        }
     }
 
 
@@ -124,43 +137,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
 
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folderId   the id of the folder to browse
-     * @param userId     the id of the user that the contents will be loaded for
-     * @param folderName the name of the folder that will be shown in the action bar
-     * @param limit the number of items that the results will be limited to when retrieving folder items
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(String folderId, String userId, String folderName, int limit) {
-        return newInstance(folderId, userId, folderName, limit, null);
-    }
-
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folderId   the id of the folder to browse
-     * @param userId     the id of the user that the contents will be loaded for
-     * @param folderName the name of the folder that will be shown in the action bar
-     * @param limit the number of items that the results will be limited to when retrieving folder items
-     * @param filter A BoxItemFilter to filter the items displayed by this fragment.
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public  static <E extends Serializable & BoxItemFilter> BoxBrowseFolderFragment newInstance(
-            String folderId, String userId, String folderName, int limit, E filter ) {
-        BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_ID, folderId);
-        args.putString(ARG_USER_ID, userId);
-        args.putString(ARG_NAME, folderName);
-        args.putInt(ARG_LIMIT, limit);
-        args.putSerializable(ARG_BOX_ITEM_FILTER, filter);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public FutureTask<Intent> fetchInfo() {

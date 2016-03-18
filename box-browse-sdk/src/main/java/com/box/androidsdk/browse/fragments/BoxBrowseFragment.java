@@ -663,7 +663,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                             FragmentTransaction trans = activity.getSupportFragmentManager().beginTransaction();
 
                             // All fragments will always navigate into folders
-                            BoxBrowseFolderFragment browseFolderFragment = BoxBrowseFolderFragment.newInstance(folder, mSession);
+                            BoxBrowseFolderFragment browseFolderFragment = new BoxBrowseFolderFragment
+                                    .Builder((BoxFolder) folder, mSession).buildInstance();
+
                             trans.replace(fragmentContainer.getId(), browseFolderFragment)
                                     .addToBackStack(TAG)
                                     .commit();
