@@ -49,7 +49,7 @@ public final class BoxListItem {
      * @param task
      *            task that should be performed if this item is gotten from the list.
      */
-    public BoxListItem(FutureTask<Intent> task, final String identifier) {
+    public BoxListItem(FutureTask task, final String identifier) {
         mTask = task;
         mType = TYPE_FUTURE_TASK;
         setIdentifier(identifier);
@@ -60,7 +60,7 @@ public final class BoxListItem {
      * 
      * @param task
      */
-    public void setTask(FutureTask<Intent> task) {
+    public void setTask(FutureTask task) {
         mTask = task;
 
     }

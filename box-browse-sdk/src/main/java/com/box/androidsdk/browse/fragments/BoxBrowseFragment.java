@@ -35,10 +35,14 @@ import android.widget.TextView;
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
+import com.box.androidsdk.browse.service.BoxBrowseController;
+import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
-import com.box.androidsdk.content.BoxException;
+import com.box.androidsdk.content.BoxApiFolder;
+import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
@@ -46,6 +50,7 @@ import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
+import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -55,7 +60,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,11 +67,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -85,23 +85,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public static final String TAG = BoxBrowseFragment.class.getName();
     protected static final int DEFAULT_LIMIT = 1000;
 
-    protected static final String ACTION_FETCHED_ITEMS = "BoxBrowseFragment_FetchedItems";
-    protected static final String ACTION_FETCHED_INFO = "BoxBrowseFragment_FetchedInfo";
-    protected static final String ACTION_DOWNLOADED_FILE_THUMBNAIL = "BoxBrowseFragment_DownloadedFileThumbnail";
-    protected static final String EXTRA_SUCCESS = "BoxBrowseFragment_ArgSuccess";
-    protected static final String EXTRA_EXCEPTION = "BoxBrowseFragment_ArgException";
-    protected static final String EXTRA_ID = "BoxBrowseFragment_FolderId";
-    protected static final String EXTRA_FILE_ID = "BoxBrowseFragment_FileId";
-    protected static final String EXTRA_OFFSET = "BoxBrowseFragment_ArgOffset";
-    protected static final String EXTRA_LIMIT = "BoxBrowseFragment_Limit";
-    protected static final String EXTRA_FOLDER = "BoxBrowseFragment_Folder";
-    protected static final String EXTRA_COLLECTION = "BoxBrowseFragment_Collection";
+    protected static final String ACTION_FETCHED_OFFSET_ITEMS = "com.box.androidsdk.browse.FETCHED_OFFSET_ITEMS";
+    protected static final String ACTION_FETCHED_ITEMS = "com.box.androidsdk.browse.FETCHED_ITEMS";
+    protected static final String ACTION_DOWNLOADED_FILE_THUMBNAIL = "com.box.androidsdk.browse.DOWNLOADED_THUMBNAIL";
     private static final String EXTRA_TITLE = "BoxBrowseFragment.Title";
     private static final String EXTRA_CANCELED = "BoxBrowseFragment.Canceled";
 
     protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "BoxBrowseFragment_SecondaryActionListener";
     protected static final String EXTRA_MULTI_SELECT_HANDLER = "BoxBrowseFragment_Multi_Select_Handler";
     protected static final String ARG_BOX_ITEM_FILTER = "BoxBrowseFilter";
+    private static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
 
 
     private static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[] {"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
@@ -114,13 +107,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected OnFragmentInteractionListener mListener;
     protected OnFragmentInteractionListener mSecondaryActionListener;
     protected MultiSelectHandler mMultiSelectHandler;
+    protected CompletionListener mCompletionListener;
 
     protected BoxItemAdapter mAdapter;
     protected RecyclerView mItemsView;
     protected ThumbnailManager mThumbnailManager;
     protected SwipeRefreshLayout mSwipeRefresh;
     protected ProgressBar mProgress;
-    protected LocalBroadcastManager mLocalBroadcastManager;
+    protected BrowseController mController;
     private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
@@ -129,22 +123,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_DOWNLOADED_FILE_THUMBNAIL)) {
-                onDownloadedThumbnail(intent);
-            } else {
-                // Handle response
-                if (intent.getAction().equals(ACTION_FETCHED_INFO)) {
-                    onInfoFetched(intent);
-                } else if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
-                    onItemsFetched(intent);
-                }
-
-                // Remove refreshing icon
-                if (mSwipeRefresh != null) {
-                    mSwipeRefresh.setRefreshing(false);
-                }
-
-            }
+        handleResponse(intent);
         }
     };
 
@@ -163,49 +142,21 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     };
 
-    private static ThreadPoolExecutor mApiExecutor;
-    private static ThreadPoolExecutor mThumbnailExecutor;
     private View mRootView;
     private BoxItemFilter mBoxItemFilter;
     private int mLimit;
-
-    protected ThreadPoolExecutor getApiExecutor() {
-        if (mApiExecutor == null || mApiExecutor.isShutdown()) {
-            mApiExecutor = new ThreadPoolExecutor(1, 1, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        }
-        return mApiExecutor;
-    }
-
-    /**
-     * Executor that we will submit thumbnail tasks to.
-     *
-     * @return executor
-     */
-    protected ThreadPoolExecutor getThumbnailExecutor() {
-        if (mThumbnailExecutor == null || mThumbnailExecutor.isShutdown()) {
-            mThumbnailExecutor = new ThreadPoolExecutor(1, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        }
-        return mThumbnailExecutor;
-    }
-
-    protected IntentFilter initializeIntentFilters() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_FETCHED_INFO);
-        filter.addAction(ACTION_FETCHED_ITEMS);
-        filter.addAction(ACTION_DOWNLOADED_FILE_THUMBNAIL);
-        return filter;
-    }
+    private LocalBroadcastManager mLocalBroadcastManager;
 
     public BoxBrowseFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize broadcast managers
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        mCompletionListener = new CompletionListener(mLocalBroadcastManager);
         if (getArguments() != null) {
             mUserId = getArguments().getString(ARG_USER_ID);
             mThumbnailManager = initializeThumbnailManager();
@@ -223,13 +174,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 mMultiSelectHandler = (MultiSelectHandler)savedInstanceState.getSerializable(EXTRA_MULTI_SELECT_HANDLER);
             }
         }
+        mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession));
         setRetainInstance(true);
     }
 
     @Override
     public void onResume() {
         getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, initializeIntentFilters());
+        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, getIntentFilter());
         super.onResume();
     }
 
@@ -280,6 +232,20 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    protected void handleResponse(Intent intent) {
+        System.out.println("Response received " + intent.getAction());
+        if (intent.getAction().equals(BoxRequestsFile.DownloadThumbnail.class.getName())) {
+            onDownloadedThumbnail(intent);
+        } else if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
+            onItemsFetched(intent);
+            if (mSwipeRefresh != null) {
+                mSwipeRefresh.setRefreshing(false);
+            }
+        } else if (intent.getAction().equals(BoxRequestsFolder.GetFolderItems.class.getName())) {
+            onOffsetItemsFetched(intent);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -300,18 +266,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
 
-        loadItems();
-        return mRootView;
-    }
-
-    protected void loadItems() {
         if (mBoxIteratorItems == null) {
             mProgress.setVisibility(View.VISIBLE);
-            getApiExecutor().submit(fetchInfo());
+            loadItems();
         } else {
             updateItems(mBoxIteratorItems);
         }
+        return mRootView;
     }
+
+    protected abstract void loadItems();
 
     protected void setListItems(final BoxIteratorItems items) {
         mBoxIteratorItems = items;
@@ -330,7 +294,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onRefresh() {
         mSwipeRefresh.setRefreshing(true);
-        getApiExecutor().execute(fetchInfo());
+        loadItems();
     }
 
     @Override
@@ -382,43 +346,38 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         return mBoxItemFilter;
     }
 
-    protected void onInfoFetched(Intent intent) {
-        onItemsFetched(intent);
+    protected void onItemsFetched(Intent intent) {
+        onOffsetItemsFetched(intent);
     }
-
-    /**
-     * Fetch the first information relevant to this fragment or what should be used for refreshing.
-     *
-     * @return A FutureTask that is tasked with fetching the first information relevant to this fragment or what should be used for refreshing.
-     */
-    public abstract FutureTask<Intent> fetchInfo();
 
     /**
      * Handle showing a collection in the given intent.
      *
      * @param intent an intent that contains a collection in EXTRA_COLLECTION.
      */
-    protected void onItemsFetched(Intent intent) {
-        if (intent.getBooleanExtra(EXTRA_SUCCESS, true)) {
+    protected void onOffsetItemsFetched(Intent intent) {
+        if (intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, true)) {
             mAdapter.remove(intent.getAction());
         } else {
             BoxListItem item = mAdapter.get(intent.getAction());
             if (item != null) {
                 item.setIsError(true);
-                if (intent.getAction().equals(ACTION_FETCHED_INFO)) {
-                    item.setTask(fetchInfo());
-                } else if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
-                    int limit = intent.getIntExtra(EXTRA_LIMIT, DEFAULT_LIMIT);
-                    int offset = intent.getIntExtra(EXTRA_OFFSET, 0);
-                    item.setTask(fetchItems(offset, limit));
+                if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
+                    // TODO: Remove?
+//                    item.setTask(fetchInfo());
                 }
+//                else if (intent.getAction().equals(ACTION_FETCHED_ITEMS)) {
+//                    int limit = intent.getIntExtra(CompletionListener.EXTRA_LIMIT, DEFAULT_LIMIT);
+//                    int offset = intent.getIntExtra(CompletionListener.EXTRA_OFFSET, 0);
+//                    item.setTask(fetchItems(offset, limit));
+//                }
                 mAdapter.update(intent.getAction());
             }
             checkConnectivity();
             return;
         }
         checkConnectivity();
-        updateItems((BoxIteratorItems) intent.getSerializableExtra(EXTRA_COLLECTION));
+        updateItems((BoxIteratorItems) intent.getSerializableExtra(CompletionListener.EXTRA_COLLECTION));
         mSwipeRefresh.setRefreshing(false);
     }
 
@@ -452,7 +411,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             addAllItems(mBoxIteratorItems, items);
             mAdapter.addAll(items);
         }
-
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -480,17 +438,22 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
-    protected abstract FutureTask<Intent> fetchItems(final int offset, final int limit);
-
     /**
      * Handles showing new thumbnails after they have been downloaded.
      *
      * @param intent
      */
     protected void onDownloadedThumbnail(final Intent intent) {
-        if (intent.getBooleanExtra(EXTRA_SUCCESS, false) && mAdapter != null) {
-            mAdapter.update(intent.getStringExtra(EXTRA_FILE_ID));
+        if (intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false) && mAdapter != null) {
+            mAdapter.update(intent.getStringExtra(CompletionListener.EXTRA_FILE_ID));
         }
+    }
+
+    public IntentFilter getIntentFilter() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BoxRequestsFolder.GetFolderWithAllItems.class.getName());
+        filter.addAction(BoxRequestsFile.DownloadThumbnail.class.getName());
+        return filter;
     }
 
     private class BoxItemDividerDecoration extends RecyclerView.ItemDecoration {
@@ -643,7 +606,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
             if (mItem.getIsError()) {
                 mItem.setIsError(false);
-                mApiExecutor.execute(mItem.getTask());
+                mController.execute(mItem.getTask());
                 setLoading();
             }
 
@@ -693,7 +656,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 boxItemHolder.setError(item);
                 return;
             } else if (item.getType() == BoxListItem.TYPE_FUTURE_TASK) {
-                getApiExecutor().execute(item.getTask());
+                mController.execute(item.getTask());
                 boxItemHolder.setLoading();
                 return;
             } else {
@@ -702,29 +665,29 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 // Fetch thumbnails for media file types
                 if (item.getBoxItem() instanceof BoxFile && isMediaType(item.getBoxItem().getName())) {
                     if (item.getTask() == null ) {
-                        item.setTask(downloadThumbnail(item.getBoxItem().getId(),
-                                mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
+                        item.setTask(getDownloadThumbnailTask(item.getBoxItem().getId(), mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
                     } else if (item.getTask().isDone()) {
-                        try {
-                            Intent intent = (Intent) item.getTask().get();
-                            boolean canceled = intent.getBooleanExtra(EXTRA_CANCELED, false);
-                            if (intent.getBooleanExtra(EXTRA_SUCCESS, true) || canceled) {
-                                // if we were unable to get this thumbnail for any reason besides a 404 try it again.
-                                Object ex = intent.getSerializableExtra(EXTRA_EXCEPTION);
-                                if (canceled || ex != null && ex instanceof BoxException && ((BoxException) ex).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-                                    item.setTask(downloadThumbnail(item.getBoxItem().getId(),
-                                            mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
-                                }
-                            }
-                        } catch (Exception e) {
-                            // e.printStackTrace();
-                        }
+                        // TODO: Baymax - restore?
+//                        try {
+//                            Intent intent = (Intent) item.getTask().get();
+//                            boolean canceled = intent.getBooleanExtra(EXTRA_CANCELED, false);
+//                            if (intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, true) || canceled) {
+//                                // if we were unable to get this thumbnail for any reason besides a 404 try it again.
+//                                Object ex = intent.getSerializableExtra(CompletionListener.EXTRA_EXCEPTION);
+//                                if (canceled || ex != null && ex instanceof BoxException && ((BoxException) ex).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+//                                    item.setTask(getDownloadThumbnailTask(item.getBoxItem().getId(),
+//                                            mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId()), boxItemHolder));
+//                                }
+//                            }
+//                        } catch (Exception e) {
+//                            // e.printStackTrace();
+//                        }
                     }
                 }
             }
 
             if (item.getTask() != null && !item.getTask().isDone()) {
-                getThumbnailExecutor().execute(item.getTask());
+                mController.getThumbnailExecutor().execute(item.getTask());
             }
         }
 
@@ -910,8 +873,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
-
-
     /**
      * Called when a {@link BoxListItem} is bound to a ViewHolder. Customizations of UI elements
      * should be done by overriding this method. If extending from a {@link BoxBrowseActivity}
@@ -997,60 +958,24 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      * @param fileId file id to download thumbnail for.
      * @return A FutureTask that is tasked with fetching information on the given folder.
      */
-    protected FutureTask<Intent> downloadThumbnail(final String fileId, final File downloadLocation, final BoxItemViewHolder holder) {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_DOWNLOADED_FILE_THUMBNAIL);
-                intent.putExtra(EXTRA_FILE_ID, fileId);
-                intent.putExtra(EXTRA_SUCCESS, false);
-                try {
-                    // no need to continue downloading thumbnail if we already have a thumbnail
-                    if (downloadLocation.exists() && downloadLocation.length() > 0) {
-                        intent.putExtra(EXTRA_SUCCESS, true);
-                        return intent;
-                    }
-                    // no need to continue downloading thumbnail if we are not viewing this thumbnail.
-                    if (holder.getItem() == null || holder.getItem().getBoxItem() == null || !(holder.getItem().getBoxItem() instanceof BoxFile)
-                            || !holder.getItem().getBoxItem().getId().equals(fileId)) {
-                        intent.putExtra(EXTRA_SUCCESS, false);
-                        intent.putExtra(EXTRA_CANCELED, true);
-                        return intent;
-                    }
-
-                    DisplayMetrics metrics = getResources().getDisplayMetrics();
-                    int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
-                    if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
-                        thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-                    } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
-                        thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-                    }
-                    getFileApi().getDownloadThumbnailRequest(downloadLocation, fileId)
-                            .setMinHeight(thumbSize)
-                            .setMinWidth(thumbSize)
-                            .send();
-                    if (downloadLocation.exists()) {
-                        intent.putExtra(EXTRA_SUCCESS, true);
-                    }
-                } catch (BoxException e) {
-                    intent.putExtra(EXTRA_SUCCESS, false);
-                    intent.putExtra(EXTRA_EXCEPTION, e);
-                } finally {
-                    mLocalBroadcastManager.sendBroadcast(intent);
-                }
-
-                return intent;
-            }
-        });
-    }
-
-    protected BoxApiFile getFileApi() {
-        if (mFileApi == null) {
-            mFileApi = new BoxApiFile(mSession);
+    protected FutureTask getDownloadThumbnailTask(final String fileId, final File downloadLocation, final BoxItemViewHolder holder) {
+        if (downloadLocation.exists() && downloadLocation.length() > 0) {
+            return null; // This will crash
         }
-        return mFileApi;
+
+        if (holder.getItem() == null || holder.getItem().getBoxItem() == null || !(holder.getItem().getBoxItem() instanceof BoxFile)
+            || !holder.getItem().getBoxItem().getId().equals(fileId)) {
+            return null;
+        }
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
+        if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
+            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
+        }
+
+        return mController.getFileThumbnail(fileId, downloadLocation, thumbSize, thumbSize, mCompletionListener);
     }
 
     /**
@@ -1098,6 +1023,4 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
     }
-
-
 }

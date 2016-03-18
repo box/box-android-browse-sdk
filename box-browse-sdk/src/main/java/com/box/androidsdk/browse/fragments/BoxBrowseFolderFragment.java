@@ -7,21 +7,15 @@ import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
+import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxConstants;
-import com.box.androidsdk.content.BoxException;
-import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 
 /**
  * Use the {@link Builder#buildInstance()} to
@@ -129,6 +123,11 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         super.onResume();
     }
 
+    @Override
+    protected void loadItems() {
+        mController.execute(mController.getFolderWithAllItems(mFolder.getId(), mCompletionListener));
+    }
+
     /**
      *
      * @return the current folder this fragment is meant to display.
@@ -138,66 +137,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
 
-
-    @Override
-    public FutureTask<Intent> fetchInfo() {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_FETCHED_INFO);
-                intent.putExtra(EXTRA_ID, mFolder.getId());
-                try {
-                    BoxRequestsFolder.GetFolderWithAllItems req = getFolderApi().getFolderWithAllItems(mFolder.getId())
-                            .setFields(BoxFolder.ALL_FIELDS);
-                    BoxFolder bf = req.send();
-                    if (bf != null) {
-                        intent.putExtra(EXTRA_SUCCESS, true);
-                        intent.putExtra(EXTRA_FOLDER, bf);
-                        intent.putExtra(EXTRA_COLLECTION, bf.getItemCollection());
-                    }
-                } catch (BoxException e) {
-                    e.printStackTrace();
-                    intent.putExtra(EXTRA_SUCCESS, false);
-                } finally {
-                    mLocalBroadcastManager.sendBroadcast(intent);
-                }
-
-                return intent;
-            }
-        });
-    }
-
-    public FutureTask<Intent> fetchItems(final int offset, final int limit) {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_FETCHED_ITEMS);
-                intent.putExtra(EXTRA_OFFSET, offset);
-                intent.putExtra(EXTRA_LIMIT, limit);
-                intent.putExtra(EXTRA_ID, mFolder.getId());
-                try {
-
-                    // this call the collection is just BoxObjectItems and each does not appear to be an instance of BoxItem.
-                    ArrayList<String> itemFields = new ArrayList<String>();
-                    String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED, BoxFolder.FIELD_PARENT};
-                    BoxIteratorItems items = getFolderApi().getItemsRequest(mFolder.getId()).setLimit(limit).setOffset(offset).setFields(fields).send();
-                    intent.putExtra(EXTRA_SUCCESS, true);
-                    intent.putExtra(EXTRA_COLLECTION, items);
-                } catch (BoxException e) {
-                    e.printStackTrace();
-                    intent.putExtra(EXTRA_SUCCESS, false);
-                } finally {
-                    mLocalBroadcastManager.sendBroadcast(intent);
-                }
-
-                return intent;
-            }
-        });
-    }
 
 
     @Override
@@ -219,44 +158,44 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
 
-    protected void onItemsFetched(Intent intent) {
+    protected void onOffsetItemsFetched(Intent intent) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
             return;
         }
-        if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
+        if (!intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false)) {
             checkConnectivity();
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }
 
         mAdapter.remove(intent.getAction());
-        if (mFolder.getId().equals(intent.getStringExtra(EXTRA_ID)) && intent.hasExtra(EXTRA_FOLDER)) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
-            super.onItemsFetched(intent);
+        if (mFolder.getId().equals(intent.getStringExtra(CompletionListener.EXTRA_ID)) && intent.hasExtra(CompletionListener.EXTRA_FOLDER)) {
+            mFolder = (BoxFolder)intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
+            super.onOffsetItemsFetched(intent);
         }
     }
 
-    protected void onInfoFetched(Intent intent) {
+    protected void onItemsFetched(Intent intent) {
         FragmentActivity activity = getActivity();
         if (activity == null || mAdapter == null) {
             return;
         }
 
-        if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
+        if (!intent.getBooleanExtra(CompletionListener.EXTRA_SUCCESS, false)) {
             checkConnectivity();
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (mFolder.getId().equals(intent.getStringExtra(EXTRA_ID))) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
+        if (mFolder.getId().equals(intent.getStringExtra(CompletionListener.EXTRA_ID))) {
+            mFolder = (BoxFolder)intent.getSerializableExtra(CompletionListener.EXTRA_FOLDER);
 
             if (mFolder != null && mFolder.getName() != null) {
                 getArguments().putString(ARG_NAME, mFolder.getName());
                 this.setToolbar(mFolder.getName());
             }
-            super.onInfoFetched(intent);
+            super.onItemsFetched(intent);
         }
     }
 

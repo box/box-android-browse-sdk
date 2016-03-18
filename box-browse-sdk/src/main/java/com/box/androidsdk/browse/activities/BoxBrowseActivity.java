@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,17 +16,18 @@ import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.fragments.BoxSearchFragment;
+import com.box.androidsdk.browse.service.BoxBrowseController;
+import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
+import com.box.androidsdk.content.BoxApiFile;
+import com.box.androidsdk.content.BoxApiFolder;
+import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,14 +47,17 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private MenuItem mSearchViewMenuItem;
     private boolean mRestoreSearch;
     private String mSearchQuery;
+    private BrowseController mController;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mController = new BoxBrowseController(new BoxApiFile(mSession),
+                new BoxApiFolder(mSession),
+                new BoxApiSearch(mSession));
         if (savedInstanceState != null) {
             mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
             mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
         }
-
     }
 
 
@@ -141,7 +146,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     public boolean onCreateOptionsMenu(Menu menu) {
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
         final BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
-        searchView.setSession(mSession);
+        searchView.setController(mController);
         searchView.setOnBoxSearchListener(this);
         if (mRestoreSearch) {
             mSearchViewMenuItem.expandActionView();
