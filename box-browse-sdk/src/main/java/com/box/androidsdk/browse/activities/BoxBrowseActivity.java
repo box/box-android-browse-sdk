@@ -10,18 +10,25 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.fragments.BoxSearchFragment;
+import com.box.androidsdk.browse.service.BoxBrowseController;
+import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
+import com.box.androidsdk.content.BoxApiFile;
+import com.box.androidsdk.content.BoxApiFolder;
+import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,14 +47,17 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private MenuItem mSearchViewMenuItem;
     private boolean mRestoreSearch;
     private String mSearchQuery;
+    private BrowseController mController;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mController = new BoxBrowseController(new BoxApiFile(mSession),
+                new BoxApiFolder(mSession),
+                new BoxApiSearch(mSession));
         if (savedInstanceState != null) {
             mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
             mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
         }
-
     }
 
 
@@ -71,13 +81,10 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     protected BoxFolder getCurrentFolder() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-        if (fragment instanceof BoxBrowseFolderFragment) {
-            System.out.println("xxx ((BoxBrowseFolderFragment) fragment).getFolder() " + fragment + " x " + ((BoxBrowseFolderFragment) fragment).getFolder());
-            return ((BoxBrowseFolderFragment) fragment).getFolder();
-        }
-        System.out.println("xxx mItem " + mItem);
-
-        return (BoxFolder) mItem;
+        BoxFolder curFolder = fragment instanceof BoxBrowseFolderFragment ?
+                    ((BoxBrowseFolderFragment) fragment).getFolder() :
+                    null;
+        return curFolder;
     }
 
     @Override
@@ -131,7 +138,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * @return Browsing fragment that will be used to show the BoxItems
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
-        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).buildInstance();
+        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
     }
 
 
@@ -139,7 +146,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     public boolean onCreateOptionsMenu(Menu menu) {
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
         final BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
-        searchView.setSession(mSession);
+        searchView.setController(mController);
         searchView.setOnBoxSearchListener(this);
         if (mRestoreSearch) {
             mSearchViewMenuItem.expandActionView();
@@ -199,7 +206,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
             // All fragments will always navigate into folders
-            BoxSearchFragment searchFragment = BoxSearchFragment.newInstance(mSession, onSearchRequested(searchRequest));
+            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, onSearchRequested(searchRequest)).build();
             trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
                     .addToBackStack(BoxBrowseFragment.TAG)
                     .commit();

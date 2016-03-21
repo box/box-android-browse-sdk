@@ -5,6 +5,7 @@ import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
 
@@ -12,7 +13,8 @@ import android.view.inputmethod.EditorInfo;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
-import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
@@ -22,11 +24,11 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
  */
 public class BoxSearchView extends SearchView implements BoxSearchListAdapter.OnBoxSearchListener{
 
-    private BoxSession mSession;
-    private BoxApiSearch mSearchApi;
+    private BrowseController mController;
     private OnQueryTextListener mOnQueryTextListener;
     private OnBoxSearchListener mBoxSearchListener;
     private String mLastQuery = null;
+    private CompletionListener mCompletionListener;
 
     public BoxSearchView(final Context context){
        super(context);
@@ -40,12 +42,13 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
 
     private void initSearchView(final Context context){
 
-        setSuggestionsAdapter(new BoxSearchListAdapter(context, R.layout.abc_list_menu_item_layout, 0, mSession));
+        setSuggestionsAdapter(new BoxSearchListAdapter(context, R.layout.abc_list_menu_item_layout, 0));
         ((BoxSearchListAdapter)getSuggestionsAdapter()).setOnBoxSearchListener(this);
         findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
-        if (mSession == null){
-            // this widget cannot be used until a session has been set into it.
+        mCompletionListener = new CompletionListener(LocalBroadcastManager.getInstance(context));
+        if (mController == null){
+            // this widget cannot be used until a controller has been set
             this.setEnabled(false);
         }
         this.setOnSuggestionListener(new OnSuggestionListener() {
@@ -63,7 +66,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
                 if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_NORMAL) {
                     mBoxSearchListener.onBoxItemSelected(cursor.getBoxItem());
                 } else if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_ADDITIONAL_RESULT) {
-                    mBoxSearchListener.onMoreResultsRequested(mSearchApi.getSearchRequest(mLastQuery));
+                    mBoxSearchListener.onMoreResultsRequested(mController.getSearchRequest(mLastQuery));
                 }
 
                 return false;
@@ -74,7 +77,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
             public boolean onQueryTextSubmit(String query) {
                 mLastQuery = query;
                 if (mBoxSearchListener != null) {
-                    mBoxSearchListener.onMoreResultsRequested(mSearchApi.getSearchRequest(mLastQuery));
+                    mBoxSearchListener.onMoreResultsRequested(mController.getSearchRequest(mLastQuery));
                 }
                 return false;
             }
@@ -95,13 +98,12 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
         return searchRequest;
     }
 
-    public void setSession(final BoxSession session){
-        mSession = session;
-        mSearchApi = new BoxApiSearch(mSession);
-        if (mSession != null){
+    public void setController(final BrowseController controller){
+        mController = controller;
+        if (mController != null){
             this.setEnabled(true);
         }
-        ((BoxSearchListAdapter)getSuggestionsAdapter()).setSession(mSession);
+        ((BoxSearchListAdapter)getSuggestionsAdapter()).setController(mController);
     }
 
 
@@ -113,14 +115,12 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
         Parcelable parcelable = super.onSaveInstanceState();
         Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_ORIGINAL_PARCELABLE,parcelable);
-        bundle.putString(EXTRA_USER_ID, mSession.getUserId());
         return bundle;
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle){
-            setSession(new BoxSession(getContext(), ((Bundle) state).getString(EXTRA_USER_ID)));
             super.onRestoreInstanceState(((Bundle) state).getParcelable(EXTRA_ORIGINAL_PARCELABLE));
         } else {
             super.onRestoreInstanceState(state);

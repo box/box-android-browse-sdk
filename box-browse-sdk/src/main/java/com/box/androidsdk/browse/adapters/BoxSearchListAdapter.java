@@ -17,9 +17,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
-import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxDownload;
@@ -29,10 +29,10 @@ import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxJsonObject;
 import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
-import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
+import com.box.androidsdk.content.utils.BoxLogUtils;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -49,14 +49,13 @@ import java.util.concurrent.TimeUnit;
 public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFutureTask.OnCompletedListener<BoxIteratorItems>{
 
 
-    private static BoxFutureTask<BoxIterator> mSearchTask;
-    private static ThreadPoolExecutor mApiExecutor;
+    private static final String TAG = BoxSearchListAdapter.class.getName();
     private Handler mHandler;
     private ThumbnailManager mThumbnailManager;
     private OnBoxSearchListener mOnBoxSearchListener;
     public static int DEFAULT_MAX_SUGGESTIONS = 9;
 
-    public BoxSearchListAdapter(Context context, int layout, int flags, final BoxSession session){
+    public BoxSearchListAdapter(Context context, int layout, int flags){
         super(context, layout, new BoxSearchCursor(null, ""), flags);
         mHandler = new Handler(Looper.getMainLooper());
         try {
@@ -97,20 +96,6 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
         return (BoxSearchCursor)super.getCursor();
     }
 
-    protected ThreadPoolExecutor getApiExecutor(){
-        if (mApiExecutor == null){
-            mApiExecutor = new ThreadPoolExecutor(1, 1, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-                    new ThreadFactory() {
-
-                        @Override
-                        public Thread newThread(Runnable r) {
-                            return new Thread(r);
-                        }
-                    });
-        }
-        return mApiExecutor;
-    }
-
     @Override
     public boolean isEnabled(final int position) {
         return true;
@@ -148,33 +133,14 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             * @param fileId file id to download thumbnail for.
             * @return A FutureTask that is tasked with fetching information on the given folder.
             */
-    public java.util.concurrent.FutureTask<Intent> downloadThumbnail(final BoxApiFile fileApi, final String fileId, final File downloadLocation, final ViewHolder holder) {
+    public java.util.concurrent.FutureTask<Intent> downloadThumbnail(final BrowseController controller, final String fileId, final File downloadLocation, final ViewHolder holder) {
         return new FutureTask<Intent>(new Callable<Intent>() {
 
             @Override
             public Intent call() throws Exception {
                 Intent intent = new Intent();
-
                 try {
-                    // no need to continue downloading thumbnail if we already have a thumbnail
-                    if (downloadLocation.exists() && downloadLocation.length() > 0) {
-                        return intent;
-                    }
-                    // no need to continue downloading thumbnail if we are not viewing this thumbnail.
-                    if (holder.boxItem == null || !(holder.boxItem instanceof BoxFile)
-                            || !holder.boxItem.getId().equals(fileId)) {
-                        return intent;
-                    }
-                    DisplayMetrics metrics = holder.icon.getResources().getDisplayMetrics();
-                    int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
-                    if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
-                        thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-                    } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
-                        thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-                    }
-                    BoxDownload download = fileApi.getDownloadThumbnailRequest(downloadLocation, fileId)
-                            .setMinHeight(thumbSize)
-                            .setMinWidth(thumbSize).send();
+                    controller.getThumbnailRequest(fileId, downloadLocation, holder.icon.getResources()).send();
                     if (downloadLocation.exists()) {
                         if (holder.boxItem == null || !(holder.boxItem instanceof BoxFile)
                                 || !holder.boxItem.getId().equals(fileId)) {
@@ -185,7 +151,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
                         }
                     }
                 } catch (BoxException e) {
-
+                    BoxLogUtils.e(TAG, e);
                 }
 
                 return intent;
@@ -194,9 +160,9 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
     }
 
-    protected BoxApiFile getFileApi(){
-        if (getFilterQueryProvider() instanceof SearchFilterQueryProvider){
-            return ((SearchFilterQueryProvider) getFilterQueryProvider()).getFileApi();
+    protected BrowseController getController() {
+        if (getFilterQueryProvider() instanceof SearchFilterQueryProvider) {
+            return ((SearchFilterQueryProvider) getFilterQueryProvider()).getController();
         }
         return null;
     }
@@ -219,10 +185,8 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
                     BoxItem item = ((BoxSearchCursor) cursor).getBoxItem();
                     holder.boxItem = item;
                     mThumbnailManager.setThumbnailIntoView(holder.icon, item);
-                    if (item instanceof BoxFile) {
-                        if (getFileApi() != null) {
-                            getThumbnailApiExecutor().execute(downloadThumbnail(getFileApi(),item.getId(),mThumbnailManager.getThumbnailForFile(item.getId()), holder));
-                        }
+                    if (ThumbnailManager.isThumbnailAvailable(item) && getController() != null) {
+                        getThumbnailApiExecutor().execute(downloadThumbnail(getController(),item.getId(),mThumbnailManager.getThumbnailForFile(item.getId()), holder));
                     }
                     holder.progressBar.setVisibility(View.INVISIBLE);
                     holder.icon.setVisibility(View.VISIBLE);
@@ -242,11 +206,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             }
     }
 
-    public void setSession(final BoxSession session){
-        if (session == null){
+    public void setController(final BrowseController controller){
+        if (controller == null){
             setFilterQueryProvider(null);
         } else {
-            setFilterQueryProvider(new SearchFilterQueryProvider(session));
+            setFilterQueryProvider(new SearchFilterQueryProvider(controller));
         }
 
 
@@ -285,20 +249,10 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
 
     private class SearchFilterQueryProvider implements FilterQueryProvider {
-        private final BoxApiSearch mSearchApi;
-        private final BoxApiFile mFileApi;
+        private final BrowseController mController;
 
-        public SearchFilterQueryProvider(final BoxSession session){
-            mSearchApi = new BoxApiSearch(session);
-            mFileApi = new BoxApiFile(session);
-        }
-
-        public BoxApiSearch getSearchApi(){
-            return mSearchApi;
-        }
-
-        public BoxApiFile getFileApi(){
-            return mFileApi;
+        public SearchFilterQueryProvider(final BrowseController controller){
+            mController = controller;
         }
 
         @Override
@@ -306,7 +260,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             if (constraint == null){
                 return null;
             }
-            BoxRequestsSearch.Search search = mSearchApi.getSearchRequest(constraint.toString());
+            BoxRequestsSearch.Search search = mController.getSearchRequest(constraint.toString());
             search = onSearchRequested(search);
             try {
 
@@ -319,6 +273,9 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             return new BoxSearchCursor(null, "failed: " + constraint);
         }
 
+        public BrowseController getController() {
+            return mController;
+        }
     }
 
     public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest){
@@ -382,7 +339,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
         }
 
         public BoxItem getBoxItem(){
-            return (BoxItem)mBoxIterator.get(mPos);
+            return (BoxItem)mBoxIterator.get(getPosition());
         }
 
         protected void initializeFromList(final BoxIteratorItems BoxIterator){
