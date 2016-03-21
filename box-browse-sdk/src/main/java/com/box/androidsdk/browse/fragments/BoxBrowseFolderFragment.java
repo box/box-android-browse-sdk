@@ -37,8 +37,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
-        }
-        if (getArguments() != null) {
+        } else if (getArguments() != null) {
             String folderId = getArguments().getString(ARG_ID);
             String folderName = getArguments().getString(ARG_NAME);
             if (mFolder == null && !SdkUtils.isBlank(folderId)) {
@@ -91,7 +90,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
             if (mFolder != null && mFolder.getItemCollection() != null) {
                 mAdapter.addAll(mFolder.getItemCollection());
-                mAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -144,9 +142,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     /**
      * Builder for constructing an instance of BoxBrowseFolderFragment
      */
-    public static class Builder {
-        Bundle mArgs = new Bundle();
-
+    public static class Builder extends BoxBrowseFragment.Builder<BoxBrowseFolderFragment> {
 
         /**
          * @param folderId id of the folder to browse
@@ -178,29 +174,9 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             mArgs.putString(ARG_NAME, folderName);
         }
 
-        /**
-         * Set the number of items that the results will be limited to when retrieving folder items
-         *
-         * @param limit
-         */
-        public void setLimit(int limit) {
-            mArgs.putInt(ARG_LIMIT, limit);
-        }
-
-        /**
-         * Set the BoxItemFilter for filtering the items being displayed
-         *
-         * @param filter
-         * @param <E>
-         */
-        public <E extends Serializable & BoxItemFilter> void setBoxItemFilter(E filter) {
-            mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
-        }
-
-        public BoxBrowseFolderFragment build() {
-            BoxBrowseFolderFragment folderFragment = new BoxBrowseFolderFragment();
-            folderFragment.setArguments(mArgs);
-            return folderFragment;
+        @Override
+        protected BoxBrowseFolderFragment getInstance() {
+            return new BoxBrowseFolderFragment();
         }
     }
 

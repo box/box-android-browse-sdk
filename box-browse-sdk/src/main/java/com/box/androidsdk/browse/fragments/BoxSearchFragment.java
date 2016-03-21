@@ -1,65 +1,29 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
-import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxListItem;
-import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
 import java.io.File;
 
 /**
- * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment#newInstance} factory method to
+ * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
  * create an instance of this fragment.
  */
 public class BoxSearchFragment extends BoxBrowseFragment {
-
-    // NOTE: The api throws a 400 bad request if the offset is not in multiples of the limit
-    private static final int DEFAULT_SEARCH_LIMIT = 200;
     private static final String OUT_ITEM = "outItem";
 
     private static BoxRequestsSearch.Search mRequest;
-
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param session The BoxSession that should be used to perform network calls.
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxSearchFragment newInstance(BoxSession session, BoxRequestsSearch.Search searchRequest) {
-        BoxSearchFragment fragment = new BoxSearchFragment();
-        mRequest = searchRequest;
-        Bundle args = new Bundle();
-        args.putString(ARG_USER_ID, session.getUserId());
-        args.putSerializable(OUT_ITEM, mRequest);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    /**
-     * Helper method creating the simplest search of the entire account for the given query.
-     *
-     * @param session
-     * @param query
-     * @return
-     */
-    public static BoxSearchFragment newInstance(BoxSession session, String query) {
-        return BoxSearchFragment.newInstance(session, (new BoxApiSearch(session)).getSearchRequest(query));
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,19 +52,22 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
-        mRequest.setLimit(DEFAULT_SEARCH_LIMIT)
-            .setOffset(0);
+        mRequest.setLimit(mLimit)
+                .setOffset(0);
         mController.execute(mRequest);
     }
 
     @Override
     protected void updateItems(BoxIteratorItems items) {
         super.updateItems(items);
+
+        // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
         if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
-            // if not all entries were fetched add a task to fetch more items if user scrolls to last entry.
+            // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
+            int multiplier = mBoxIteratorItems.size() / mLimit;
             BoxRequestsSearch.Search incrementalSearchTask = mRequest
-                    .setOffset(mBoxIteratorItems.size())
-                    .setLimit(DEFAULT_SEARCH_LIMIT);
+                    .setOffset(multiplier * mLimit)
+                    .setLimit(mLimit);
             mAdapter.add(new BoxListItem(incrementalSearchTask, ACTION_FUTURE_TASK));
         }
     }
@@ -120,23 +87,25 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     private void onItemsFetched(BoxResponseIntent intent) {
+        checkConnectivity();
+
+        if (mAdapter == null) {
+            return;
+        }
+
+        // On failure updates the existing loading item with an error item
         if (!intent.isSuccess()) {
+            BoxListItem item = mAdapter.get(intent.getAction());
+            if (item != null) {
+                item.setResponse(intent);
+                item.setState(BoxListItem.State.ERROR);
+                mAdapter.update(intent.getAction());
+            }
             Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_performing_search), Toast.LENGTH_LONG).show();
             return;
         }
 
-        checkConnectivity();
-
-        if (!intent.isSuccess()) {
-            // This logic removes the incremental loading item which is currently only used in the search fragment
-            BoxListItem item = mAdapter.get(intent.getAction());
-            if (item != null) {
-                item.setState(BoxListItem.State.ERROR);
-                mAdapter.update(intent.getAction());
-            }
-            return;
-        }
-
+        // On success should remove the existing loading item
         mAdapter.remove(intent.getAction());
         if (intent.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems collection = (BoxIteratorItems) intent.getResult();
@@ -157,5 +126,38 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         holder.getProgressBar().setVisibility(View.GONE);
         holder.getMetaDescription().setVisibility(View.VISIBLE);
         holder.getThumbView().setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Builder for constructing an instance of BoxBrowseFolderFragment
+     */
+    public static class Builder extends BoxBrowseFragment.Builder<BoxSearchFragment> {
+
+        /**
+         * @param session
+         * @param searchRequest
+         */
+        public Builder(BoxSession session, BoxRequestsSearch.Search searchRequest) {
+            mRequest = searchRequest;
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putSerializable(OUT_ITEM, mRequest);
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+
+        }
+
+        /**
+         * @param session
+         * @param query
+         */
+        public Builder(BoxSession session, String query) {
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putSerializable(OUT_ITEM, mRequest);
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+        }
+
+        @Override
+        protected BoxSearchFragment getInstance() {
+            return new BoxSearchFragment();
+        }
     }
 }

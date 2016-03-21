@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
@@ -205,7 +206,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
             // All fragments will always navigate into folders
-            BoxSearchFragment searchFragment = BoxSearchFragment.newInstance(mSession, onSearchRequested(searchRequest));
+            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, onSearchRequested(searchRequest)).build();
             trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
                     .addToBackStack(BoxBrowseFragment.TAG)
                     .commit();

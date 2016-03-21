@@ -1,5 +1,6 @@
 package com.box.androidsdk.browse.uidata;
 
+import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequest;
@@ -12,13 +13,15 @@ public final class BoxListItem {
     public static final int TYPE_BOX_FOLDER_ITEM = 0;
     public static final int TYPE_BOX_FILE_ITEM = 1;
     public static final int TYPE_FUTURE_TASK = 2;
-    private Exception mException;
     private BoxItem mBoxItem;
     private BoxRequest mRequest;
     private int mType;
+    private Integer mPosition;
     private String mIdentifier;
     private State mState = State.CREATED;
     private boolean mIsEnabled = true;
+    private BoxResponseIntent mResponse;
+
     /**
      * Constructor.
      *
@@ -44,12 +47,12 @@ public final class BoxListItem {
         setIdentifier(identifier);
     }
 
-    public Exception getException() {
-        return mException;
+    public BoxResponseIntent getResponse() {
+        return mResponse;
     }
 
-    public void setException(Exception exception) {
-        mException = exception;
+    public void setResponse(BoxResponseIntent intent) {
+        mResponse = intent;
     }
 
     /**
@@ -146,6 +149,24 @@ public final class BoxListItem {
      */
     private void setIdentifier(final String identifier) {
         mIdentifier = identifier;
+    }
+
+    /**
+     * Returns the position of this list item in the container list (used as a performance enhancement)
+     *
+     * @return
+     */
+    public Integer getPosition() {
+        return mPosition;
+    }
+
+    /**
+     * Sets the position of this list item in the containing list (used as a performance enhancement)
+     *
+     * @param position
+     */
+    public void setPosition(int position) {
+        mPosition = position;
     }
 
     public enum State {

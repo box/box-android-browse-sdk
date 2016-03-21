@@ -62,7 +62,6 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,23 +72,21 @@ import java.util.Locale;
  * and update the ui on a response.
  */
 public abstract class BoxBrowseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-
-    public static final String ARG_ID = "argId";
-    public static final String ARG_USER_ID = "argUserId";
-    public static final String ARG_NAME = "argName";
-    public static final String ARG_LIMIT = "argLimit";
-
     public static final String TAG = BoxBrowseFragment.class.getName();
-    protected static final int DEFAULT_LIMIT = 1000;
 
-    protected static final String ARG_BOX_ITEM_FILTER = "BoxBrowseFilter";
+    protected static final int DEFAULT_LIMIT = 200;
+
+    protected static final String ARG_ID = "argId";
+    protected static final String ARG_USER_ID = "argUserId";
+    protected static final String ARG_NAME = "argName";
+    protected static final String ARG_LIMIT = "argLimit";
+    protected static final String ARG_BOX_ITEM_FILTER = "argBoxBrowseFilter";
+
     protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "com.box.androidsdk.browse.SECONDARYACTIONLISTENER";
     protected static final String EXTRA_MULTI_SELECT_HANDLER = "com.box.androidsdk.browse.MULTI_SELECT_HANDLER";
     protected static final String EXTRA_TITLE = "com.box.androidsdk.browse.TITLE";
     protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
     protected static final String ACTION_FUTURE_TASK = "com.box.androidsdk.browse.FUTURE_TASK";
-
-    protected static List<String> THUMBNAIL_MEDIA_EXTENSIONS = Arrays.asList(new String[]{"gif", "jpeg", "jpg", "bmp", "svg", "png", "tiff"});
 
     protected String mUserId;
     protected BoxSession mSession;
@@ -106,6 +103,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected ProgressBar mProgress;
     protected BrowseController mController;
     protected LocalBroadcastManager mLocalBroadcastManager;
+    protected int mLimit = DEFAULT_LIMIT;
+
     private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
@@ -133,7 +132,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     };
     private View mRootView;
     private BoxItemFilter mBoxItemFilter;
-    private int mLimit;
 
     public BoxBrowseFragment() {
         // Required empty public constructor
@@ -310,7 +308,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public <T extends OnFragmentInteractionListener & Serializable> void setSecondaryActionListener(T listener) {
         mSecondaryActionListener = listener;
         if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
+            mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
         }
     }
 
@@ -358,8 +356,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         mProgress.setVisibility(View.GONE);
-        // if we are trying to display the original list no need to add.
+
+        final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 1;
         if (items == mBoxIteratorItems) {
+            // if we are trying to display the original list no need to add.
             if (mAdapter.getItemCount() < 1) {
                 mAdapter.addAll(items);
             }
@@ -368,13 +368,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 setListItems(items);
             }
 
-            addAllItems(mBoxIteratorItems, items);
+            mBoxIteratorItems = addAllItems(mBoxIteratorItems, items);
             mAdapter.addAll(items);
         }
+        final int endRange = mAdapter.getItemCount();
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter.notifyDataSetChanged();
+                mAdapter.notifyItemRangeChanged(startRange, endRange);
             }
         });
     }
@@ -394,7 +395,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 targetArray.asArray().add(value);
             }
         }
-        return target;
+        return new BoxIteratorItems(targetJsonObject);
 
     }
 
@@ -407,10 +408,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (mAdapter != null) {
             BoxListItem item = mAdapter.get(((BoxRequestsFile.DownloadThumbnail) intent.getRequest()).getId());
             if (item != null) {
-                if (!intent.isSuccess()) {
-                    item.setState(BoxListItem.State.ERROR);
-                    item.setException(intent.getException());
-                }
+                item.setResponse(intent);
                 mAdapter.update(item.getIdentifier());
             }
         }
@@ -630,7 +628,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 mSelectedItems.clear();
             }
             if (mItemAdapter != null && mItemAdapter.get() != null) {
-                mItemAdapter.get().notifyDataSetChanged();
+                mItemAdapter.get().notifyItemRangeChanged(0, mItemAdapter.get().getItemCount());
             }
         }
 
@@ -843,9 +841,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             if (item.getBoxItem() instanceof BoxFile && ThumbnailManager.isThumbnailAvailable(item.getBoxItem())) {
                 if (item.getRequest() == null) {
                     item.setRequest(getDownloadThumbnailTask(item.getBoxItem().getId(), mThumbnailManager.getThumbnailForFile(item.getBoxItem().getId())));
-                } else if (item.getException() instanceof BoxException) {
-                    BoxException ex = (BoxException) item.getException();
-                    if (ex.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+                } else if (item.getResponse() != null) {
+                     BoxException ex = (BoxException) item.getResponse().getException();
+                    if (ex != null && ex.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                         item.setState(BoxListItem.State.CREATED);
                     }
                 }
@@ -883,7 +881,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         public synchronized void remove(String key) {
             BoxListItem item = mItemsMap.remove(key);
             if (item != null) {
-                boolean success = mListItems.remove(item);
+                int index = item.getPosition() != null ?
+                        item.getPosition().intValue() :
+                        mListItems.indexOf(item);
+                mListItems.remove(index);
+                this.notifyItemRemoved(index);
             }
         }
 
@@ -899,7 +901,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         public synchronized void add(BoxListItem listItem) {
-
             if (listItem.getBoxItem() != null) {
                 // If the item should not be visible, skip adding the item
                 if (!isItemVisible(listItem.getBoxItem())) {
@@ -912,13 +913,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 listItem.setIsEnabled(isItemEnabled(listItem.getBoxItem()));
             }
             mListItems.add(listItem);
+            listItem.setPosition(mListItems.size() - 1);
             mItemsMap.put(listItem.getIdentifier(), listItem);
         }
 
         public void update(String id) {
             BoxListItem item = mItemsMap.get(id);
             if (item != null) {
-                int index = mListItems.indexOf(item);
+                int index = item.getPosition() != null ?
+                        item.getPosition() :
+                        mListItems.indexOf(item);
                 notifyItemChanged(index);
             }
         }
@@ -937,5 +941,45 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             getSecondaryActionListener().handleOnItemClick(mBoxListItem.getBoxItem());
         }
 
+    }
+
+
+    /**
+     * Builder for constructing an instance of BoxBrowseFolderFragment
+     */
+    public static abstract class Builder<T extends BoxBrowseFragment> {
+        protected Bundle mArgs = new Bundle();
+
+        /**
+         * Set the number of items that the results will be limited to when retrieving folder items
+         *
+         * @param limit
+         */
+        public void setLimit(int limit) {
+            mArgs.putInt(ARG_LIMIT, limit);
+        }
+
+        /**
+         * Set the BoxItemFilter for filtering the items being displayed
+         *
+         * @param filter
+         * @param <E>
+         */
+        public <E extends Serializable & BoxItemFilter> void setBoxItemFilter(E filter) {
+            mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
+        }
+
+        /**
+         * Returns an empty instance of the fragment to build
+         *
+         * @return
+         */
+        protected abstract T getInstance();
+
+        public T build() {
+            T newFragment = getInstance();
+            newFragment.setArguments(mArgs);
+            return newFragment;
+        }
     }
 }
