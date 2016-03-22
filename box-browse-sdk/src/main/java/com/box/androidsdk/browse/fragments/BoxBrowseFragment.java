@@ -354,49 +354,25 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (activity == null) {
             return;
         }
-
         mProgress.setVisibility(View.GONE);
 
-        final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 1;
         if (items == mBoxIteratorItems) {
             // if we are trying to display the original list no need to add.
-            if (mAdapter.getItemCount() < 1) {
+            if (mAdapter.getItemCount() <= 0) {
                 mAdapter.addAll(items);
             }
-        } else {
-            if (mBoxIteratorItems == null) {
-                setListItems(items);
-            }
-
-            mBoxIteratorItems = addAllItems(mBoxIteratorItems, items);
-            mAdapter.addAll(items);
+            return;
         }
-        final int endRange = mAdapter.getItemCount();
+
+        // Because we are always retrieving a folder with all items, we want to replace everything
+        mAdapter.removeAll();
+        mAdapter.addAll(items);
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter.notifyItemRangeChanged(startRange, endRange);
+                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
             }
         });
-    }
-
-    private BoxIteratorItems addAllItems(BoxIteratorItems target, BoxIteratorItems source) {
-        JsonValue sourceArray = source.toJsonObject().get(BoxIterator.FIELD_ENTRIES);
-        JsonObject targetJsonObject = target.toJsonObject();
-        JsonValue targetArray = targetJsonObject.get(BoxIterator.FIELD_ENTRIES);
-        if (targetArray == null || targetArray.isNull()) {
-            JsonArray jsonArray = new JsonArray();
-            targetJsonObject.set(BoxIterator.FIELD_ENTRIES, jsonArray);
-            target.createFromJson(targetJsonObject);
-            targetArray = jsonArray;
-        }
-        if (sourceArray != null) {
-            for (JsonValue value : sourceArray.asArray()) {
-                targetArray.asArray().add(value);
-            }
-        }
-        return new BoxIteratorItems(targetJsonObject);
-
     }
 
     /**
