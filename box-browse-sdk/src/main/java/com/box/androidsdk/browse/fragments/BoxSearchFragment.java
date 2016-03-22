@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.fragments;
 
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
 
@@ -10,9 +11,13 @@ import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 import java.io.File;
 
@@ -59,7 +64,27 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected void updateItems(BoxIteratorItems items) {
-        super.updateItems(items);
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        mProgress.setVisibility(View.GONE);
+
+        // Search can potentially have a lot of results so incremental loading and de-duping logic is needed
+        final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 1;
+        if (items == mBoxIteratorItems) {
+            // if we are trying to display the original list no need to add.
+            if (mAdapter.getItemCount() <= 0) {
+                mAdapter.addAll(items);
+            }
+        } else {
+            if (mBoxIteratorItems == null) {
+                setListItems(items);
+            }
+
+            mBoxIteratorItems = appendItems(mBoxIteratorItems, items);
+            mAdapter.addAll(items);
+        }
 
         // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
         if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
@@ -70,6 +95,33 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                     .setLimit(mLimit);
             mAdapter.add(new BoxListItem(incrementalSearchTask, ACTION_FUTURE_TASK));
         }
+        final int endRange = mAdapter.getItemCount();
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyItemRangeChanged(startRange, endRange);
+            }
+        });
+    }
+
+    private BoxIteratorItems appendItems(BoxIteratorItems target, BoxIteratorItems source) {
+        JsonValue sourceArray = source.toJsonObject().get(BoxIterator.FIELD_ENTRIES);
+        JsonObject targetJsonObject = target.toJsonObject();
+        JsonValue targetArray = targetJsonObject.get(BoxIterator.FIELD_ENTRIES);
+        if (targetArray == null || targetArray.isNull()) {
+            JsonArray jsonArray = new JsonArray();
+            targetJsonObject.set(BoxIterator.FIELD_ENTRIES, jsonArray);
+            target.createFromJson(targetJsonObject);
+            targetArray = jsonArray;
+        }
+        if (sourceArray != null) {
+            for (JsonValue value : sourceArray.asArray()) {
+                targetArray.asArray().add(value);
+            }
+        }
+        return new BoxIteratorItems(targetJsonObject);
+
     }
 
     @Override
