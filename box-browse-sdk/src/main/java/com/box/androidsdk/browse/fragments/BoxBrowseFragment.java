@@ -405,7 +405,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      * @param intent
      */
     protected void onDownloadedThumbnail(final BoxResponseIntent intent) {
-        if (mAdapter != null) {
+        if (mAdapter != null && intent.getException() == null) {
             BoxListItem item = mAdapter.get(((BoxRequestsFile.DownloadThumbnail) intent.getRequest()).getId());
             if (item != null) {
                 item.setResponse(intent);
