@@ -47,13 +47,11 @@ import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
+import com.box.androidsdk.content.utils.BoxLogUtils;
+import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -88,7 +86,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
     protected static final String ACTION_FUTURE_TASK = "com.box.androidsdk.browse.FUTURE_TASK";
 
-    protected String mUserId;
     protected BoxSession mSession;
     protected BoxIteratorItems mBoxIteratorItems;
 
@@ -101,13 +98,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected ThumbnailManager mThumbnailManager;
     protected SwipeRefreshLayout mSwipeRefresh;
     protected ProgressBar mProgress;
-    protected BrowseController mController;
     protected LocalBroadcastManager mLocalBroadcastManager;
     protected int mLimit = DEFAULT_LIMIT;
 
     private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
+    private BrowseController mController;
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -152,10 +149,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mUserId = getArguments().getString(ARG_USER_ID);
+            String userId = getArguments().getString(ARG_USER_ID);
+            if (SdkUtils.isBlank(userId)) {
+                throw new IllegalArgumentException("A valid session or user id must be provided");
+            }
+            mSession = new BoxSession(getActivity(), userId);
             mThumbnailManager = initializeThumbnailManager();
-            mUserId = getArguments().getString(ARG_USER_ID);
-            mSession = new BoxSession(getActivity(), mUserId);
             mLimit = getArguments().getInt(ARG_LIMIT);
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
@@ -171,8 +170,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         // Initialize controller and listeners
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
-        mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
-                .setCompletedListener(new CompletionListener(mLocalBroadcastManager));
 
         // TODO: Do we really need this?
         setRetainInstance(true);
@@ -215,9 +212,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     private ThumbnailManager initializeThumbnailManager() {
         try {
-            return new ThumbnailManager(getActivity().getCacheDir());
+            return new ThumbnailManager(mSession.getCacheDir());
         } catch (FileNotFoundException e) {
-            // TODO: Call error handler
+            BoxLogUtils.e(TAG, e);
             return null;
         }
     }
@@ -233,14 +230,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void handleResponse(BoxResponseIntent intent) {
+        if (!intent.isSuccess()) {
+            mController.onError(getActivity(), intent.getResponse());
+        }
         if (intent.getAction().equals(BoxRequestsFile.DownloadThumbnail.class.getName())) {
             onDownloadedThumbnail(intent);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.box_browsesdk_fragment_browse, container, false);
         mSwipeRefresh = (SwipeRefreshLayout) mRootView.findViewById(R.id.box_browsesdk_swipe_reresh);
         mSwipeRefresh.setOnRefreshListener(this);
@@ -293,6 +292,18 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public BrowseController getController() {
+        if (mController == null) {
+            mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
+                    .setCompletedListener(new CompletionListener(mLocalBroadcastManager));
+        }
+        return mController;
+    }
+
+    public void setController(BrowseController controller) {
+        mController = controller;
     }
 
     protected OnFragmentInteractionListener getSecondaryActionListener() {
@@ -481,7 +492,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      * @return A FutureTask that is tasked with fetching information on the given folder.
      */
     protected BoxRequestsFile.DownloadThumbnail getDownloadThumbnailTask(final String fileId, final File downloadLocation) {
-        return mController.getThumbnailRequest(fileId, downloadLocation, getResources());
+        return getController().getThumbnailRequest(fileId, downloadLocation, getResources());
     }
 
     /**
@@ -761,7 +772,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
             if (mItem.getState() == BoxListItem.State.ERROR) {
                 mItem.setState(BoxListItem.State.SUBMITTED);
-                mController.execute(mItem.getRequest());
+                getController().execute(mItem.getRequest());
                 setLoading();
             }
 
@@ -828,7 +839,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // Execute a request if it hasn't been done so already
             if (item.getRequest() != null && item.getState() == BoxListItem.State.CREATED) {
                 item.setState(BoxListItem.State.SUBMITTED);
-                mController.execute(item.getRequest());
+                getController().execute(item.getRequest());
                 if (item.getIdentifier().equals(ACTION_FUTURE_TASK)) {
                     boxItemHolder.setLoading();
                 }
@@ -902,6 +913,17 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 notifyItemChanged(index);
             }
         }
+
+        public void update(BoxItem item) {
+            BoxListItem listItem = mItemsMap.get(item.getId());
+            if (listItem != null) {
+                listItem.setBoxItem(item);
+                int index = listItem.getPosition() != null ?
+                        listItem.getPosition() :
+                        mListItems.indexOf(listItem);
+                notifyItemChanged(index);
+            }
+        }
     }
 
     private class BoxItemClickListener implements View.OnClickListener {
@@ -925,6 +947,19 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      */
     public static abstract class Builder<T extends BoxBrowseFragment> {
         protected Bundle mArgs = new Bundle();
+
+
+        protected void setFolderId(String folderId) {
+            mArgs.putString(ARG_ID, folderId);
+        }
+
+        protected void setFolderName(String folderName) {
+            mArgs.putString(ARG_NAME, folderName);
+        }
+
+        protected void setUserId(String userId) {
+            mArgs.putString(ARG_USER_ID, userId);
+        }
 
         /**
          * Set the number of items that the results will be limited to when retrieving folder items
