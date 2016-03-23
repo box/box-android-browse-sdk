@@ -51,7 +51,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mController = new BoxBrowseController(new BoxApiFile(mSession),
+        mController = new BoxBrowseController(mSession, new BoxApiFile(mSession),
                 new BoxApiFolder(mSession),
                 new BoxApiSearch(mSession));
         if (savedInstanceState != null) {
@@ -138,7 +138,9 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * @return Browsing fragment that will be used to show the BoxItems
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
-        return new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
+        BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
+        fragment.setController(mController);
+        return fragment;
     }
 
 
