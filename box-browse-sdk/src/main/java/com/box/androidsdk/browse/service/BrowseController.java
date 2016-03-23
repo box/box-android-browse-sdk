@@ -65,4 +65,6 @@ public interface BrowseController {
      * @param response response returned from the server that contains the request, result, and exception
      */
     void onError(Context context, BoxResponse response);
+
+    File getThumbnailCacheDir();
 }

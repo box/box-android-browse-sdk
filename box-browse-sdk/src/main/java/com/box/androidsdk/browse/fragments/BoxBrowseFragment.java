@@ -212,7 +212,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     private ThumbnailManager initializeThumbnailManager() {
         try {
-            return new ThumbnailManager(mSession.getCacheDir());
+            return new ThumbnailManager(getController().getThumbnailCacheDir());
         } catch (FileNotFoundException e) {
             BoxLogUtils.e(TAG, e);
             return null;
@@ -296,7 +296,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     public BrowseController getController() {
         if (mController == null) {
-            mController = new BoxBrowseController(new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
+            mController = new BoxBrowseController(mSession, new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
                     .setCompletedListener(new CompletionListener(mLocalBroadcastManager));
         }
         return mController;

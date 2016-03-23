@@ -11,6 +11,7 @@ import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
@@ -19,6 +20,7 @@ import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,10 +39,12 @@ public class BoxBrowseController implements BrowseController {
     private final BoxApiFile mFileApi;
     private final BoxApiFolder mFolderApi;
     private final BoxApiSearch mSearchApi;
+    private final BoxSession mSession;
     private BoxFutureTask.OnCompletedListener mListener;
 
 
-    public BoxBrowseController(BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {
+    public BoxBrowseController(BoxSession session, BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {
+        mSession = session;
         mFileApi = apiFile;
         mFolderApi = apiFolder;
         mSearchApi = apiSearch;
@@ -111,6 +115,11 @@ public class BoxBrowseController implements BrowseController {
         } else if (response.getRequest() instanceof BoxRequestsSearch.Search) {
             Toast.makeText(context, R.string.box_browsesdk_problem_performing_search, Toast.LENGTH_LONG);
         }
+    }
+
+    @Override
+    public File getThumbnailCacheDir() {
+        return mSession.getCacheDir();
     }
 
     protected ThreadPoolExecutor getApiExecutor() {
