@@ -13,36 +13,33 @@ import com.box.androidsdk.content.requests.BoxResponse;
  * will hold all related information to a BoxResponse
  */
 public class BoxResponseIntent<E extends BoxObject> extends Intent {
-
-    private final E mResult;
-    private final boolean mIsSuccess;
-    private final BoxRequest mRequest;
-    private final Exception mException;
+    private final BoxResponse<E> mResponse;
 
     public BoxResponseIntent(BoxResponse<E> response) {
-        mIsSuccess = response.isSuccess();
-        mResult = response.getResult();
-        mRequest = response.getRequest();
-        mException = response.getException();
-        if (mRequest != null) {
-            setAction(mRequest.getClass().getName());
+        mResponse = response;
+        if (mResponse.getRequest() != null) {
+            setAction(mResponse.getRequest().getClass().getName());
         }
     }
 
     public boolean isSuccess() {
-        return mIsSuccess;
+        return mResponse.isSuccess();
     }
 
     public BoxRequest getRequest() {
-        return mRequest;
+        return mResponse.getRequest();
     }
 
     public E getResult() {
-        return mResult;
+        return mResponse.getResult();
     }
 
     public Exception getException() {
-        return mException;
+        return mResponse.getException();
+    }
+
+    public BoxResponse<E> getResponse() {
+        return mResponse;
     }
 
     @Override
@@ -53,19 +50,25 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         super.writeToParcel(out, flags);
+        out.writeSerializable(mResponse);
     }
 
     public static final Parcelable.Creator<BoxResponseIntent> CREATOR = new Creator<BoxResponseIntent>() {
         @Override
         public BoxResponseIntent createFromParcel(Parcel source) {
-            return null;
+            return new BoxResponseIntent(source);
         }
 
         @Override
         public BoxResponseIntent[] newArray(int size) {
-            return new BoxResponseIntent[0];
+            return new BoxResponseIntent[size];
         }
     };
+
+    private BoxResponseIntent(Parcel in) {
+        readFromParcel(in);
+        mResponse = (BoxResponse) in.readSerializable();
+    }
 }
 
 

@@ -1,8 +1,11 @@
 package com.box.androidsdk.browse.service;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.widget.Toast;
 
+import com.box.androidsdk.browse.R;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
@@ -12,11 +15,11 @@ import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -99,6 +102,15 @@ public class BoxBrowseController implements BrowseController {
     public BrowseController setCompletedListener(BoxFutureTask.OnCompletedListener listener) {
         mListener = listener;
         return this;
+    }
+
+    @Override
+    public void onError(Context context, BoxResponse response) {
+        if (response.getRequest() instanceof BoxRequestsFolder.GetFolderWithAllItems) {
+            Toast.makeText(context, R.string.box_browsesdk_problem_fetching_folder, Toast.LENGTH_LONG);
+        } else if (response.getRequest() instanceof BoxRequestsSearch.Search) {
+            Toast.makeText(context, R.string.box_browsesdk_problem_performing_search, Toast.LENGTH_LONG);
+        }
     }
 
     protected ThreadPoolExecutor getApiExecutor() {

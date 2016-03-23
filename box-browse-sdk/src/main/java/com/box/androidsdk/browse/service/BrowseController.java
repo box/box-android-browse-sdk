@@ -1,12 +1,15 @@
 package com.box.androidsdk.browse.service;
 
+import android.content.Context;
 import android.content.res.Resources;
 
+import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.box.androidsdk.content.requests.BoxResponse;
 
 import java.io.File;
 
@@ -54,4 +57,12 @@ public interface BrowseController {
      * @return
      */
     BrowseController setCompletedListener(BoxFutureTask.OnCompletedListener listener);
+
+    /**
+     * Error handler for whenever an error occurs from a request
+     *
+     * @param context
+     * @param response response returned from the server that contains the request, result, and exception
+     */
+    void onError(Context context, BoxResponse response);
 }

@@ -59,7 +59,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     protected void loadItems() {
         mRequest.setLimit(mLimit)
                 .setOffset(0);
-        mController.execute(mRequest);
+        getController().execute(mRequest);
     }
 
     @Override

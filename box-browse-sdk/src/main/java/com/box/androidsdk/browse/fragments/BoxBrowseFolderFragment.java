@@ -3,18 +3,13 @@ package com.box.androidsdk.browse.fragments;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
 
-import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
-
-import java.io.Serializable;
 
 /**
  * Use the {@link Builder#build()} to
@@ -43,11 +38,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             if (mFolder == null && !SdkUtils.isBlank(folderId)) {
                 mFolder = BoxFolder.createFromIdAndName(folderId, folderName);
             }
-
-            if (SdkUtils.isBlank(mUserId)) {
-                Toast.makeText(getActivity(), R.string.box_browsesdk_cannot_view_folder, Toast.LENGTH_LONG).show();
-                // TODO: Call error handler
-            }
         }
     }
 
@@ -73,7 +63,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
-        mController.execute(mController.getFolderWithAllItems(mFolder.getId()));
+        getController().execute(getController().getFolderWithAllItems(mFolder.getId()));
     }
 
     /**
@@ -108,7 +98,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
         if (!intent.isSuccess()) {
             checkConnectivity();
-            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
             return;
         }
 
