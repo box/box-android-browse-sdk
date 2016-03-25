@@ -366,6 +366,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             return;
         }
         mProgress.setVisibility(View.GONE);
+        mSwipeRefresh.setRefreshing(false);
 
         if (items == mBoxIteratorItems) {
             // if we are trying to display the original list no need to add.
@@ -392,11 +393,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      * @param intent
      */
     protected void onDownloadedThumbnail(final BoxResponseIntent intent) {
-        if (mAdapter != null && intent.getException() == null) {
+        if (mAdapter != null) {
             BoxListItem item = mAdapter.get(((BoxRequestsFile.DownloadThumbnail) intent.getRequest()).getId());
             if (item != null) {
                 item.setResponse(intent);
-                mAdapter.update(item.getIdentifier());
+                if (intent.isSuccess()) {
+                    mAdapter.update(item.getIdentifier());
+                }
             }
         }
     }

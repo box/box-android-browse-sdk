@@ -139,7 +139,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
         BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
-        fragment.setController(mController);
         return fragment;
     }
 
