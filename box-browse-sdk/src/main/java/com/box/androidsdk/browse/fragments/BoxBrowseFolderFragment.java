@@ -114,21 +114,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an item being tapped to be communicated to the activity
-     */
-    public interface OnFragmentInteractionListener extends BoxBrowseFragment.OnFragmentInteractionListener {
-
-        /**
-         * Called whenever an item in the RecyclerView is tapped
-         *
-         * @param item the item that was tapped
-         * @return whether the tap event should continue to be handled by the fragment
-         */
-        boolean handleOnItemClick(BoxItem item);
-    }
-
-    /**
      * Builder for constructing an instance of BoxBrowseFolderFragment
      */
     public static class Builder extends BoxBrowseFragment.Builder<BoxBrowseFolderFragment> {

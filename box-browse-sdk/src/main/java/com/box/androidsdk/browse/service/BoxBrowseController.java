@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.service;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
@@ -10,6 +11,7 @@ import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequest;
@@ -36,11 +38,11 @@ public class BoxBrowseController implements BrowseController {
     private static ThreadPoolExecutor mApiExecutor;
     private static ThreadPoolExecutor mThumbnailExecutor;
 
-    private final BoxApiFile mFileApi;
-    private final BoxApiFolder mFolderApi;
-    private final BoxApiSearch mSearchApi;
-    private final BoxSession mSession;
-    private BoxFutureTask.OnCompletedListener mListener;
+    protected final BoxApiFile mFileApi;
+    protected final BoxApiFolder mFolderApi;
+    protected final BoxApiSearch mSearchApi;
+    protected final BoxSession mSession;
+    protected BoxFutureTask.OnCompletedListener mListener;
 
 
     public BoxBrowseController(BoxSession session, BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {

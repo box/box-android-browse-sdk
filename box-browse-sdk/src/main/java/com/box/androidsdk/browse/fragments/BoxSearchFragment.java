@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.BoxListItem;
@@ -164,20 +165,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             updateItems(collection);
         }
         mSwipeRefresh.setRefreshing(false);
-    }
-
-    @Override
-    protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-        if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
-            return;
-        }
-        final BoxItem item = holder.getItem().getBoxItem();
-        holder.getNameView().setText(item.getName());
-        holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
-        mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
-        holder.getProgressBar().setVisibility(View.GONE);
-        holder.getMetaDescription().setVisibility(View.VISIBLE);
-        holder.getThumbView().setVisibility(View.VISIBLE);
     }
 
     /**
