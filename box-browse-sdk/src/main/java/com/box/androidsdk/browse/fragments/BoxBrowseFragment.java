@@ -556,18 +556,30 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         boolean mIsMultiSelecting;
         transient WeakReference<BoxItemAdapter> mItemAdapter;
 
-        public List<BoxItem> getSelectedBoxItem() {
+        /**
+         *
+         * @return a list of selected items.
+         */
+        public List<BoxItem> getSelectedBoxItems() {
             ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
-            mSelectedItems.addAll(items);
+            items.addAll(mSelectedItems);
             return items;
         }
 
+        /**
+         *
+         * @return the number of items selected.
+         */
         public int getSize() {
             return mSelectedItems.size();
         }
 
+        /**
+         *
+         * @param item a box item being displayed in this fragment.
+         * @return true if the item is selected.
+         */
         public boolean isItemSelected(BoxItem item) {
-            boolean selected = mSelectedItems.contains(item);
             return mSelectedItems.contains(item);
         }
 
@@ -604,11 +616,48 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mItemAdapter = new WeakReference<BoxItemAdapter>(adapter);
         }
 
+        /**
+         * Select all known box items and update ui.
+         */
+        public void selectAll(){
+            int totalItemCount = mItemAdapter.get().getItemCount();
+            if (mSelectedItems.size() < totalItemCount) {
+                int originalSize = mSelectedItems.size();
+                for (BoxListItem item : mItemAdapter.get().mListItems){
+                    BoxItem boxItem = item.getBoxItem();
+                    if (boxItem != null && isSelectable(boxItem) && !isItemSelected(boxItem) ){
+                        mSelectedItems.add(boxItem);
+                        handleItemSelected(boxItem, true, this);
+                    }
+                }
+                if (originalSize != mSelectedItems.size()){
+                    mItemAdapter.get().notifyItemRangeChanged(0, mItemAdapter.get().getItemCount());
+                }
+            }
 
-        boolean isEnabled() {
+        }
+
+        /**
+         * Deselect all selected box items and update ui.
+         */
+        public void deselectAll(){
+            if (mSelectedItems.size() > 0) {
+                mSelectedItems.clear();
+                mItemAdapter.get().notifyItemRangeChanged(0, mItemAdapter.get().getItemCount());
+            }
+
+        }
+
+        /**
+         * Return true if multi selecting, false otherwise.
+         */
+        public boolean isEnabled() {
             return mIsMultiSelecting;
         }
 
+        /**
+         * Enable or disable multiselect mode.
+         */
         public void setEnabled(boolean enabled) {
             if (mIsMultiSelecting == enabled) {
                 return;
@@ -752,8 +801,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public boolean onLongClick(View v) {
             if (getMultiSelectHandler() != null) {
-                getMultiSelectHandler().toggle(mItem.getBoxItem());
                 getMultiSelectHandler().setEnabled(!getMultiSelectHandler().isEnabled());
+                getMultiSelectHandler().toggle(mItem.getBoxItem());
                 return true;
             }
             return false;
