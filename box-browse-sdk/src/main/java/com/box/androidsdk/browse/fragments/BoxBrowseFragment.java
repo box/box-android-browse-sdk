@@ -19,6 +19,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -251,7 +252,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
         mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mProgress = (ProgressBar) mRootView.findViewById(R.id.box_browsesdk_progress_bar);
-        mAdapter = new BoxItemAdapter();
+        mAdapter = createBoxItemAdapter();
         mItemsView.setAdapter(mAdapter);
         if (getMultiSelectHandler() != null) {
             getMultiSelectHandler().setItemAdapter(mAdapter);
@@ -264,6 +265,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             updateItems(mBoxIteratorItems);
         }
         return mRootView;
+    }
+
+    protected BoxItemAdapter createBoxItemAdapter(){
+        return new BoxItemAdapter();
     }
 
     protected abstract void loadItems();
@@ -710,7 +715,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         ProgressBar mProgressBar;
         ImageButton mSecondaryAction;
         BoxItemClickListener mSecondaryClickListener;
-        CheckBox mItemCheckBox;
+        AppCompatCheckBox mItemCheckBox;
 
 
         public BoxItemViewHolder(View itemView) {
@@ -725,7 +730,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mMetaDescription = (TextView) itemView.findViewById(R.id.metaline_description);
             mProgressBar = (ProgressBar) itemView.findViewById((R.id.spinner));
             mSecondaryAction = (ImageButton) itemView.findViewById(R.id.secondaryAction);
-            mItemCheckBox = (CheckBox) itemView.findViewById(R.id.boxItemCheckBox);
+            mItemCheckBox = (AppCompatCheckBox) itemView.findViewById(R.id.boxItemCheckBox);
             mSecondaryClickListener = new BoxItemClickListener();
             mSecondaryAction.setOnClickListener(mSecondaryClickListener);
             setAccentColor(getResources(), mProgressBar);
