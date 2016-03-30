@@ -149,6 +149,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
         if (getArguments() != null) {
             String userId = getArguments().getString(ARG_USER_ID);
             if (SdkUtils.isBlank(userId)) {
@@ -170,7 +171,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         // Initialize controller and listeners
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+
 
         // TODO: Do we really need this?
         setRetainInstance(true);
