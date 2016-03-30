@@ -23,6 +23,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.box.androidsdk.browse.R;
@@ -112,6 +113,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private View mRootView;
     private BoxItemFilter mBoxItemFilter;
     private LocalBroadcastManager mLocalBroadcastmanager;
+    private ImageView mEmptyFolder;
 
     public BoxBrowseFragment() {
         // Required empty public constructor
@@ -200,6 +202,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.box_browsesdk_fragment_browse, container, false);
+        mEmptyFolder = (ImageView) mRootView.findViewById(R.id.box_browsesdk_folder_empty);
         mSwipeRefresh = (SwipeRefreshLayout) mRootView.findViewById(R.id.box_browsesdk_swipe_reresh);
         mSwipeRefresh.setOnRefreshListener(this);
         mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
@@ -359,6 +362,21 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             @Override
             public void run() {
                 mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
+                updateUI();
+            }
+        });
+    }
+
+    /**
+     * Updates the UI based on the current state of the adapter
+     */
+    protected void updateUI() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ?
+                        View.VISIBLE : View.GONE;
+                mEmptyFolder.setVisibility(emptyFolderVisibility);
             }
         });
     }

@@ -15,6 +15,14 @@
             android:background="@color/box_browsesdk_list_background"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <ImageView
+        android:id="@+id/box_browsesdk_folder_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/box_browsesdk_folder_empty_state"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <ProgressBar
         android:id="@+id/box_browsesdk_progress_bar"
         android:layout_width="36dp"
