@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,9 +17,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -211,13 +212,28 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
+        mItemsView.addItemDecoration(new FooterDecoration(getResources()));
         mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mProgress = (ProgressBar) mRootView.findViewById(R.id.box_browsesdk_progress_bar);
         mAdapter = createAdapter();
+
+        mAdapter.registerAdapterDataObserver(new AdapterDataObserver() {
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                updateUI();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                updateUI();
+            }
+        });
+
         mItemsView.setAdapter(mAdapter);
         if (getMultiSelectHandler() != null) {
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
+
 
         if (mBoxIteratorItems == null) {
             mProgress.setVisibility(View.VISIBLE);
@@ -232,6 +248,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     protected void setListItems(final BoxIteratorItems items) {
         mBoxIteratorItems = items;
+    }
+
+    private void updateUI() {
+        final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
+        mEmptyFolder.setVisibility(emptyFolderVisibility);
     }
 
     protected BoxItemAdapter createAdapter() {
@@ -362,21 +383,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             @Override
             public void run() {
                 mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
-                updateUI();
-            }
-        });
-    }
-
-    /**
-     * Updates the UI based on the current state of the adapter
-     */
-    protected void updateUI() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ?
-                        View.VISIBLE : View.GONE;
-                mEmptyFolder.setVisibility(emptyFolderVisibility);
             }
         });
     }
@@ -557,6 +563,22 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
                 mDivider.setBounds(left, top, right, bottom);
                 mDivider.draw(c);
+            }
+        }
+    }
+
+    private static class FooterDecoration extends RecyclerView.ItemDecoration {
+        private final int mFooterPadding;
+
+        public FooterDecoration(Resources resources) {
+            mFooterPadding = (int) resources.getDimension(R.dimen.box_browsesdk_list_footer_padding);
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            super.getItemOffsets(outRect, view, parent, state);
+            if (parent.getChildAdapterPosition(view) == parent.getAdapter().getItemCount() -1) {
+                outRect.bottom = mFooterPadding;
             }
         }
     }

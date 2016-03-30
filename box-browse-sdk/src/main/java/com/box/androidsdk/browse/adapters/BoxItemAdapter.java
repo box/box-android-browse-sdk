@@ -6,6 +6,8 @@ import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -46,6 +48,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected HashMap<String, BoxListItem> mItemsMap = new HashMap<String, BoxListItem>();
     private BoxItemFilter mBoxItemFilter;
     private ThumbnailManager mThumbnailManager;
+
+    protected int ITEM_VIEW_TYPE = 1;
 
     public BoxItemAdapter(Context context, BoxItemFilter boxItemFilter, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -98,6 +102,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     @Override
     public int getItemCount() {
         return mListItems.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
     }
 
     public BoxListItem get(String id) {
@@ -371,8 +380,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         @Override
         public boolean onLongClick(View v) {
             if (mListener.getMultiSelectHandler() != null) {
-                mListener.getMultiSelectHandler().toggle(mItem.getBoxItem());
                 mListener.getMultiSelectHandler().setEnabled(!mListener.getMultiSelectHandler().isEnabled());
+                mListener.getMultiSelectHandler().toggle(mItem.getBoxItem());
                 return true;
             }
             return false;
