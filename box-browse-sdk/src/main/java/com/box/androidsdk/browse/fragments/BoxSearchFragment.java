@@ -3,11 +3,14 @@ package com.box.androidsdk.browse.fragments;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
+import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.BoxListItem;
@@ -61,6 +64,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mRequest.setLimit(mLimit)
                 .setOffset(0);
         getController().execute(mRequest);
+    }
+
+    @Override
+    protected BoxItemAdapter createAdapter() {
+        return new BoxSearchAdapter(getActivity(), null, getController(), this);
     }
 
     @Override
