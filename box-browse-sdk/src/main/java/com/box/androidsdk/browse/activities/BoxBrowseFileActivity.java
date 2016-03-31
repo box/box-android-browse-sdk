@@ -43,17 +43,14 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     }
 
     @Override
-    public boolean handleOnItemClick(BoxItem item) {
+    public void onItemClick(BoxItem item) {
         if (item instanceof BoxFile || item instanceof BoxBookmark) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_BOX_FILE, item);
             setResult(Activity.RESULT_OK, intent);
             finish();
-            return false;
-        }
-        else {
-            onBoxItemSelected(item);
-            return false;
+        } else {
+            super.onItemClick(item);
         }
     }
 
@@ -62,7 +59,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     public void onBoxItemSelected(BoxItem boxItem) {
         super.onBoxItemSelected(boxItem);
         if (!(boxItem instanceof BoxFolder)) {
-            handleOnItemClick(boxItem);
+            onItemClick(boxItem);
         }
     }
 

@@ -2,9 +2,11 @@ package com.box.androidsdk.browse.service;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
@@ -42,6 +44,7 @@ public interface BrowseController {
      * @return
      */
     BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, Resources resources);
+
 
     /***
      * Executes the request using the appropriate executor

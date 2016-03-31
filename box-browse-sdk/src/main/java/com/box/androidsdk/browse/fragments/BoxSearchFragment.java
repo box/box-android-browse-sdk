@@ -3,10 +3,14 @@ package com.box.androidsdk.browse.fragments;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.adapters.BoxItemAdapter;
+import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.BoxListItem;
@@ -60,6 +64,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mRequest.setLimit(mLimit)
                 .setOffset(0);
         getController().execute(mRequest);
+    }
+
+    @Override
+    protected BoxItemAdapter createAdapter() {
+        return new BoxSearchAdapter(getActivity(), null, getController(), this);
     }
 
     @Override
@@ -164,20 +173,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             updateItems(collection);
         }
         mSwipeRefresh.setRefreshing(false);
-    }
-
-    @Override
-    protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-        if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
-            return;
-        }
-        final BoxItem item = holder.getItem().getBoxItem();
-        holder.getNameView().setText(item.getName());
-        holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
-        mThumbnailManager.setThumbnailIntoView(holder.getThumbView(), item);
-        holder.getProgressBar().setVisibility(View.GONE);
-        holder.getMetaDescription().setVisibility(View.VISIBLE);
-        holder.getThumbView().setVisibility(View.VISIBLE);
     }
 
     /**

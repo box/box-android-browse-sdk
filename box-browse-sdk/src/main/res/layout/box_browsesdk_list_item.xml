@@ -74,6 +74,7 @@
                 style="@style/BoxLabelText"
                 android:layout_gravity="start"
                 android:gravity="start"
+                android:paddingLeft="0dp"
                 android:baselineAlignBottom="true"
                 android:ellipsize="end"
                 android:singleLine="true"/>

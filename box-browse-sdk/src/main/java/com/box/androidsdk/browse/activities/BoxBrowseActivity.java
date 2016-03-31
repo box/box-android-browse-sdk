@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
@@ -33,7 +32,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFolderFragment.OnFragmentInteractionListener, BoxSearchView.OnBoxSearchListener {
+public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.OnBoxSearchListener {
 
     protected static final String EXTRA_SHOULD_SEARCH_ALL = "extraShouldSearchAll";
 
@@ -211,6 +210,13 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
                     .addToBackStack(BoxBrowseFragment.TAG)
                     .commit();
+        }
+    }
+
+    @Override
+    public void onItemClick(BoxItem item) {
+        if (item instanceof BoxFolder) {
+            handleBoxFolderClicked((BoxFolder) item);
         }
     }
 

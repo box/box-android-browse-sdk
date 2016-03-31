@@ -111,16 +111,10 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         mSelectFolderButton.setOnClickListener(this);
         initToolbar();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1) {
-            onBoxItemSelected(mItem);
+            onItemClick(mItem);
         }
         mSelectFolderButton.setEnabled(true);
 
-    }
-
-    @Override
-    public boolean handleOnItemClick(BoxItem item) {
-        onBoxItemSelected(item);
-        return false;
     }
 
     @Override

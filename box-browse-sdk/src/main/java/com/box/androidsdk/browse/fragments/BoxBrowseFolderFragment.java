@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentActivity;
 
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
-import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
@@ -111,21 +110,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
                 updateItems(mFolder.getItemCollection());
             }
         }
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an item being tapped to be communicated to the activity
-     */
-    public interface OnFragmentInteractionListener extends BoxBrowseFragment.OnFragmentInteractionListener {
-
-        /**
-         * Called whenever an item in the RecyclerView is tapped
-         *
-         * @param item the item that was tapped
-         * @return whether the tap event should continue to be handled by the fragment
-         */
-        boolean handleOnItemClick(BoxItem item);
     }
 
     /**
