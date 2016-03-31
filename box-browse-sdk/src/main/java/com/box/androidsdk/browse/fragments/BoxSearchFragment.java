@@ -4,20 +4,16 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import android.widget.Toast;
 
-import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
-import com.box.androidsdk.browse.uidata.BoxListItem;
-import com.box.androidsdk.content.models.BoxIterator;
+import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
+
+import java.util.ArrayList;
 
 /**
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
@@ -44,7 +40,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     public void search(BoxRequestsSearch.Search request) {
-        setListItems(new BoxIteratorItems());
+        mRequest = request;
         mAdapter.removeAll();
         loadItems();
         mAdapter.notifyDataSetChanged();
@@ -65,7 +61,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     @Override
-    protected void updateItems(BoxIteratorItems items) {
+    protected void updateItems(ArrayList<BoxItem> items) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
             return;
@@ -73,30 +69,22 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mProgress.setVisibility(View.GONE);
 
         // Search can potentially have a lot of results so incremental loading and de-duping logic is needed
-        final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 1;
-        if (items == mBoxIteratorItems) {
-            // if we are trying to display the original list no need to add.
-            if (mAdapter.getItemCount() <= 0) {
-                mAdapter.addAll(items);
+        final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 0;
+
+        ArrayList<BoxItem> filteredItems = new ArrayList<BoxItem>();
+        for (BoxItem item : items) {
+            if ((getItemFilter() != null && !getItemFilter().accept(item)) || mAdapter.contains(item)) {
+                continue;
             }
+            filteredItems.add(item);
+        }
+        if (startRange > 0) {
+            mAdapter.addAll(filteredItems);
         } else {
-            if (mBoxIteratorItems == null) {
-                setListItems(items);
-            }
-
-            mBoxIteratorItems = appendItems(mBoxIteratorItems, items);
-            mAdapter.addAll(items);
+            mItems = filteredItems;
+            mAdapter.setItems(mItems);
         }
 
-        // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-        if (items.fullSize() != null && mBoxIteratorItems.size() < items.fullSize()) {
-            // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
-            int multiplier = mBoxIteratorItems.size() / mLimit;
-            BoxRequestsSearch.Search incrementalSearchTask = mRequest
-                    .setOffset(multiplier * mLimit)
-                    .setLimit(mLimit);
-            mAdapter.add(new BoxListItem(incrementalSearchTask, ACTION_FUTURE_TASK));
-        }
         final int endRange = mAdapter.getItemCount();
 
         activity.runOnUiThread(new Runnable() {
@@ -107,24 +95,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         });
     }
 
-    private BoxIteratorItems appendItems(BoxIteratorItems target, BoxIteratorItems source) {
-        JsonValue sourceArray = source.toJsonObject().get(BoxIterator.FIELD_ENTRIES);
-        JsonObject targetJsonObject = target.toJsonObject();
-        JsonValue targetArray = targetJsonObject.get(BoxIterator.FIELD_ENTRIES);
-        if (targetArray == null || targetArray.isNull()) {
-            JsonArray jsonArray = new JsonArray();
-            targetJsonObject.set(BoxIterator.FIELD_ENTRIES, jsonArray);
-            target.createFromJson(targetJsonObject);
-            targetArray = jsonArray;
-        }
-        if (sourceArray != null) {
-            for (JsonValue value : sourceArray.asArray()) {
-                targetArray.asArray().add(value);
-            }
-        }
-        return new BoxIteratorItems(targetJsonObject);
-
-    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -141,29 +111,24 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     private void onItemsFetched(BoxResponseIntent intent) {
-        checkConnectivity();
-
-        if (mAdapter == null) {
-            return;
-        }
-
-        // On failure updates the existing loading item with an error item
-        if (!intent.isSuccess()) {
-            BoxListItem item = mAdapter.get(intent.getAction());
-            if (item != null) {
-                item.setResponse(intent);
-                item.setState(BoxListItem.State.ERROR);
-                mAdapter.update(intent.getAction());
-            }
-            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_performing_search), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // On success should remove the existing loading item
-        mAdapter.remove(intent.getAction());
+//        // On failure updates the existing loading item with an error item
+//        if (!intent.isSuccess()) {
+//            checkConnectivity();
+//            BoxListItem item = mAdapter.get(intent.getAction());
+//            if (item != null) {
+//                item.setResponse(intent);
+//                item.setState(BoxListItem.State.ERROR);
+//                mAdapter.update(intent.getAction());
+//            }
+//            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_performing_search), Toast.LENGTH_LONG).show();
+//            return;
+//        }
+//
+//        // On success should remove the existing loading item
+//        mAdapter.remove(intent.getAction());
         if (intent.getResult() instanceof BoxIteratorItems) {
-            BoxIteratorItems collection = (BoxIteratorItems) intent.getResult();
-            updateItems(collection);
+            ArrayList<BoxItem> items = ((BoxIteratorItems) intent.getResult()).getEntries();
+            updateItems(items);
         }
         mSwipeRefresh.setRefreshing(false);
     }

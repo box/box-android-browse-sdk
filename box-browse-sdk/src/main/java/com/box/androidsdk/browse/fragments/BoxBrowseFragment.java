@@ -32,12 +32,10 @@ import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.service.CompletionListener;
-import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.utils.SdkUtils;
@@ -71,8 +69,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
     public static final String ACTION_FUTURE_TASK = "com.box.androidsdk.browse.FUTURE_TASK";
 
+    protected ArrayList<BoxItem> mItems;
     protected BoxSession mSession;
-    protected BoxIteratorItems mBoxIteratorItems;
 
     protected OnItemClickListener mListener;
     protected OnSecondaryActionListener mSecondaryActionListener;
@@ -133,7 +131,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
-            setListItems((BoxIteratorItems) savedInstanceState.getSerializable(EXTRA_COLLECTION));
+            mItems = (ArrayList<BoxItem>) savedInstanceState.getSerializable(EXTRA_COLLECTION);
             if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)) {
                 mSecondaryActionListener = (OnSecondaryActionListener) savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
             }
@@ -162,7 +160,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(EXTRA_COLLECTION, mBoxIteratorItems);
+        outState.putSerializable(EXTRA_COLLECTION, mItems);
         outState.putSerializable(EXTRA_TITLE, mTitle);
         if (mSecondaryActionListener instanceof Serializable) {
             outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable) mSecondaryActionListener);
@@ -217,20 +215,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
 
-        if (mBoxIteratorItems == null) {
+        if (mItems == null) {
             mProgress.setVisibility(View.VISIBLE);
             loadItems();
         } else {
-            updateItems(mBoxIteratorItems);
+            updateItems(mItems);
         }
         return mRootView;
     }
 
     protected abstract void loadItems();
-
-    protected void setListItems(final BoxIteratorItems items) {
-        mBoxIteratorItems = items;
-    }
 
     private void updateUI() {
         final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
@@ -342,25 +336,27 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     /**
      * Updates the list of items that the adapter is bound to
      */
-    protected void updateItems(final BoxIteratorItems items) {
+    protected void updateItems(final ArrayList<BoxItem> items) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
             return;
         }
+
         mProgress.setVisibility(View.GONE);
         mSwipeRefresh.setRefreshing(false);
-        if (items == mBoxIteratorItems) {
-            // if we are trying to display the original list no need to add.
-            if (mAdapter.getItemCount() <= 0) {
-                mAdapter.addAll(items);
-            }
-            return;
-        }
 
-        // Because we are always retrieving a folder with all items, we want to replace everything
+        ArrayList<BoxItem> filteredItems = new ArrayList<BoxItem>();
+        for (BoxItem item : items) {
+            if (getItemFilter() != null && !getItemFilter().accept(item)) {
+                continue;
+            }
+            filteredItems.add(item);
+        }
+        mItems = filteredItems;
+
+        // Accounts for the deletion case where the original adapter size is larger than the new size
         final int oldCount = mAdapter.getItemCount();
-        mAdapter.removeAll();
-        mAdapter.addAll(items);
+        mAdapter.setItems(mItems);
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -376,13 +372,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
      */
     protected void onDownloadedThumbnail(final BoxResponseIntent intent) {
         if (mAdapter != null) {
-            BoxListItem item = mAdapter.get(((BoxRequestsFile.DownloadThumbnail) intent.getRequest()).getId());
-            if (item != null) {
-                item.setResponse(intent);
-                if (intent.isSuccess()) {
-                    mAdapter.update(item.getIdentifier());
-                }
-            }
+            int index = mAdapter.indexOf(((BoxRequestsFile.DownloadThumbnail)intent.getRequest()).getId());
+            mAdapter.notifyItemChanged(index);
         }
     }
 
@@ -474,8 +465,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             int totalItemCount = mItemAdapter.get().getItemCount();
             if (mSelectedItems.size() < totalItemCount) {
                 int originalSize = mSelectedItems.size();
-                for (BoxListItem item : mItemAdapter.get().getItems()) {
-                    BoxItem boxItem = item.getBoxItem();
+                for (BoxItem boxItem : mItemAdapter.get().getItems()) {
                     if (boxItem != null && isSelectable(boxItem) && !isItemSelected(boxItem)) {
                         mSelectedItems.add(boxItem);
                         handleItemSelected(boxItem, true, this);

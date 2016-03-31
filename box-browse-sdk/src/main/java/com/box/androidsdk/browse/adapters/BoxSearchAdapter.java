@@ -31,10 +31,10 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-            if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
+            if (holder.getItem() == null || holder.getItem() == null) {
                 return;
             }
-            final BoxItem item = holder.getItem().getBoxItem();
+            final BoxItem item = holder.getItem();
             holder.getNameView().setText(item.getName());
             holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
             getThumbanilManager().setThumbnailIntoView(holder.getThumbView(), item);

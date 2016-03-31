@@ -6,8 +6,6 @@ import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,29 +21,22 @@ import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.uidata.BoxListItem;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
-import com.box.androidsdk.content.BoxException;
-import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsFile;
 
 import java.io.FileNotFoundException;
-import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
     private final Context mContext;
     private final BrowseController mController;
     private final OnInteractionListener mListener;
-    protected ArrayList<BoxListItem> mListItems = new ArrayList<BoxListItem>();
-    protected HashMap<String, BoxListItem> mItemsMap = new HashMap<String, BoxListItem>();
+    protected ArrayList<BoxItem> mItems = new ArrayList<BoxItem>();
+    protected HashMap<String, Integer> mItemsPositionMap = new HashMap<String, Integer>();
     private BoxItemFilter mBoxItemFilter;
     private ThumbnailManager mThumbnailManager;
 
@@ -67,41 +58,41 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     @Override
     public void onBindViewHolder(BoxItemViewHolder boxItemHolder, int i) {
-        BoxListItem item = mListItems.get(i);
-        if (item.getState() == BoxListItem.State.ERROR) {
-            boxItemHolder.setError(item);
-            return;
-        }
+        BoxItem item = mItems.get(i);
+//        if (item.getState() == BoxListItem.State.ERROR) {
+//            boxItemHolder.setError(item);
+//            return;
+//        }
         boxItemHolder.bindItem(item);
 
-        // Fetch thumbnails for media file types
-        if (item.getBoxItem() instanceof BoxFile && ThumbnailManager.isThumbnailAvailable(item.getBoxItem())) {
-            if (item.getRequest() == null) {
-                BoxRequestsFile.DownloadThumbnail req = mController.getThumbnailRequest(item.getBoxItem().getId(),
-                        getThumbanilManager().getThumbnailForFile(item.getBoxItem().getId()), mContext.getResources());
-                item.setRequest(req);
-            } else if (item.getResponse() != null) {
-                BoxException ex = (BoxException) item.getResponse().getException();
-                if (ex != null && ex.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-                    item.setState(BoxListItem.State.CREATED);
-                }
-            }
-        }
-
-        // Execute a request if it hasn't been done so already
-        if (item.getRequest() != null && item.getState() == BoxListItem.State.CREATED) {
-            item.setState(BoxListItem.State.SUBMITTED);
-            mController.execute(item.getRequest());
-            if (item.getIdentifier().equals(BoxBrowseFragment.ACTION_FUTURE_TASK)) {
-                boxItemHolder.setLoading();
-            }
-            return;
-        }
+//        // Fetch thumbnails for media file types
+//        if (item instanceof BoxFile && ThumbnailManager.isThumbnailAvailable(item)) {
+//            if (item.getRequest() == null) {
+//                BoxRequestsFile.DownloadThumbnail req = mController.getThumbnailRequest(item.getBoxItem().getId(),
+//                        getThumbanilManager().getThumbnailForFile(item.getBoxItem().getId()), mContext.getResources());
+//                item.setRequest(req);
+//            } else if (item.getResponse() != null) {
+//                BoxException ex = (BoxException) item.getResponse().getException();
+//                if (ex != null && ex.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+//                    item.setState(BoxListItem.State.CREATED);
+//                }
+//            }
+//        }
+//
+//        // Execute a request if it hasn't been done so already
+//        if (item.getRequest() != null && item.getState() == BoxListItem.State.CREATED) {
+//            item.setState(BoxListItem.State.SUBMITTED);
+//            mController.execute(item.getRequest());
+//            if (item.getIdentifier().equals(BoxBrowseFragment.ACTION_FUTURE_TASK)) {
+//                boxItemHolder.setLoading();
+//            }
+//            return;
+//        }
     }
 
     @Override
     public int getItemCount() {
-        return mListItems.size();
+        return mItems != null ? mItems.size() : 0;
     }
 
     @Override
@@ -109,72 +100,60 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return super.getItemViewType(position);
     }
 
-    public BoxListItem get(String id) {
-        return mItemsMap.get(id);
+
+    public synchronized void setItems(ArrayList<BoxItem> items) {
+        mItemsPositionMap.clear();
+        mItems = items;
+        for (int i = 0; i < mItems.size(); ++i) {
+            mItemsPositionMap.put(mItems.get(i).getId(), i);
+        }
+    }
+
+    public boolean contains(BoxItem item) {
+        return mItemsPositionMap.containsKey(item.getId());
     }
 
     public synchronized void removeAll() {
-        mItemsMap.clear();
-        mListItems.clear();
+        mItemsPositionMap.clear();
+        mItems.clear();
     }
 
-    public void remove(BoxListItem listItem) {
-        remove(listItem.getIdentifier());
-    }
-
-    public synchronized void remove(String key) {
-        BoxListItem item = mItemsMap.remove(key);
-        if (item != null) {
-            int index = item.getPosition() != null ?
-                    item.getPosition().intValue() :
-                    mListItems.indexOf(item);
-            mListItems.remove(index);
-            this.notifyItemRemoved(index);
+    public synchronized int remove(BoxItem item) {
+        if (item == null || !mItemsPositionMap.containsKey(item.getId())) {
+            return -1;
         }
+        int index = mItemsPositionMap.get(item.getId());
+        mItems.remove(index);
+        return index;
     }
 
-    public void addAll(BoxIteratorItems items) {
+    public void addAll(ArrayList<BoxItem> items) {
         for (BoxItem item : items) {
-            if (!mItemsMap.containsKey(item.getId())) {
-                add(new BoxListItem(item, item.getId()));
-            } else {
-                // update an existing item if it exists.
-                mItemsMap.get(item.getId()).setBoxItem(item);
-            }
+            add(item);
         }
     }
 
-    public synchronized void add(BoxListItem listItem) {
-        if (listItem.getBoxItem() != null) {
-            //Filter out item if necessary
-            if (mBoxItemFilter != null && !mBoxItemFilter.accept(listItem.getBoxItem())) {
-                return;
-            }
-        }
-        mListItems.add(listItem);
-        listItem.setPosition(mListItems.size() - 1);
-        mItemsMap.put(listItem.getIdentifier(), listItem);
+    public synchronized void add(BoxItem item) {
+        mItems.add(item);
+        mItemsPositionMap.put(item.getId(), mItems.size() - 1);
     }
 
-    public void update(String id) {
-        BoxListItem item = mItemsMap.get(id);
-        if (item != null) {
-            int index = item.getPosition() != null ?
-                    item.getPosition() :
-                    mListItems.indexOf(item);
-            notifyItemChanged(index);
+    public int update(BoxItem item) {
+        if (item == null || !mItemsPositionMap.containsKey(item.getId())) {
+            return -1;
         }
+
+        int index = mItemsPositionMap.get(item.getId());
+        mItems.set(index, item);
+        return index;
     }
 
-    public void update(BoxItem item) {
-        BoxListItem listItem = mItemsMap.get(item.getId());
-        if (listItem != null) {
-            listItem.setBoxItem(item);
-            int index = listItem.getPosition() != null ?
-                    listItem.getPosition() :
-                    mListItems.indexOf(listItem);
-            notifyItemChanged(index);
+    public int indexOf(String id) {
+        if (!mItemsPositionMap.containsKey(id)) {
+            return -1;
         }
+
+        return mItemsPositionMap.get(id);
     }
 
     protected ThumbnailManager getThumbanilManager() {
@@ -188,13 +167,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return mThumbnailManager;
     }
 
-    public List<BoxListItem> getItems() {
-        return mListItems;
+    public ArrayList<BoxItem> getItems() {
+        return mItems;
     }
 
 
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        BoxListItem mItem;
+        BoxItem mItem;
 
         View mView;
         ImageView mThumbView;
@@ -224,15 +203,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             setAccentColor(mContext.getResources(), mProgressBar);
         }
 
-        public void bindItem(BoxListItem item) {
+        public void bindItem(BoxItem item) {
             mItem = item;
-            mSecondaryClickListener.setListItem(item);
+            mSecondaryClickListener.setListItem(mItem);
             onBindBoxItemViewHolder(this);
         }
 
 
         /**
-         * Called when a {@link BoxListItem} is bound to a ViewHolder. Customizations of UI elements
+         * Called when a {@link BoxItem} is bound to a ViewHolder. Customizations of UI elements
          * should be done by overriding this method. If extending from a {@link BoxBrowseActivity}
          * a custom BoxBrowseFolder fragment can be returned in
          * {@link BoxBrowseActivity#createBrowseFolderFragment(BoxItem, BoxSession)}
@@ -240,11 +219,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
          * @param holder the BoxItemHolder
          */
         protected void onBindBoxItemViewHolder(BoxItemAdapter.BoxItemViewHolder holder) {
-            if (holder.getItem() == null || holder.getItem().getBoxItem() == null) {
+            if (holder.getItem() == null) {
                 return;
             }
 
-            final BoxItem item = holder.getItem().getBoxItem();
+            final BoxItem item = holder.getItem();
             holder.getNameView().setText(item.getName());
             String description = "";
             if (item != null) {
@@ -261,17 +240,17 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
-            if (!holder.getItem().getIsEnabled()) {
-                holder.getView().setEnabled(false);
-                holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
-                holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_disabled_hint));
-                holder.getThumbView().setAlpha(0.26f);
-            } else {
+//            if (!holder.getItem().getIsEnabled()) {
+//                holder.getView().setEnabled(false);
+//                holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
+//                holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_disabled_hint));
+//                holder.getThumbView().setAlpha(0.26f);
+//            } else {
                 holder.getView().setEnabled(true);
                 holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_primary_text));
                 holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
                 holder.getThumbView().setAlpha(1f);
-            }
+//            }
             if (mListener.getOnSecondaryActionListener() != null) {
                 holder.getSecondaryAction().setVisibility(View.VISIBLE);
             } else {
@@ -289,9 +268,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         }
 
-        public void setError(BoxListItem item) {
-            mItem = item;
-            mItem.setState(BoxListItem.State.ERROR);
+        public void setError() {
+//            mItem = item;
+//            mItem.setState(BoxListItem.State.ERROR);
 
             mThumbView.setImageResource(R.drawable.ic_box_browsesdk_refresh_grey_36dp);
             mThumbView.setVisibility(View.VISIBLE);
@@ -352,7 +331,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
 
-        public BoxListItem getItem() {
+        public BoxItem getItem() {
             return mItem;
         }
 
@@ -381,7 +360,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         public boolean onLongClick(View v) {
             if (mListener.getMultiSelectHandler() != null) {
                 mListener.getMultiSelectHandler().setEnabled(!mListener.getMultiSelectHandler().isEnabled());
-                mListener.getMultiSelectHandler().toggle(mItem.getBoxItem());
+                mListener.getMultiSelectHandler().toggle(mItem);
                 return true;
             }
             return false;
@@ -390,7 +369,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         @Override
         public void onClick(View v) {
             if (mListener.getMultiSelectHandler() != null && mListener.getMultiSelectHandler().isEnabled()) {
-                mListener.getMultiSelectHandler().toggle(mItem.getBoxItem());
+                mListener.getMultiSelectHandler().toggle(mItem);
                 onBindBoxItemViewHolder(this);
                 return;
             }
@@ -402,14 +381,14 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 return;
             }
 
-            if (mItem.getState() == BoxListItem.State.ERROR) {
-                mItem.setState(BoxListItem.State.SUBMITTED);
-                mController.execute(mItem.getRequest());
-                setLoading();
-            }
+//            if (mItem.getState() == BoxListItem.State.ERROR) {
+//                mItem.setState(BoxListItem.State.SUBMITTED);
+//                mController.execute(mItem.getRequest());
+//                setLoading();
+//            }
 
             if (mListener != null) {
-                mListener.getOnItemClickListener().onItemClick(mItem.getBoxItem());
+                mListener.getOnItemClickListener().onItemClick(mItem);
 
             }
         }
@@ -428,15 +407,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     private class BoxItemClickListener implements View.OnClickListener {
 
-        protected BoxListItem mBoxListItem;
+        protected BoxItem mItem;
 
-        void setListItem(BoxListItem listItem) {
-            mBoxListItem = listItem;
+        void setListItem(BoxItem item) {
+            mItem = item;
         }
 
         @Override
         public void onClick(View v) {
-            mListener.getOnSecondaryActionListener().onSecondaryAction(mBoxListItem.getBoxItem());
+            mListener.getOnSecondaryActionListener().onSecondaryAction(mItem);
         }
     }
 
