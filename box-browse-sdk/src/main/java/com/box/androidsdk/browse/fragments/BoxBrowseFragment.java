@@ -55,8 +55,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         BoxItemAdapter.OnInteractionListener {
     public static final String TAG = BoxBrowseFragment.class.getName();
 
-    protected static final int DEFAULT_LIMIT = 200;
-
     protected static final String ARG_ID = "argId";
     protected static final String ARG_USER_ID = "argUserId";
     protected static final String ARG_NAME = "argName";
@@ -80,7 +78,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected RecyclerView mItemsView;
     protected SwipeRefreshLayout mSwipeRefresh;
     protected ProgressBar mProgress;
-    protected int mLimit = DEFAULT_LIMIT;
 
     private String mTitle;
     private boolean mWaitingForConnection;
@@ -127,7 +124,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
                 throw new IllegalArgumentException("A valid session or user id must be provided");
             }
             mSession = new BoxSession(getActivity(), userId);
-            mLimit = getArguments().getInt(ARG_LIMIT);
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
@@ -603,15 +599,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         protected void setUserId(String userId) {
             mArgs.putString(ARG_USER_ID, userId);
-        }
-
-        /**
-         * Set the number of items that the results will be limited to when retrieving folder items
-         *
-         * @param limit
-         */
-        public void setLimit(int limit) {
-            mArgs.putInt(ARG_LIMIT, limit);
         }
 
         /**

@@ -25,22 +25,21 @@ import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 
-import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
-    private final Context mContext;
-    private final BrowseController mController;
-    private final OnInteractionListener mListener;
+    protected final Context mContext;
+    protected final BrowseController mController;
+    protected final OnInteractionListener mListener;
     protected ArrayList<BoxItem> mItems = new ArrayList<BoxItem>();
     protected HashMap<String, Integer> mItemsPositionMap = new HashMap<String, Integer>();
     private BoxItemFilter mBoxItemFilter;
     private ThumbnailManager mThumbnailManager;
 
-    protected int ITEM_VIEW_TYPE = 1;
+    protected int BOX_ITEM_VIEW_TYPE = 0;
 
     public BoxItemAdapter(Context context, BoxItemFilter boxItemFilter, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -97,7 +96,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     @Override
     public int getItemViewType(int position) {
-        return super.getItemViewType(position);
+        return BOX_ITEM_VIEW_TYPE;
     }
 
 
@@ -118,11 +117,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         mItems.clear();
     }
 
-    public synchronized int remove(BoxItem item) {
-        if (item == null || !mItemsPositionMap.containsKey(item.getId())) {
+    public int remove(BoxItem item) {
+        if (item == null) {
             return -1;
         }
-        int index = mItemsPositionMap.get(item.getId());
+        return remove(item.getId());
+    }
+
+    public synchronized int remove(String id) {
+        if (!mItemsPositionMap.containsKey(id)) {
+            return -1;
+        }
+        int index = mItemsPositionMap.get(id);
         mItems.remove(index);
         return index;
     }
@@ -154,17 +160,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         return mItemsPositionMap.get(id);
-    }
-
-    protected ThumbnailManager getThumbanilManager() {
-        if (mThumbnailManager == null) {
-            try {
-                mThumbnailManager = new ThumbnailManager(mController.getThumbnailCacheDir());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-        return mThumbnailManager;
     }
 
     public ArrayList<BoxItem> getItems() {
@@ -234,7 +229,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                         localFileSizeToDisplay(item.getSize()) :
                         "";
                 description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
-                getThumbanilManager().setThumbnailIntoView(holder.getThumbView(), item);
+                mController.getThumbnailManager().loadThumbnail(item, holder.getThumbView());
             }
             holder.getMetaDescription().setText(description);
             holder.getProgressBar().setVisibility(View.GONE);
@@ -266,25 +261,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 holder.getCheckBox().setVisibility(View.GONE);
             }
 
-        }
-
-        public void setError() {
-//            mItem = item;
-//            mItem.setState(BoxListItem.State.ERROR);
-
-            mThumbView.setImageResource(R.drawable.ic_box_browsesdk_refresh_grey_36dp);
-            mThumbView.setVisibility(View.VISIBLE);
-            mProgressBar.setVisibility(View.GONE);
-            mMetaDescription.setVisibility(View.VISIBLE);
-            mNameView.setText(mContext.getResources().getString(R.string.box_browsesdk_error_retrieving_items));
-            mMetaDescription.setText(mContext.getResources().getString(R.string.box_browsesdk_tap_to_retry));
-        }
-
-        public void setLoading() {
-            mThumbView.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.VISIBLE);
-            mMetaDescription.setVisibility(View.GONE);
-            mNameView.setText(mContext.getResources().getString(R.string.boxsdk_Please_wait));
         }
 
         /**

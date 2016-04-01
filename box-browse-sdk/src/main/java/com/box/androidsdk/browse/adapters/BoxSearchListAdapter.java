@@ -7,7 +7,6 @@ import android.database.MatrixCursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.widget.ResourceCursorAdapter;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,17 +18,13 @@ import android.widget.TextView;
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
-import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
-import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxJsonObject;
-import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
-import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
@@ -38,7 +33,6 @@ import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -51,18 +45,12 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
     private static final String TAG = BoxSearchListAdapter.class.getName();
     private Handler mHandler;
-    private ThumbnailManager mThumbnailManager;
     private OnBoxSearchListener mOnBoxSearchListener;
     public static int DEFAULT_MAX_SUGGESTIONS = 9;
 
     public BoxSearchListAdapter(Context context, int layout, int flags){
         super(context, layout, new BoxSearchCursor(null, ""), flags);
         mHandler = new Handler(Looper.getMainLooper());
-        try {
-            mThumbnailManager = new ThumbnailManager(context.getCacheDir());
-        } catch (Exception e){
-
-        }
     }
 
     @Override
@@ -140,14 +128,14 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             public Intent call() throws Exception {
                 Intent intent = new Intent();
                 try {
-                    controller.getThumbnailRequest(fileId, downloadLocation, holder.icon.getResources()).send();
+                    controller.getThumbnailRequest(fileId, downloadLocation).send();
                     if (downloadLocation.exists()) {
                         if (holder.boxItem == null || !(holder.boxItem instanceof BoxFile)
                                 || !holder.boxItem.getId().equals(fileId)) {
                             return intent;
                         }
                         else {
-                            mThumbnailManager.setThumbnailIntoView(holder.icon, holder.boxItem);
+                            controller.getThumbnailManager().setThumbnailIntoView(holder.icon, holder.boxItem);
                         }
                     }
                 } catch (BoxException e) {
@@ -184,9 +172,9 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
                     holder.description.setText(((BoxSearchCursor) cursor).getPath());
                     BoxItem item = ((BoxSearchCursor) cursor).getBoxItem();
                     holder.boxItem = item;
-                    mThumbnailManager.setThumbnailIntoView(holder.icon, item);
+                    getController().getThumbnailManager().setThumbnailIntoView(holder.icon, item);
                     if (ThumbnailManager.isThumbnailAvailable(item) && getController() != null) {
-                        getThumbnailApiExecutor().execute(downloadThumbnail(getController(),item.getId(),mThumbnailManager.getThumbnailForFile(item.getId()), holder));
+                        getThumbnailApiExecutor().execute(downloadThumbnail(getController(),item.getId(),getController().getThumbnailManager().getThumbnailForFile(item.getId()), holder));
                     }
                     holder.progressBar.setVisibility(View.INVISIBLE);
                     holder.icon.setVisibility(View.VISIBLE);

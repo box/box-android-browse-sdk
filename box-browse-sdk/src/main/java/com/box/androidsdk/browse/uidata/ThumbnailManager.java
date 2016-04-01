@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -20,9 +21,13 @@ import android.os.Looper;
 import android.widget.ImageView;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxBookmark;
+import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 
@@ -37,6 +42,7 @@ public class ThumbnailManager {
 
     /** The extension added for thumbnails in this manager. */
     private static final String THUMBNAIL_FILE_EXTENSION = ".boxthumbnail";
+    private final BrowseController mController;
 
     /** The path where files in thumbnail should be stored. */
     private File mCacheDirectory;
@@ -45,7 +51,7 @@ public class ThumbnailManager {
     private Handler mHandler;
     
     /** Executor that we will submit our set thumbnail tasks to. */
-    private ThreadPoolExecutor thumbnailManagerExecutor;
+    private ThreadPoolExecutor thumbnailRequestExecutor;
 
     private final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
 
@@ -121,27 +127,19 @@ public class ThumbnailManager {
 
     }
 
-    /**
-     * Constructor.
-     * 
-     * @param cacheDirectoryPath
-     *            the directory to store thumbnail images.
-     * @throws java.io.FileNotFoundException
-     *             thrown if the directory given does not exist and cannot be created.
-     */
-    public ThumbnailManager(final String cacheDirectoryPath) throws FileNotFoundException {
-        this(new File(cacheDirectoryPath));
-    }
 
     /**
      * Constructor.
      * 
+     *
+     * @param controller
      * @param cacheDirectory
      *            a file representing the directory to store thumbnail images.
      * @throws java.io.FileNotFoundException
      *             thrown if the directory given does not exist and cannot be created.
      */
-    public ThumbnailManager(final File cacheDirectory) throws FileNotFoundException {
+    public ThumbnailManager(BrowseController controller, final File cacheDirectory) throws FileNotFoundException {
+        mController = controller;
         mCacheDirectory = cacheDirectory;
         mCacheDirectory.mkdirs();
         if (!mCacheDirectory.exists() || !mCacheDirectory.isDirectory()) {
@@ -165,7 +163,7 @@ public class ThumbnailManager {
     public void setThumbnailIntoView(final ImageView icon, final BoxItem boxItem) {
         final WeakReference<ImageView> iconHolder = new WeakReference<ImageView>(icon);
         final Resources res = icon.getResources();
-        getThumbnailExecutor().execute(new Runnable() {
+        getRequestExecutor().execute(new Runnable() {
 
             public void run() {
                 setThumbnail(iconHolder.get(), getDefaultIconResource(boxItem));
@@ -328,18 +326,35 @@ public class ThumbnailManager {
         }
         return false;
     }
-  
+
+
+    WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
+
+    public void loadThumbnail(final BoxItem item, final ImageView target) {
+        setThumbnail(target, getDefaultIconResource(item));
+        if (item instanceof BoxFile && isThumbnailAvailable(item)) {
+            BoxFutureTask task = mTargetToTask.remove(target);
+            if (task != null) {
+                task.cancel(false);
+            }
+
+            BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), getThumbnailForFile(item.getId()));
+            BoxFutureTask loadTask = BoxThumbnailLoader.create(request, target);
+            mTargetToTask.put(target, loadTask);
+            getRequestExecutor().execute(loadTask);
+        }
+    }
 
     /**
      * Executor that we will submit our set thumbnail tasks to.
      * 
      * @return executor
      */
-    private ThreadPoolExecutor getThumbnailExecutor() {
-        if (thumbnailManagerExecutor == null || thumbnailManagerExecutor.isShutdown()) {
-            thumbnailManagerExecutor = new ThreadPoolExecutor(4, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private ThreadPoolExecutor getRequestExecutor() {
+        if (thumbnailRequestExecutor == null || thumbnailRequestExecutor.isShutdown()) {
+            thumbnailRequestExecutor = new ThreadPoolExecutor(4, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         }
-        return thumbnailManagerExecutor;
+        return thumbnailRequestExecutor;
     }
 
 }

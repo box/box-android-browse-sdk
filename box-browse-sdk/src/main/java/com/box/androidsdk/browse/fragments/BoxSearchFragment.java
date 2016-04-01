@@ -12,6 +12,7 @@ import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.box.androidsdk.content.requests.BoxResponse;
 
 import java.util.ArrayList;
 
@@ -21,14 +22,22 @@ import java.util.ArrayList;
  */
 public class BoxSearchFragment extends BoxBrowseFragment {
     private static final String OUT_ITEM = "outItem";
+    private static final String OUT_OFFSET = "outOffset";
+    private static final int DEFAULT_LIMIT = 200;
 
     private static BoxRequestsSearch.Search mRequest;
+    private int mOffset = 0;
+    private int mLimit;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
             mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
+            mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
+        }
+        if (savedInstanceState != null) {
+            mOffset = savedInstanceState.getInt(OUT_OFFSET);
         }
     }
 
@@ -50,8 +59,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
+        mOffset = 0;
         mRequest.setLimit(mLimit)
-                .setOffset(0);
+                .setOffset(mOffset);
         getController().execute(mRequest);
     }
 
@@ -95,10 +105,10 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         });
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(OUT_ITEM, mRequest);
+        outState.putInt(OUT_OFFSET, mOffset);
         super.onSaveInstanceState(outState);
     }
 
@@ -106,11 +116,15 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     protected void handleResponse(BoxResponseIntent intent) {
         super.handleResponse(intent);
         if (intent.getAction().equals(BoxRequestsSearch.Search.class.getName())) {
-            onItemsFetched(intent);
+            onItemsFetched(intent.getResponse());
         }
     }
 
-    private void onItemsFetched(BoxResponseIntent intent) {
+    private void onItemsFetched(BoxResponse response) {
+        if (!response.isSuccess()) {
+            checkConnectivity();
+            return;
+        }
 //        // On failure updates the existing loading item with an error item
 //        if (!intent.isSuccess()) {
 //            checkConnectivity();
@@ -126,9 +140,20 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 //
 //        // On success should remove the existing loading item
 //        mAdapter.remove(intent.getAction());
-        if (intent.getResult() instanceof BoxIteratorItems) {
-            ArrayList<BoxItem> items = ((BoxIteratorItems) intent.getResult()).getEntries();
-            updateItems(items);
+
+        if (response.getResult() instanceof BoxIteratorItems) {
+            BoxIteratorItems items = (BoxIteratorItems) response.getResult();
+            updateItems(items.getEntries());
+
+            mOffset += items.size();
+            // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
+            if (items.fullSize() != null && mOffset < items.fullSize()) {
+                // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
+                BoxRequestsSearch.Search incrementalSearchTask = mRequest
+                        .setOffset(mOffset)
+                        .setLimit(mLimit);
+                ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
+            }
         }
         mSwipeRefresh.setRefreshing(false);
     }
@@ -146,8 +171,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mRequest = searchRequest;
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putSerializable(OUT_ITEM, mRequest);
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
-
         }
 
         /**
@@ -158,6 +181,17 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putSerializable(OUT_ITEM, mRequest);
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+        }
+
+
+        /**
+         * Set the number of items that the results will be limited to when retrieving search results
+         *
+         * @param limit
+         */
+        public BoxSearchFragment.Builder setLimit(int limit) {
+            mArgs.putInt(ARG_LIMIT, limit);
+            return this;
         }
 
         @Override

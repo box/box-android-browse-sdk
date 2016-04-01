@@ -128,7 +128,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         public Builder(String folderId, String userId) {
             mArgs.putString(ARG_ID, folderId);
             mArgs.putString(ARG_USER_ID, userId);
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
 
         }
 
@@ -139,7 +138,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         public Builder(BoxFolder folder, BoxSession session) {
             mArgs.putString(ARG_ID, folder.getId());
             mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
         }
 
         /**
