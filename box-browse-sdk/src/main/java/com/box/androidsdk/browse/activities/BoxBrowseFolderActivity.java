@@ -112,6 +112,9 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         initToolbar();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1) {
             onItemClick(mItem);
+            if (mItem instanceof BoxFolder) {
+                getSupportActionBar().setTitle(mItem.getName());
+            }
         }
         mSelectFolderButton.setEnabled(true);
 
@@ -160,6 +163,7 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
     public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
         // Search will be limited to folders only.
         searchRequest.limitType(BoxFolder.TYPE);
+        getSupportActionBar().setTitle(searchRequest.getQuery());
         return super.onSearchRequested(searchRequest);
     }
 

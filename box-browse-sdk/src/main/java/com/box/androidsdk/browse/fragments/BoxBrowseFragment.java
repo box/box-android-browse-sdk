@@ -15,8 +15,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
@@ -49,6 +47,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Base fragment for displaying box items. This class provides the internals needed to make requests
@@ -89,6 +88,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
     private BrowseController mController;
+    private Set<OnUpdateListener> mUpdateListeners = new HashSet<OnUpdateListener>();
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -171,24 +171,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             outState.putSerializable(EXTRA_MULTI_SELECT_HANDLER, (Serializable) mMultiSelectHandler);
         }
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            setToolbar(savedInstanceState.getString(EXTRA_TITLE));
-        }
-    }
-
-    protected void setToolbar(String name) {
-        mTitle = name;
-        if (getActivity() != null && getActivity() instanceof AppCompatActivity) {
-            ActionBar toolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (toolbar != null) {
-                toolbar.setTitle(mTitle);
-            }
-        }
     }
 
     protected void handleResponse(BoxResponseIntent intent) {
@@ -367,7 +349,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
         mProgress.setVisibility(View.GONE);
         mSwipeRefresh.setRefreshing(false);
-
         if (items == mBoxIteratorItems) {
             // if we are trying to display the original list no need to add.
             if (mAdapter.getItemCount() <= 0) {
@@ -538,6 +519,37 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
 
+    }
+
+    public void addOnUpdateListener(OnUpdateListener updateListener) {
+        synchronized (mUpdateListeners) {
+            mUpdateListeners.add(updateListener);
+        }
+
+    }
+
+    public void removeOnUpdateListener(OnUpdateListener updateListener) {
+        synchronized (mUpdateListeners) {
+            mUpdateListeners.remove(updateListener);
+        }
+
+    }
+
+    @Override
+    public void onDestroy() {
+        synchronized (mUpdateListeners) {
+            mUpdateListeners.clear();
+        }
+
+        super.onDestroy();
+    }
+
+    protected void notifyUpdateListeners() {
+        synchronized (mUpdateListeners) {
+            for (OnUpdateListener listener : mUpdateListeners) {
+                listener.onUpdate();
+            }
+        }
     }
 
     private class BoxItemDividerDecoration extends RecyclerView.ItemDecoration {

@@ -41,15 +41,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     @Override
-    public void onResume() {
-        if (getArguments() != null) {
-            String folderName = getArguments().getString(ARG_NAME);
-            setToolbar(folderName);
-        }
-        super.onResume();
-    }
-
-    @Override
     protected void handleResponse(BoxResponseIntent intent) {
         super.handleResponse(intent);
         if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
@@ -105,12 +96,12 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
             mFolder = responseFolder;
 
             if (mFolder != null) {
-                getArguments().putString(ARG_NAME, mFolder.getName());
-                this.setToolbar(mFolder.getName());
                 updateItems(mFolder.getItemCollection());
+                notifyUpdateListeners();
             }
         }
     }
+
 
     /**
      * Builder for constructing an instance of BoxBrowseFolderFragment

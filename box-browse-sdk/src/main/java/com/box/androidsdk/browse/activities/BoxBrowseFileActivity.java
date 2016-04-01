@@ -36,10 +36,12 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.box_browsesdk_activity_file);
+        initToolbar();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1){
             onBoxItemSelected(mItem);
+            getSupportActionBar().setTitle(mItem.getName());
         }
-        initToolbar();
+
     }
 
     @Override
