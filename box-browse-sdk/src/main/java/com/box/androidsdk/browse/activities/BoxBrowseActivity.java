@@ -4,10 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,12 +18,14 @@ import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.fragments.BoxSearchFragment;
+import com.box.androidsdk.browse.fragments.OnUpdateListener;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
@@ -47,6 +52,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private boolean mRestoreSearch;
     private String mSearchQuery;
     private BrowseController mController;
+    private OnUpdateListener mUpdateListener;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,10 +143,33 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * @return Browsing fragment that will be used to show the BoxItems
      */
     protected BoxBrowseFolderFragment createBrowseFolderFragment(final BoxItem folder, final BoxSession session) {
-        BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
+        final BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment.Builder((BoxFolder) folder, session).build();
+        if (mUpdateListener == null) {
+            mUpdateListener = new OnUpdateListener() {
+                @Override
+                public void onUpdate() {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            setTitle(getCurrentFolder());
+                        }
+                    });
+                }
+            };
+        }
+
+        fragment.addOnUpdateListener(mUpdateListener);
         return fragment;
     }
 
+
+    protected void setTitle(final BoxFolder folder) {
+        ActionBar actionbar = getSupportActionBar();
+        if (actionbar != null && folder != null) {
+            actionbar.setTitle(folder.getId() == BoxConstants.ROOT_FOLDER_ID
+                    ? getString(R.string.box_browsesdk_all_files) : folder.getName());
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

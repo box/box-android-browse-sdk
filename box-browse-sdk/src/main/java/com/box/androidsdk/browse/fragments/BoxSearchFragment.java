@@ -3,18 +3,14 @@ package com.box.androidsdk.browse.fragments;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
-import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.BoxListItem;
-import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
@@ -22,8 +18,6 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-
-import java.io.File;
 
 /**
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
@@ -39,7 +33,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
             mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
-            setToolbar(mRequest.getQuery());
         }
     }
 
@@ -51,11 +44,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     public void search(BoxRequestsSearch.Search request) {
-        setToolbar(request.getQuery());
         setListItems(new BoxIteratorItems());
         mAdapter.removeAll();
         loadItems();
         mAdapter.notifyDataSetChanged();
+        notifyUpdateListeners();
 
     }
 
