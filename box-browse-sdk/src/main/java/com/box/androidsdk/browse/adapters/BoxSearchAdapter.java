@@ -1,6 +1,7 @@
 package com.box.androidsdk.browse.adapters;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,15 +11,17 @@ import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
+import com.eclipsesource.json.JsonObject;
 
 import java.io.File;
 
 public class BoxSearchAdapter extends BoxItemAdapter {
 
+    public static final String LOAD_MORE_ID = "com.box.androidsdk.browse.LOAD_MORE";
     protected static final int LOAD_MORE_VIEW_TYPE = 1;
 
-    public BoxSearchAdapter(Context context, BoxItemFilter boxItemFilter, BrowseController controller, OnInteractionListener listener) {
-        super(context, boxItemFilter, controller, listener);
+    public BoxSearchAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
+        super(context, controller, listener);
     }
 
     @Override
@@ -45,7 +48,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     }
 
     public void addLoadMoreItem(BoxRequestsSearch.Search searchReq) {
-        this.add(new LoadMoreItem(searchReq));
+        this.add(LoadMoreItem.create(searchReq));
     }
 
     class SearchViewHolder extends BoxItemViewHolder {
@@ -61,7 +64,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
             final BoxItem item = holder.getItem();
             holder.getNameView().setText(item.getName());
             holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
-            mController.getThumbnailManager().setThumbnailIntoView(holder.getThumbView(), item);
+            mController.getThumbnailManager().loadThumbnail(item, holder.getThumbView());
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
@@ -75,24 +78,17 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-            super.onBindBoxItemViewHolder(holder);
             mController.execute(((LoadMoreItem) mItem).getRequest());
         }
 
         public void setError() {
+            // TODO: Should set error state
             mThumbView.setImageResource(R.drawable.ic_box_browsesdk_refresh_grey_36dp);
             mThumbView.setVisibility(View.VISIBLE);
             mProgressBar.setVisibility(View.GONE);
             mMetaDescription.setVisibility(View.VISIBLE);
             mNameView.setText(mContext.getResources().getString(R.string.box_browsesdk_error_retrieving_items));
             mMetaDescription.setText(mContext.getResources().getString(R.string.box_browsesdk_tap_to_retry));
-        }
-
-        public void setLoading() {
-            mThumbView.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.VISIBLE);
-            mMetaDescription.setVisibility(View.GONE);
-            mNameView.setText(mContext.getResources().getString(R.string.boxsdk_Please_wait));
         }
 
     }
@@ -105,13 +101,25 @@ public class BoxSearchAdapter extends BoxItemAdapter {
  */
 class LoadMoreItem extends BoxItem {
 
-    private final BoxRequestsSearch.Search mRequest;
+    private BoxRequestsSearch.Search mRequest;
 
-    public LoadMoreItem(BoxRequestsSearch.Search searchReq) {
-        mRequest = searchReq;
+    private LoadMoreItem(JsonObject obj) {
+        super(obj);
+    }
+
+    static LoadMoreItem create(BoxRequestsSearch.Search request) {
+        JsonObject object = new JsonObject();
+        object.add(BoxItem.FIELD_ID, BoxSearchAdapter.LOAD_MORE_ID);
+        LoadMoreItem ret = new LoadMoreItem(object);
+        ret.setRequest(request);
+        return ret;
     }
 
     public BoxRequestsSearch.Search getRequest() {
         return mRequest;
+    }
+
+    private void setRequest(BoxRequestsSearch.Search request) {
+        mRequest = request;
     }
 }

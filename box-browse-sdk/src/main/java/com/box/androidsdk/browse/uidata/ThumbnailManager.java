@@ -43,16 +43,18 @@ public class ThumbnailManager {
 
     /** The extension added for thumbnails in this manager. */
     private static final String THUMBNAIL_FILE_EXTENSION = ".boxthumbnail";
+
+    /** Controller used for all requests */
     private final BrowseController mController;
 
     /** The path where files in thumbnail should be stored. */
     private File mCacheDirectory;
-
-    /** Handler on ui thread */
-    private Handler mHandler;
     
     /** Executor that we will submit our set thumbnail tasks to. */
     private ThreadPoolExecutor thumbnailRequestExecutor;
+
+    /** Maps the target image view to the thumbnail task. Provides ability to cancel tasks */
+    WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
 
     private final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
 
@@ -146,77 +148,6 @@ public class ThumbnailManager {
         if (!mCacheDirectory.exists() || !mCacheDirectory.isDirectory()) {
             throw new FileNotFoundException();
         }
-        mHandler = new Handler(Looper.getMainLooper());
-    }
-
-    private void populateDefaultResourceMap(){
-
-    }
-
-    /**
-     * Sets the best known image for given item into the given view.
-     * 
-     * @param icon
-     *            view to set image for.
-     * @param boxItem
-     *            the BoxItem used to set the view.
-     */
-    public void setThumbnailIntoView(final ImageView icon, final BoxItem boxItem) {
-        final WeakReference<ImageView> iconHolder = new WeakReference<ImageView>(icon);
-        final Resources res = icon.getResources();
-        getRequestExecutor().execute(new Runnable() {
-
-            public void run() {
-                setThumbnail(iconHolder.get(), getDefaultIconResource(boxItem));
-                Bitmap cachedIcon = getCachedIcon(boxItem);
-
-                if (cachedIcon != null) {
-                    setThumbnail(iconHolder.get(), new BitmapDrawable(res, cachedIcon));
-                }
-            }
-        });
-
-    }
-
-    /**
-     * Set the given image resource into given view on ui thread.
-     * 
-     * @param icon
-     *            the ImageView to put drawable into.
-     * @param imageRes
-     *            the image resource to set into icon.
-     */
-    private void setThumbnail(final ImageView icon, final int imageRes) {
-        Log.d("ThumbnailManager", "Placeholder being set for: " + icon.hashCode());
-        mHandler.post(new Runnable() {
-
-            public void run() {
-                if (icon != null) {
-                    icon.setImageResource(imageRes);
-                }
-            }
-        });
-    }
-
-    /**
-     * Set the given drawable into given view on ui thread.
-     * 
-     * @param icon
-     *            the ImageView to put drawable into.
-     * @param drawable
-     *            the drawable to set into icon.
-     */
-    private void setThumbnail(final ImageView icon, final Drawable drawable) {
-        mHandler.post(new Runnable() {
-
-            public void run() {
-                if (icon != null) {
-                    icon.setImageDrawable(drawable);
-
-                }
-            }
-        });
-
     }
 
     /**
@@ -249,34 +180,6 @@ public class ThumbnailManager {
             }
             return R.drawable.ic_box_browsesdk_other;
         }
-    }
-
-    /**
-     * Gets a bitmap for the item if one exists.
-     * 
-     * @param boxItem
-     *            The box item to show to user.
-     * @return an integer resource.
-     */
-    private Bitmap getCachedIcon(final BoxItem boxItem) {
-        File file = getCachedFile(boxItem);
-        if (file.exists() && file.isFile()) {
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            return bitmap;
-        }
-        return null;
-    }
-
-    /**
-     * Returns a file in a determinate location for the given boxItem.
-     * 
-     * @param boxItem
-     *            the box item to generate file or get file for.
-     * @return a File object where the icon is located or written to if non existent.
-     */
-    private File getCachedFile(final BoxItem boxItem) {
-        return getThumbnailForFile(boxItem.getId());
-
     }
 
     /**
@@ -330,11 +233,6 @@ public class ThumbnailManager {
     }
 
     /**
-     * Maps the target image view to the thumbnail task
-     */
-    WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
-
-    /**
      * Loads the thumbnail for the provided BoxItem (if available) into the target image view
      *
      * @param item
@@ -342,11 +240,13 @@ public class ThumbnailManager {
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
         if (item instanceof BoxFile && isThumbnailAvailable(item)) {
+            // Cancel pending task upon recycle.
             BoxFutureTask task = mTargetToTask.remove(targetImage);
             if (task != null) {
                 task.cancel(false);
             }
 
+            // Set the drawable to our loader drawable, which will show a placeholder before loading the thumbnail into the view
             Bitmap placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item));
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), getThumbnailForFile(item.getId()));
             LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);

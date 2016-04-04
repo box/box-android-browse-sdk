@@ -6,6 +6,8 @@ import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,7 +23,6 @@ import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 
@@ -36,16 +37,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected final OnInteractionListener mListener;
     protected ArrayList<BoxItem> mItems = new ArrayList<BoxItem>();
     protected HashMap<String, Integer> mItemsPositionMap = new HashMap<String, Integer>();
-    private BoxItemFilter mBoxItemFilter;
-    private ThumbnailManager mThumbnailManager;
+    protected final Handler mHandler;
 
     protected int BOX_ITEM_VIEW_TYPE = 0;
 
-    public BoxItemAdapter(Context context, BoxItemFilter boxItemFilter, BrowseController controller, OnInteractionListener listener) {
+    public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
-        mBoxItemFilter = boxItemFilter;
         mController = controller;
         mListener = listener;
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
 
@@ -58,35 +58,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     @Override
     public void onBindViewHolder(BoxItemViewHolder boxItemHolder, int i) {
         BoxItem item = mItems.get(i);
-//        if (item.getState() == BoxListItem.State.ERROR) {
-//            boxItemHolder.setError(item);
-//            return;
-//        }
         boxItemHolder.bindItem(item);
-
-//        // Fetch thumbnails for media file types
-//        if (item instanceof BoxFile && ThumbnailManager.isThumbnailAvailable(item)) {
-//            if (item.getRequest() == null) {
-//                BoxRequestsFile.DownloadThumbnail req = mController.getThumbnailRequest(item.getBoxItem().getId(),
-//                        getThumbanilManager().getThumbnailForFile(item.getBoxItem().getId()), mContext.getResources());
-//                item.setRequest(req);
-//            } else if (item.getResponse() != null) {
-//                BoxException ex = (BoxException) item.getResponse().getException();
-//                if (ex != null && ex.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-//                    item.setState(BoxListItem.State.CREATED);
-//                }
-//            }
-//        }
-//
-//        // Execute a request if it hasn't been done so already
-//        if (item.getRequest() != null && item.getState() == BoxListItem.State.CREATED) {
-//            item.setState(BoxListItem.State.SUBMITTED);
-//            mController.execute(item.getRequest());
-//            if (item.getIdentifier().equals(BoxBrowseFragment.ACTION_FUTURE_TASK)) {
-//                boxItemHolder.setLoading();
-//            }
-//            return;
-//        }
     }
 
     @Override
@@ -130,6 +102,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
         int index = mItemsPositionMap.get(id);
         mItems.remove(index);
+        notifyChange(index);
         return index;
     }
 
@@ -151,6 +124,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         int index = mItemsPositionMap.get(item.getId());
         mItems.set(index, item);
+        notifyChange(index);
         return index;
     }
 
@@ -166,6 +140,23 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return mItems;
     }
 
+    private void notifyChange(final int index) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyItemChanged(index);
+            }
+        });
+    }
+
+    private void notifyChange(final int startIndex, final int endIndex) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyItemRangeChanged(startIndex, endIndex);
+            }
+        });
+    }
 
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         BoxItem mItem;
@@ -194,8 +185,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             mSecondaryAction = (ImageButton) itemView.findViewById(R.id.secondaryAction);
             mItemCheckBox = (AppCompatCheckBox) itemView.findViewById(R.id.boxItemCheckBox);
             mSecondaryClickListener = new BoxItemClickListener();
-            mSecondaryAction.setOnClickListener(mSecondaryClickListener);
-            setAccentColor(mContext.getResources(), mProgressBar);
+            if (mSecondaryAction != null) {
+                mSecondaryAction.setOnClickListener(mSecondaryClickListener);
+            }
         }
 
         public void bindItem(BoxItem item) {
@@ -349,34 +341,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 onBindBoxItemViewHolder(this);
                 return;
             }
-            // TODO: Baymax - make sure swipe is disabled while refreshing
-//            if (mSwipeRefresh.isRefreshing()) {
-//                return;
-//            }
             if (mItem == null) {
                 return;
             }
 
-//            if (mItem.getState() == BoxListItem.State.ERROR) {
-//                mItem.setState(BoxListItem.State.SUBMITTED);
-//                mController.execute(mItem.getRequest());
-//                setLoading();
-//            }
-
             if (mListener != null) {
                 mListener.getOnItemClickListener().onItemClick(mItem);
 
-            }
-        }
-
-        public void setAccentColor(Resources res, ProgressBar progressBar) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                int accentColor = res.getColor(R.color.box_accent);
-                Drawable drawable = progressBar.getIndeterminateDrawable();
-                if (drawable != null) {
-                    drawable.setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
-                    drawable.invalidateSelf();
-                }
             }
         }
     }

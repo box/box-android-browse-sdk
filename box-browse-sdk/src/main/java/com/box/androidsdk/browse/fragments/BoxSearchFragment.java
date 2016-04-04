@@ -67,7 +67,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected BoxItemAdapter createAdapter() {
-        return new BoxSearchAdapter(getActivity(), null, getController(), this);
+        return new BoxSearchAdapter(getActivity(), getController(), this);
     }
 
     @Override
@@ -125,21 +125,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             checkConnectivity();
             return;
         }
-//        // On failure updates the existing loading item with an error item
-//        if (!intent.isSuccess()) {
-//            checkConnectivity();
-//            BoxListItem item = mAdapter.get(intent.getAction());
-//            if (item != null) {
-//                item.setResponse(intent);
-//                item.setState(BoxListItem.State.ERROR);
-//                mAdapter.update(intent.getAction());
-//            }
-//            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_performing_search), Toast.LENGTH_LONG).show();
-//            return;
-//        }
-//
-//        // On success should remove the existing loading item
-//        mAdapter.remove(intent.getAction());
+        mAdapter.remove(BoxSearchAdapter.LOAD_MORE_ID);
 
         if (response.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems items = (BoxIteratorItems) response.getResult();

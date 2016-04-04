@@ -65,7 +65,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_MULTI_SELECT_HANDLER = "com.box.androidsdk.browse.MULTI_SELECT_HANDLER";
     protected static final String EXTRA_TITLE = "com.box.androidsdk.browse.TITLE";
     protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
-    public static final String ACTION_FUTURE_TASK = "com.box.androidsdk.browse.FUTURE_TASK";
 
     protected ArrayList<BoxItem> mItems;
     protected BoxSession mSession;
@@ -136,7 +135,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
 
-        // TODO: Do we really need this?
         setRetainInstance(true);
     }
 
@@ -223,12 +221,16 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected abstract void loadItems();
 
     private void updateUI() {
+        if (mItems == null) {
+            // UI should not be updated before the first load
+            return;
+        }
         final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
         mEmptyFolder.setVisibility(emptyFolderVisibility);
     }
 
     protected BoxItemAdapter createAdapter() {
-        return new BoxItemAdapter(getActivity(), mBoxItemFilter, getController(), this);
+        return new BoxItemAdapter(getActivity(), getController(), this);
     }
 
     @Override

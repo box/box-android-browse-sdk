@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFile;
@@ -99,55 +98,6 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
     }
 
-    /**
-     * The Executor used for thumbnail api calls.
-     */
-    private ThreadPoolExecutor thumbnailApiExecutor;
-
-    /**
-     * Executor that we will submit thumbnail tasks to.
-     *
-     * @return executor
-     */
-    protected ThreadPoolExecutor getThumbnailApiExecutor() {
-        if (thumbnailApiExecutor == null || thumbnailApiExecutor.isShutdown()) {
-            thumbnailApiExecutor = new ThreadPoolExecutor(1, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        }
-        return thumbnailApiExecutor;
-    }
-
-    /* Download the thumbnail for a given file.
-    *
-            * @param fileId file id to download thumbnail for.
-            * @return A FutureTask that is tasked with fetching information on the given folder.
-            */
-    public java.util.concurrent.FutureTask<Intent> downloadThumbnail(final BrowseController controller, final String fileId, final File downloadLocation, final ViewHolder holder) {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                try {
-                    controller.getThumbnailRequest(fileId, downloadLocation).send();
-                    if (downloadLocation.exists()) {
-                        if (holder.boxItem == null || !(holder.boxItem instanceof BoxFile)
-                                || !holder.boxItem.getId().equals(fileId)) {
-                            return intent;
-                        }
-                        else {
-                            controller.getThumbnailManager().setThumbnailIntoView(holder.icon, holder.boxItem);
-                        }
-                    }
-                } catch (BoxException e) {
-                    BoxLogUtils.e(TAG, e);
-                }
-
-                return intent;
-            }
-        });
-
-    }
-
     protected BrowseController getController() {
         if (getFilterQueryProvider() instanceof SearchFilterQueryProvider) {
             return ((SearchFilterQueryProvider) getFilterQueryProvider()).getController();
@@ -172,24 +122,21 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
                     holder.description.setText(((BoxSearchCursor) cursor).getPath());
                     BoxItem item = ((BoxSearchCursor) cursor).getBoxItem();
                     holder.boxItem = item;
-                    getController().getThumbnailManager().setThumbnailIntoView(holder.icon, item);
-                    if (ThumbnailManager.isThumbnailAvailable(item) && getController() != null) {
-                        getThumbnailApiExecutor().execute(downloadThumbnail(getController(),item.getId(),getController().getThumbnailManager().getThumbnailForFile(item.getId()), holder));
-                    }
                     holder.progressBar.setVisibility(View.INVISIBLE);
-                    holder.icon.setVisibility(View.VISIBLE);
+                    holder.thumbnail.setVisibility(View.VISIBLE);
+                    getController().getThumbnailManager().loadThumbnail(item, holder.thumbnail);
                 } else  if (((BoxSearchCursor)cursor).getType() == BoxSearchCursor.TYPE_QUERY) {
                     holder.boxItem = null;
                     holder.description.setText(R.string.box_browsesdk_performing_search);
-                    holder.icon.setImageResource(R.drawable.ic_box_browsesdk_search_grey_24dp);
+                    holder.thumbnail.setImageResource(R.drawable.ic_box_browsesdk_search_grey_24dp);
                     holder.progressBar.setVisibility(View.VISIBLE);
-                    holder.icon.setVisibility(View.INVISIBLE);
+                    holder.thumbnail.setVisibility(View.INVISIBLE);
                 } else if (((BoxSearchCursor)cursor).getType() == BoxSearchCursor.TYPE_ADDITIONAL_RESULT){
                     holder.boxItem = null;
                     holder.name.setText(R.string.box_browsesdk_see_additional_results);
                     holder.description.setText("");
                     holder.progressBar.setVisibility(View.INVISIBLE);
-                    holder.icon.setVisibility(View.INVISIBLE);
+                    holder.thumbnail.setVisibility(View.INVISIBLE);
                 }
             }
     }
@@ -210,7 +157,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View v = LayoutInflater.from(context).inflate(R.layout.box_browsesdk_list_item, parent, false);
         ViewHolder vh = new ViewHolder();
-        vh.icon = (ImageView)v.findViewById(R.id.box_browsesdk_thumb_image);
+        vh.thumbnail = (ImageView)v.findViewById(R.id.box_browsesdk_thumb_image);
         vh.name = (TextView)v.findViewById(R.id.box_browsesdk_name_text);
         vh.description = (TextView)v.findViewById(R.id.metaline_description);
         vh.progressBar = (ProgressBar)v.findViewById(R.id.spinner);
@@ -220,7 +167,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     }
 
     private static class ViewHolder {
-        ImageView icon;
+        ImageView thumbnail;
         TextView name;
         TextView description;
         ProgressBar progressBar;
