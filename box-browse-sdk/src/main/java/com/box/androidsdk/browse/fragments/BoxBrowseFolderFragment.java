@@ -2,13 +2,16 @@ package com.box.androidsdk.browse.fragments;
 
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 /**
  * Use the {@link Builder#build()} to
@@ -43,8 +46,12 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     @Override
     protected void handleResponse(BoxResponseIntent intent) {
         super.handleResponse(intent);
+        if (!intent.isSuccess()) {
+            checkConnectivity();
+            return;
+        }
         if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
-            onItemsFetched(intent);
+            onFolderFetched((BoxFolder) intent.getResult());
             if (mSwipeRefresh != null) {
                 mSwipeRefresh.setRefreshing(false);
             }
@@ -64,44 +71,39 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
-            if (mFolder != null && mFolder.getItemCollection() != null) {
-                mAdapter.addAll(mFolder.getItemCollection());
-            }
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(OUT_ITEM, mFolder);
         super.onSaveInstanceState(outState);
     }
 
-    private void onItemsFetched(BoxResponseIntent intent) {
-        FragmentActivity activity = getActivity();
-        if (activity == null || mAdapter == null) {
-            return;
-        }
+    protected void onFolderFetched(BoxFolder folder) {
+        if (folder != null && mFolder.getId().equals(folder.getId())) {
+            updateItems(folder.getItemCollection().getEntries());
+            mFolder = cloneFolderWithoutItems(folder);
 
-        if (!intent.isSuccess()) {
-            checkConnectivity();
-            return;
-        }
-
-        BoxFolder responseFolder = (BoxFolder) intent.getResult();
-        if (responseFolder != null && mFolder.getId().equals(responseFolder.getId())) {
-            mFolder = responseFolder;
-
-            if (mFolder != null) {
-                updateItems(mFolder.getItemCollection());
+            if (mFolder != null && mFolder.getItemCollection() != null) {
+                updateItems(mFolder.getItemCollection().getEntries());
                 notifyUpdateListeners();
             }
         }
     }
 
+
+    /**
+     * Convenience method that returns a folder object without its item collection. This is done to ensure
+     * a single source of truth for the item collection
+     *
+     * @param folder
+     * @return
+     */
+    protected BoxFolder cloneFolderWithoutItems(BoxFolder folder) {
+        JsonObject jsonObject = folder.toJsonObject();
+        JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
+        if (obj != null && !obj.isNull()) {
+            obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
+        }
+        return new BoxFolder(jsonObject);
+    }
 
     /**
      * Builder for constructing an instance of BoxBrowseFolderFragment
@@ -115,7 +117,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         public Builder(String folderId, String userId) {
             mArgs.putString(ARG_ID, folderId);
             mArgs.putString(ARG_USER_ID, userId);
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
 
         }
 
@@ -126,7 +127,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         public Builder(BoxFolder folder, BoxSession session) {
             mArgs.putString(ARG_ID, folder.getId());
             mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
         }
 
         /**

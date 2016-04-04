@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:id="@+id/boxItemMain"
+    style="@style/BoxListItem"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="@dimen/box_browsesdk_horizontal_margin"
+        android:adjustViewBounds="true">
+
+        <ProgressBar
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="@color/box_accent"
+            android:visibility="visible"/>
+    </FrameLayout>
+
+    <LinearLayout
+        style="@style/BoxListItem_Description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:gravity="start"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/box_browsesdk_name_text"
+            style="@style/BoxLabelText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:baselineAlignBottom="true"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:paddingLeft="0dp"
+            android:singleLine="true"
+            android:text="@string/boxsdk_Please_wait"
+            />
+    </LinearLayout>
+</FrameLayout>

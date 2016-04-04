@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
@@ -42,6 +43,7 @@ public class BoxBrowseController implements BrowseController {
     protected final BoxApiFolder mFolderApi;
     protected final BoxApiSearch mSearchApi;
     protected final BoxSession mSession;
+    protected final ThumbnailManager mThumbnailManager;
     protected BoxFutureTask.OnCompletedListener mListener;
 
 
@@ -50,6 +52,16 @@ public class BoxBrowseController implements BrowseController {
         mFileApi = apiFile;
         mFolderApi = apiFolder;
         mSearchApi = apiSearch;
+        mThumbnailManager = createThumbnailManager(mSession);
+    }
+
+    private ThumbnailManager createThumbnailManager(BoxSession session) {
+        try {
+            return new ThumbnailManager(this, session.getCacheDir());
+        } catch (FileNotFoundException e) {
+            BoxLogUtils.e(TAG, e);
+        }
+        return null;
     }
 
     @Override
@@ -64,12 +76,8 @@ public class BoxBrowseController implements BrowseController {
     }
 
     @Override
-    public BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, Resources resources) {
-        if (downloadFile.exists() && downloadFile.length() > 0) {
-            return null;
-        }
-
-        DisplayMetrics metrics = resources.getDisplayMetrics();
+    public BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile) {
+        DisplayMetrics metrics = mSession.getApplicationContext().getResources().getDisplayMetrics();
         int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
         if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
             thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
@@ -122,6 +130,11 @@ public class BoxBrowseController implements BrowseController {
     @Override
     public File getThumbnailCacheDir() {
         return mSession.getCacheDir();
+    }
+
+    @Override
+    public ThumbnailManager getThumbnailManager() {
+        return mThumbnailManager;
     }
 
     protected ThreadPoolExecutor getApiExecutor() {

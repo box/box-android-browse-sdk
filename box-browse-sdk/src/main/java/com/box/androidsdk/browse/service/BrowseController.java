@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 
+import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFile;
@@ -40,10 +41,9 @@ public interface BrowseController {
      *
      * @param fileId
      * @param downloadFile
-     * @param resources
      * @return
      */
-    BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile, Resources resources);
+    BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile);
 
 
     /***
@@ -70,4 +70,6 @@ public interface BrowseController {
     void onError(Context context, BoxResponse response);
 
     File getThumbnailCacheDir();
+
+    ThumbnailManager getThumbnailManager();
 }
