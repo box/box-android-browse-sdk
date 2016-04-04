@@ -18,6 +18,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.box.androidsdk.browse.R;
@@ -186,6 +187,7 @@ public class ThumbnailManager {
      *            the image resource to set into icon.
      */
     private void setThumbnail(final ImageView icon, final int imageRes) {
+        Log.d("ThumbnailManager", "Placeholder being set for: " + icon.hashCode());
         mHandler.post(new Runnable() {
 
             public void run() {
@@ -327,21 +329,32 @@ public class ThumbnailManager {
         return false;
     }
 
-
+    /**
+     * Maps the target image view to the thumbnail task
+     */
     WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
 
-    public void loadThumbnail(final BoxItem item, final ImageView target) {
-        setThumbnail(target, getDefaultIconResource(item));
+    /**
+     * Loads the thumbnail for the provided BoxItem (if available) into the target image view
+     *
+     * @param item
+     * @param targetImage
+     */
+    public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
         if (item instanceof BoxFile && isThumbnailAvailable(item)) {
-            BoxFutureTask task = mTargetToTask.remove(target);
+            BoxFutureTask task = mTargetToTask.remove(targetImage);
             if (task != null) {
                 task.cancel(false);
             }
 
+            Bitmap placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item));
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), getThumbnailForFile(item.getId()));
-            BoxFutureTask loadTask = BoxThumbnailLoader.create(request, target);
-            mTargetToTask.put(target, loadTask);
-            getRequestExecutor().execute(loadTask);
+            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
+            targetImage.setImageDrawable(loaderDrawable);
+            mTargetToTask.put(targetImage, loaderDrawable.getTask());
+            getRequestExecutor().execute(loaderDrawable.getTask());
+        } else {
+            targetImage.setImageResource(getDefaultIconResource(item));
         }
     }
 

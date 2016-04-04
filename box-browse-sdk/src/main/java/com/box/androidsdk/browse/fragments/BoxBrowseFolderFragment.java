@@ -71,17 +71,6 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
-            if (mFolder != null && mItems != null) {
-                mAdapter.addAll(mItems);
-            }
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(OUT_ITEM, mFolder);
         super.onSaveInstanceState(outState);
