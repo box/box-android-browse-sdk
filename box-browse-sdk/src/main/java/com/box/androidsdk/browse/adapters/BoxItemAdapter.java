@@ -100,11 +100,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         if (!mItemsPositionMap.containsKey(id)) {
             return -1;
         }
-        int index = mItemsPositionMap.get(id);
+        final int index = mItemsPositionMap.get(id);
         mItems.remove(index);
-        notifyChange(index);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyItemRemoved(index);
+            }
+        });
         return index;
     }
+
+
 
     public void addAll(ArrayList<BoxItem> items) {
         for (BoxItem item : items) {
