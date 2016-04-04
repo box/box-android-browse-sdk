@@ -358,12 +358,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         // Because we are always retrieving a folder with all items, we want to replace everything
+        final int oldCount = mAdapter.getItemCount();
         mAdapter.removeAll();
         mAdapter.addAll(items);
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
+                mAdapter.notifyItemRangeChanged(0, Math.max(mAdapter.getItemCount(), oldCount));
             }
         });
     }
