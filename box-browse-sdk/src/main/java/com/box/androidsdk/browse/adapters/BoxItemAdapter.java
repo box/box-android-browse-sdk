@@ -29,7 +29,10 @@ import com.box.androidsdk.content.models.BoxSession;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
     protected final Context mContext;
@@ -111,7 +114,41 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return index;
     }
 
+    /**
+     * Does the appropriate add and removes to display only provided items.
+     * @param items
+     */
+    public synchronized void updateTo(ArrayList<BoxItem> items){
 
+        final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
+        final Set<String> oldIds = oldPositionMap.keySet();
+        mItemsPositionMap = new HashMap<String, Integer>(items.size());
+        mItems.clear();
+        addAll(items);
+        if (oldPositionMap.size() > mItems.size() ){
+
+            Iterator<Map.Entry<String,Integer>> iterator = oldPositionMap.entrySet().iterator();
+            while (iterator.hasNext()){
+                Map.Entry<String,Integer> entry = iterator.next();
+                if (mItemsPositionMap.containsKey(entry.getKey())){
+                    iterator.remove();
+                }
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<String, Integer> entry : oldPositionMap.entrySet()){
+                        notifyItemRemoved(entry.getValue());
+                    }
+                    notifyItemRangeChanged(0, mItems.size());
+                }
+            });
+
+        } else {
+            notifyChange(0, mItems.size());
+        }
+
+    }
 
     public void addAll(ArrayList<BoxItem> items) {
         for (BoxItem item : items) {

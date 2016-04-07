@@ -351,16 +351,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             filteredItems.add(item);
         }
         mItems = filteredItems;
-
-        // Accounts for the deletion case where the original adapter size is larger than the new size
-        final int oldCount = mAdapter.getItemCount();
-        mAdapter.setItems(mItems);
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.notifyItemRangeChanged(0, Math.max(mAdapter.getItemCount(), oldCount));
-            }
-        });
+        mAdapter.updateTo(mItems);
     }
 
     /**
