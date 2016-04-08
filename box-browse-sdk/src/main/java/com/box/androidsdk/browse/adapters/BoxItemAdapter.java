@@ -121,7 +121,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     public synchronized void updateTo(ArrayList<BoxItem> items){
 
         final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
-        final Set<String> oldIds = oldPositionMap.keySet();
         mItemsPositionMap = new HashMap<String, Integer>(items.size());
         mItems.clear();
         addAll(items);
