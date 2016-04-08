@@ -80,11 +80,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         if (folder != null && mFolder.getId().equals(folder.getId())) {
             updateItems(folder.getItemCollection().getEntries());
             mFolder = cloneFolderWithoutItems(folder);
-
-            if (mFolder != null && mFolder.getItemCollection() != null) {
-                updateItems(mFolder.getItemCollection().getEntries());
-                notifyUpdateListeners();
-            }
+            notifyUpdateListeners();
         }
     }
 
