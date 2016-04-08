@@ -157,7 +157,7 @@ public class ThumbnailManager {
      *            The box item to show to user.
      * @return an integer resource.
      */
-    private int getDefaultIconResource(final BoxItem boxItem) {
+    public int getDefaultIconResource(final BoxItem boxItem) {
         if (boxItem instanceof BoxFolder) {
             BoxFolder boxFolder = (BoxFolder) boxItem;
             if (boxFolder.getHasCollaborations() == Boolean.TRUE) {
