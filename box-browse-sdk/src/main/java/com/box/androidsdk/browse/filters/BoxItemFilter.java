@@ -12,8 +12,16 @@ public interface BoxItemFilter {
 
      /**
      *
-     * @param item
-     * @return true if the item with given name should be returned by this fragment, false otherwise.
+     * @param item a file, folder, or bookmark
+     * @return return true if the item should be shown, false otherwise.
      */
-    public boolean accept(final BoxItem item);
+     boolean accept(final BoxItem item);
+
+    /**
+     *
+     * @param item a file, folder, or bookmark
+     * @return return true if the item if shown should be enabled, false otherwise.
+     */
+     boolean isEnabled(final BoxItem item);
+
 }
