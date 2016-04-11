@@ -213,7 +213,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         BoxItemClickListener mSecondaryClickListener;
         AppCompatCheckBox mItemCheckBox;
 
-
         public BoxItemViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
@@ -254,6 +253,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             }
 
             final BoxItem item = holder.getItem();
+            boolean isEnabled = mListener.getItemFilter() == null || mListener.getItemFilter().isEnabled(item);
+
             holder.getNameView().setText(item.getName());
             String description = "";
             if (item != null) {
@@ -270,18 +271,19 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
-//            if (!holder.getItem().getIsEnabled()) {
-//                holder.getView().setEnabled(false);
-//                holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
-//                holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_disabled_hint));
-//                holder.getThumbView().setAlpha(0.26f);
-//            } else {
-                holder.getView().setEnabled(true);
+
+            holder.getView().setEnabled(isEnabled);
+            if (isEnabled) {
+                holder.getThumbView().setAlpha(1f);
                 holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_primary_text));
                 holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
-                holder.getThumbView().setAlpha(1f);
-//            }
-            if (mListener.getOnSecondaryActionListener() != null) {
+            } else {
+                holder.getThumbView().setAlpha(.3f);
+                holder.getNameView().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_hint));
+                holder.getMetaDescription().setTextColor(mContext.getResources().getColor(R.color.box_browsesdk_disabled_hint));
+            }
+
+            if (isEnabled && mListener.getOnSecondaryActionListener() != null) {
                 holder.getSecondaryAction().setVisibility(View.VISIBLE);
             } else {
                 holder.getSecondaryAction().setVisibility(View.GONE);
@@ -290,10 +292,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             if (mListener.getMultiSelectHandler() != null && mListener.getMultiSelectHandler().isEnabled()) {
                 holder.getSecondaryAction().setVisibility(View.GONE);
                 holder.getCheckBox().setVisibility(View.VISIBLE);
-                holder.getCheckBox().setEnabled(mListener.getMultiSelectHandler().isSelectable(item));
-                holder.getCheckBox().setChecked(mListener.getMultiSelectHandler().isItemSelected(item));
+                holder.getCheckBox().setEnabled(isEnabled && mListener.getMultiSelectHandler().isSelectable(item));
+                holder.getCheckBox().setChecked(isEnabled && mListener.getMultiSelectHandler().isItemSelected(item));
             } else {
                 holder.getCheckBox().setVisibility(View.GONE);
+            }
+
+            if (mListener.getItemFilter() != null){
+                if (mListener.getItemFilter().isEnabled(item)){
+                    getView().setAlpha(1f);
+                } else {
+                    getView().setAlpha(.5f);
+                }
             }
 
         }
@@ -413,6 +423,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         BoxBrowseFragment.MultiSelectHandler getMultiSelectHandler();
         BoxBrowseFragment.OnSecondaryActionListener getOnSecondaryActionListener();
         BoxBrowseFragment.OnItemClickListener getOnItemClickListener();
+        BoxItemFilter getItemFilter();
+
     }
 
 
