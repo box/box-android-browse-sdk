@@ -56,13 +56,13 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
-            if (holder.getItem() == null || holder.getItem() == null) {
+            if (itemToBind == null || itemToBind == null) {
                 return;
             }
-            final BoxItem item = holder.getItem();
-            holder.getNameView().setText(item.getName());
-            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
-            mController.getThumbnailManager().loadThumbnail(item, holder.getThumbView());
+
+            holder.getNameView().setText(itemToBind.getName());
+            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(itemToBind, File.separator));
+            mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);

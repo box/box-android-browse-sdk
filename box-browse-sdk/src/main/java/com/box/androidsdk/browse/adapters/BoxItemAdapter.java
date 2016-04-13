@@ -391,7 +391,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         public void onClick(View v) {
             if (mListener.getMultiSelectHandler() != null && mListener.getMultiSelectHandler().isEnabled()) {
                 mListener.getMultiSelectHandler().toggle(mItem);
-                onBindBoxItemViewHolder(this, null);
+                onBindBoxItemViewHolder(this, mItem);
                 return;
             }
             if (mItem == null) {
