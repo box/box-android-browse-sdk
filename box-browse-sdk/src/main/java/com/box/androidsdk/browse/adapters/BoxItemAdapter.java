@@ -2,10 +2,6 @@ package com.box.androidsdk.browse.adapters;
 
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -32,7 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
     protected final Context mContext;
@@ -233,9 +228,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         public void bindItem(BoxItem item) {
+            onBindBoxItemViewHolder(this, item);
             mItem = item;
             mSecondaryClickListener.setListItem(mItem);
-            onBindBoxItemViewHolder(this);
         }
 
 
@@ -246,32 +241,37 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
          * {@link BoxBrowseActivity#createBrowseFolderFragment(BoxItem, BoxSession)}
          *
          * @param holder the BoxItemHolder
+         * @param itemToBind
          */
-        protected void onBindBoxItemViewHolder(BoxItemAdapter.BoxItemViewHolder holder) {
-            if (holder.getItem() == null) {
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
+            if (itemToBind == null) {
                 return;
             }
 
-            final BoxItem item = holder.getItem();
-            boolean isEnabled = mListener.getItemFilter() == null || mListener.getItemFilter().isEnabled(item);
-
-            holder.getNameView().setText(item.getName());
-            String description = "";
-            if (item != null) {
-                String modifiedAt = item.getModifiedAt() != null ?
-                        DateFormat.getDateInstance(DateFormat.MEDIUM).format(item.getModifiedAt()).toUpperCase() :
+            final BoxItem prevItem = holder.getItem();
+            boolean isSame = prevItem != null && prevItem.getId() != null &&
+                    prevItem.getId().equals(itemToBind.getId()) &&
+                    prevItem.getModifiedAt() != null &&
+                    prevItem.getModifiedAt().equals(itemToBind.getModifiedAt()) &&
+                    prevItem.getSize() != null &&
+                    prevItem.getSize().equals(itemToBind.getSize());
+            if (!isSame) {
+                holder.getNameView().setText(itemToBind.getName());
+                String modifiedAt = itemToBind.getModifiedAt() != null ?
+                        DateFormat.getDateInstance(DateFormat.MEDIUM).format(itemToBind.getModifiedAt()).toUpperCase() :
                         "";
-                String size = item.getSize() != null ?
-                        localFileSizeToDisplay(item.getSize()) :
+                String size = itemToBind.getSize() != null ?
+                        localFileSizeToDisplay(itemToBind.getSize()) :
                         "";
-                description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
-                mController.getThumbnailManager().loadThumbnail(item, holder.getThumbView());
+                String description = String.format(Locale.ENGLISH, "%s  • %s", modifiedAt, size);
+                holder.getMetaDescription().setText(description);
+                mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             }
-            holder.getMetaDescription().setText(description);
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
 
+            boolean isEnabled = mListener.getItemFilter() == null || mListener.getItemFilter().isEnabled(itemToBind);
             holder.getView().setEnabled(isEnabled);
             if (isEnabled) {
                 holder.getThumbView().setAlpha(1f);
@@ -292,14 +292,14 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             if (mListener.getMultiSelectHandler() != null && mListener.getMultiSelectHandler().isEnabled()) {
                 holder.getSecondaryAction().setVisibility(View.GONE);
                 holder.getCheckBox().setVisibility(View.VISIBLE);
-                holder.getCheckBox().setEnabled(isEnabled && mListener.getMultiSelectHandler().isSelectable(item));
-                holder.getCheckBox().setChecked(isEnabled && mListener.getMultiSelectHandler().isItemSelected(item));
+                holder.getCheckBox().setEnabled(isEnabled && mListener.getMultiSelectHandler().isSelectable(itemToBind));
+                holder.getCheckBox().setChecked(isEnabled && mListener.getMultiSelectHandler().isItemSelected(itemToBind));
             } else {
                 holder.getCheckBox().setVisibility(View.GONE);
             }
 
             if (mListener.getItemFilter() != null){
-                if (mListener.getItemFilter().isEnabled(item)){
+                if (mListener.getItemFilter().isEnabled(itemToBind)){
                     getView().setAlpha(1f);
                 } else {
                     getView().setAlpha(.5f);
@@ -391,7 +391,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         public void onClick(View v) {
             if (mListener.getMultiSelectHandler() != null && mListener.getMultiSelectHandler().isEnabled()) {
                 mListener.getMultiSelectHandler().toggle(mItem);
-                onBindBoxItemViewHolder(this);
+                onBindBoxItemViewHolder(this, null);
                 return;
             }
             if (mItem == null) {

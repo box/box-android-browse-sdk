@@ -1,13 +1,11 @@
 package com.box.androidsdk.browse.adapters;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
@@ -57,7 +55,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         }
 
         @Override
-        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
             if (holder.getItem() == null || holder.getItem() == null) {
                 return;
             }
@@ -77,7 +75,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         }
 
         @Override
-        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
             mController.execute(((LoadMoreItem) mItem).getRequest());
         }
 
