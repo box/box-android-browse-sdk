@@ -18,6 +18,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -188,6 +189,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
         mItemsView.addItemDecoration(new FooterDecoration(getResources()));
         mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        if (mItemsView.getItemAnimator() instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) mItemsView.getItemAnimator()).setSupportsChangeAnimations(false);
+        }
         mProgress = (ProgressBar) mRootView.findViewById(R.id.box_browsesdk_progress_bar);
         mAdapter = createAdapter();
 

@@ -246,9 +246,14 @@ public class ThumbnailManager {
                 task.cancel(false);
             }
 
+            // Placeholder should not be displayed (ie. set to null) if the file has already been fetched
+            File thumbnailFile = getThumbnailForFile(item.getId());
+            Bitmap placeHolderBitmap = thumbnailFile.length() == 0 ?
+                    BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item)) :
+                    null;
+
             // Set the drawable to our loader drawable, which will show a placeholder before loading the thumbnail into the view
-            Bitmap placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item));
-            BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), getThumbnailForFile(item.getId()));
+            BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), thumbnailFile);
             LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
             targetImage.setImageDrawable(loaderDrawable);
             mTargetToTask.put(targetImage, loaderDrawable.getTask());
