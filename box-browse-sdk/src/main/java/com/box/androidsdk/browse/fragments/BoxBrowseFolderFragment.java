@@ -6,12 +6,12 @@ import android.os.Bundle;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxIterator;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 /**
  * Use the {@link Builder#build()} to
@@ -79,7 +79,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     protected void onFolderFetched(BoxFolder folder) {
         if (folder != null && mFolder.getId().equals(folder.getId())) {
             updateItems(folder.getItemCollection().getEntries());
-            mFolder = cloneFolderWithoutItems(folder);
+            mFolder = createFolderWithoutItems(folder);
             notifyUpdateListeners();
         }
     }
@@ -92,11 +92,23 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * @param folder
      * @return
      */
-    protected BoxFolder cloneFolderWithoutItems(BoxFolder folder) {
-        JsonObject jsonObject = folder.toJsonObject();
-        JsonValue obj = jsonObject.get(BoxFolder.FIELD_ITEM_COLLECTION);
-        if (obj != null && !obj.isNull()) {
-            obj.asObject().set(BoxIterator.FIELD_ENTRIES, new JsonArray());
+    protected BoxFolder createFolderWithoutItems(BoxFolder folder) {
+        JsonObject jsonObject = new JsonObject();
+        for (String key: folder.getPropertiesKeySet()){
+            if (!key.equals(BoxFolder.FIELD_ITEM_COLLECTION)){
+                jsonObject.add(key, folder.getPropertyValue(key));
+            } else {
+                JsonObject itemCollection = new JsonObject();
+                BoxIteratorItems iteratorItems = folder.getItemCollection();
+                for (String collectionKey : iteratorItems.getPropertiesKeySet()){
+                    if (!collectionKey.equals(BoxIterator.FIELD_ENTRIES)) {
+                        itemCollection.add(collectionKey, iteratorItems.getPropertyValue(collectionKey));
+                    } else {
+                        itemCollection.add(collectionKey, new JsonArray());
+                    }
+                }
+                jsonObject.add(key, itemCollection);
+            }
         }
         return new BoxFolder(jsonObject);
     }
