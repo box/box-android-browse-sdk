@@ -106,7 +106,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
     };
-    private View mRootView;
+    protected View mRootView;
     private BoxItemFilter mBoxItemFilter;
     private LocalBroadcastManager mLocalBroadcastmanager;
     private ImageView mEmptyFolder;
