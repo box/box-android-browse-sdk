@@ -1,20 +1,21 @@
+<?xml version="1.0" encoding="null"?>
 <resources>
-    <string name="box_browsesdk_title" description="Default title for the Browse SDK">Browse</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">Browse</string>
     <string name="box_browsesdk_problem_fetching_folder">Problem fetching folder.</string>
     <string name="box_browsesdk_problem_performing_search">Problem performing search.</string>
-    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">You cannot view the items in this folder.</string>
-    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">Network error. Please try again.</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">Session is not authenticated</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">No item selected</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">You cannot view the items in this folder.</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Network error. Please try again.</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">Session is not authenticated</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">No item selected</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">All files</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">All files</string>
 
-    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Settings</string>
-    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">Search</string>
-    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">Create folder</string>
-    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">Select this folder</string>
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">Settings</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">Search</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Create folder</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Select this folder</string>
     <string name="box_browsesdk_dialog_ok">OK</string>
-    <string name="box_browsesdk_dialog_cancel">Cancel</string>
+    <string name="box_browsesdk_dialog_cancel">CANCEL</string>
 
     <string name="box_browsesdk_create_folder_conflict">A folder with that name has already been created.</string>
     <string name="box_browsesdk_error_retrieving_items">Error retrieving items</string>
