@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.activities.BoxBrowseActivity;
+import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
@@ -24,6 +25,7 @@ import com.box.androidsdk.content.models.BoxSession;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -128,11 +130,22 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     iterator.remove();
                 }
             }
+
+            // NOTE:
+            // We need to notify item removed in descending order of index
+            // Otherwise once we remove the 1st item, index of all others would change
+            // and we will end up removing incorrect items
+            final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
+            for (Map.Entry<String, Integer> entry : oldPositionMap.entrySet()){
+                removedIndexes.add(entry.getValue());
+            }
+            Collections.sort(removedIndexes);
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    for (Map.Entry<String, Integer> entry : oldPositionMap.entrySet()){
-                        notifyItemRemoved(entry.getValue());
+                    for (int i = removedIndexes.size() - 1; i >= 0; i--) {
+                        notifyItemRemoved(removedIndexes.get(i));
                     }
                     notifyItemRangeChanged(0, mItems.size());
                 }
