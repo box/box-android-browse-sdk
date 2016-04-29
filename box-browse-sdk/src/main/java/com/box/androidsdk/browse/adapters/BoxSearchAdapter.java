@@ -1,13 +1,11 @@
 package com.box.androidsdk.browse.adapters;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
@@ -57,14 +55,14 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         }
 
         @Override
-        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
-            if (holder.getItem() == null || holder.getItem() == null) {
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
+            if (itemToBind == null || itemToBind == null) {
                 return;
             }
-            final BoxItem item = holder.getItem();
-            holder.getNameView().setText(item.getName());
-            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(item, File.separator));
-            mController.getThumbnailManager().loadThumbnail(item, holder.getThumbView());
+
+            holder.getNameView().setText(itemToBind.getName());
+            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(itemToBind, File.separator));
+            mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
@@ -77,7 +75,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         }
 
         @Override
-        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder) {
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
             mController.execute(((LoadMoreItem) mItem).getRequest());
         }
 
