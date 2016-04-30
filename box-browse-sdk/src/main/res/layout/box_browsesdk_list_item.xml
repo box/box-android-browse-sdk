@@ -43,7 +43,7 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:clickable="false"
-                style="@style/BoxListItem_SecondaryAction"
+                style="@style/BoxListItem_Checkbox"
                 android:visibility="gone"
                 />
             <ImageButton
