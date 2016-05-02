@@ -40,6 +40,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected final Handler mHandler;
 
     protected int BOX_ITEM_VIEW_TYPE = 0;
+    protected static final int REMOVE_LIMIT = 20;
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -115,20 +116,31 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
      * Does the appropriate add and removes to display only provided items.
      * @param items
      */
-    public synchronized void updateTo(ArrayList<BoxItem> items){
+    public synchronized void updateTo(final ArrayList<BoxItem> items){
 
         final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
-        mItemsPositionMap = new HashMap<String, Integer>(items.size());
-        mItems.clear();
-        addAll(items);
-        if (oldPositionMap.size() > mItems.size() ){
+        final HashMap<String, Integer> newPositionMap = new HashMap<String, Integer>(items.size());
+        for (int i=0; i < items.size(); i++) {
+            newPositionMap.put(items.get(i).getId(), i);
+        }
+        // if we are updating to a smaller size list we must delete old entries first.
+        if (oldPositionMap.size() > newPositionMap.size() ){
 
             Iterator<Map.Entry<String,Integer>> iterator = oldPositionMap.entrySet().iterator();
             while (iterator.hasNext()){
                 Map.Entry<String,Integer> entry = iterator.next();
-                if (mItemsPositionMap.containsKey(entry.getKey())){
+                if (newPositionMap.containsKey(entry.getKey())){
                     iterator.remove();
                 }
+            }
+
+            // if the user is removing over the remove limit it's not worth removing them individually.
+            if (oldPositionMap.size() > REMOVE_LIMIT){
+                mItems.clear();
+                mItems.addAll(items);
+                mItemsPositionMap = newPositionMap;
+                notifyDataSetChanged();
+                return;
             }
 
             // NOTE:
@@ -147,11 +159,17 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     for (int i = removedIndexes.size() - 1; i >= 0; i--) {
                         notifyItemRemoved(removedIndexes.get(i));
                     }
+                    mItems.clear();
+                    mItems.addAll(items);
+                    mItemsPositionMap = newPositionMap;
                     notifyItemRangeChanged(0, mItems.size());
                 }
             });
 
         } else {
+            mItems.clear();
+            mItems.addAll(items);
+            mItemsPositionMap = newPositionMap;
             notifyChange(0, mItems.size());
         }
 
