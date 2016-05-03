@@ -134,6 +134,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
          */
         public Builder(BoxFolder folder, BoxSession session) {
             mArgs.putString(ARG_ID, folder.getId());
+            mArgs.putString(ARG_NAME, folder.getName());
             mArgs.putString(ARG_USER_ID, session.getUserId());
         }
 
