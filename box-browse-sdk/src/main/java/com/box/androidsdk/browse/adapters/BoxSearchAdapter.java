@@ -76,7 +76,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
-            mController.execute(((LoadMoreItem) mItem).getRequest());
+            mController.execute(((LoadMoreItem) itemToBind).getRequest());
         }
 
         public void setError() {

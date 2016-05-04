@@ -45,6 +45,7 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
         ((BoxSearchListAdapter)getSuggestionsAdapter()).setOnBoxSearchListener(this);
         findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
+        setQueryHint(context.getString(R.string.box_browsesdk_search_hint));
         if (mController == null){
             // this widget cannot be used until a controller has been set
             this.setEnabled(false);
