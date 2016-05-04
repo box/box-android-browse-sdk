@@ -21,4 +21,5 @@
     <string name="box_browsesdk_tap_to_retry">Tap to retry</string>
     <string name="box_browsesdk_performing_search">Performing search&#8230;</string>
     <string name="box_browsesdk_see_additional_results">See additional results</string>
+    <string name="box_browsesdk_search_hint">Search</string>
 </resources>
