@@ -411,8 +411,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         @Override
         public boolean onLongClick(View v) {
             if (mListener.getMultiSelectHandler() != null) {
-                mListener.getMultiSelectHandler().setEnabled(!mListener.getMultiSelectHandler().isEnabled());
-                mListener.getMultiSelectHandler().toggle(mItem);
+                if (mListener.getMultiSelectHandler().isEnabled()) {
+                    mListener.getMultiSelectHandler().deselectAll();
+                    mListener.getMultiSelectHandler().setEnabled(false);
+                } else {
+                    mListener.getMultiSelectHandler().setEnabled(true);
+                    mListener.getMultiSelectHandler().toggle(mItem);
+                }
                 return true;
             }
             return false;
