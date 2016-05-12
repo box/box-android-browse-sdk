@@ -25,9 +25,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     private static final String OUT_OFFSET = "outOffset";
     private static final int DEFAULT_LIMIT = 200;
 
-    private static BoxRequestsSearch.Search mRequest;
-    private int mOffset = 0;
-    private int mLimit;
+    protected static BoxRequestsSearch.Search mRequest;
+    protected int mOffset = 0;
+    protected int mLimit;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,7 +120,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
     }
 
-    private void onItemsFetched(BoxResponse response) {
+    protected void onItemsFetched(BoxResponse response) {
         if (!response.isSuccess()) {
             checkConnectivity();
             return;
