@@ -60,6 +60,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
                 return;
             }
 
+            super.onBindBoxItemViewHolder(holder, itemToBind);
             holder.getNameView().setText(itemToBind.getName());
             holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(itemToBind, File.separator));
             mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
