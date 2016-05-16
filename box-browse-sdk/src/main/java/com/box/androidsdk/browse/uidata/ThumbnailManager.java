@@ -3,22 +3,16 @@ package com.box.androidsdk.browse.uidata;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.WeakHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.box.androidsdk.browse.R;
@@ -38,17 +32,14 @@ import com.box.androidsdk.content.utils.SdkUtils;
  */
 public class ThumbnailManager {
 
-    /** The prefix added for thumbnails in this manager. */
-    private static final String THUMBNAIL_FILE_PREFIX = "thumbnail_";
-
     /** The extension added for thumbnails in this manager. */
-    private static final String THUMBNAIL_FILE_EXTENSION = ".boxthumbnail";
+    private static final String THUMBNAIL_FILE_EXTENSION = ".thumbnail";
 
     /** Controller used for all requests */
     private final BrowseController mController;
 
     /** The path where files in thumbnail should be stored. */
-    private File mCacheDirectory;
+    private File mThumbnailDirectory;
     
     /** Executor that we will submit our set thumbnail tasks to. */
     private ThreadPoolExecutor thumbnailRequestExecutor;
@@ -136,16 +127,27 @@ public class ThumbnailManager {
      * 
      *
      * @param controller
-     * @param cacheDirectory
+     * @param cacheDir
      *            a file representing the directory to store thumbnail images.
      * @throws java.io.FileNotFoundException
      *             thrown if the directory given does not exist and cannot be created.
      */
-    public ThumbnailManager(BrowseController controller, final File cacheDirectory) throws FileNotFoundException {
+    public ThumbnailManager(BrowseController controller, final File cacheDir) throws FileNotFoundException {
         mController = controller;
-        mCacheDirectory = cacheDirectory;
-        mCacheDirectory.mkdirs();
-        if (!mCacheDirectory.exists() || !mCacheDirectory.isDirectory()) {
+
+        // Ensure that parent cache directory is present
+        if (!cacheDir.exists()) {
+            cacheDir.mkdir();
+        }
+
+        // Create box thumbnail directory.
+        // This should be same as in preview to ensure preview can use thumbnails from here
+        mThumbnailDirectory = new File(cacheDir, "BoxThumbnails");
+        if (!mThumbnailDirectory.exists()) {
+            mThumbnailDirectory.mkdir();
+        }
+
+        if (!mThumbnailDirectory.exists() || !mThumbnailDirectory.isDirectory()) {
             throw new FileNotFoundException();
         }
     }
@@ -184,13 +186,27 @@ public class ThumbnailManager {
 
     /**
      * Returns a file in a determinate location for the given boxItem.
-     * 
-     * @param fileId
-     *            The id of the box file.
+     *
+     * @param boxItem
      * @return a File object where the thumbnail is saved to or should be saved to.
      */
-    public File getThumbnailForFile(final String fileId) {
-        File file = new File(getCacheDirectory(), THUMBNAIL_FILE_PREFIX + fileId + THUMBNAIL_FILE_EXTENSION);
+    public File getThumbnailForBoxItem(final BoxItem boxItem) {
+        if (boxItem instanceof BoxFile) {
+            return getThumbnailForBoxFile((BoxFile) boxItem);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a file in a determinate location for the given boxItem.
+     * 
+     * @param boxFile
+     *            box file.
+     * @return a File object where the thumbnail is saved to or should be saved to.
+     */
+    public File getThumbnailForBoxFile(final BoxFile boxFile) {
+        File file = new File(getThumbnailDirectory(), getCacheName(boxFile));
         try{
             file.createNewFile();
         } catch (IOException e){
@@ -199,18 +215,25 @@ public class ThumbnailManager {
         return file;
     }
 
+    protected String getCacheName(BoxFile boxFile) {
+        if (boxFile == null || SdkUtils.isBlank(boxFile.getId()) || SdkUtils.isBlank(boxFile.getSha1())) {
+            throw new IllegalArgumentException("BoxFile argument must not be null and must also contain an id and sha1");
+        }
+        return String.format(Locale.ENGLISH, "%s_%s%s", boxFile.getId(), boxFile.getSha1(), THUMBNAIL_FILE_EXTENSION);
+    }
+
     /**
      * @return the cacheDirectory of this thumbnail manager.
      */
-    public File getCacheDirectory() {
-        return mCacheDirectory;
+    public File getThumbnailDirectory() {
+        return mThumbnailDirectory;
     }
 
     /**
      * Convenience method to delete all files in the provided cache directory.
      */
     public void deleteFilesInCacheDirectory() {
-        File[] files = mCacheDirectory.listFiles();
+        File[] files = mThumbnailDirectory.listFiles();
         if (files != null) {
             for (int index = 0; index < files.length; index++) {
                 if (files[index].isFile()) {
@@ -247,8 +270,8 @@ public class ThumbnailManager {
             }
 
             // Placeholder should not be displayed (ie. set to null) if the file has already been fetched
-            File thumbnailFile = getThumbnailForFile(item.getId());
-            Bitmap placeHolderBitmap = thumbnailFile.length() == 0 ?
+            File thumbnailFile = getThumbnailForBoxFile((BoxFile) item);
+            Bitmap placeHolderBitmap = (thumbnailFile.length() == 0 || !thumbnailFile.exists()) ?
                     BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item)) :
                     null;
 
