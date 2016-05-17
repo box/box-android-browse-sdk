@@ -46,7 +46,7 @@
         <item name="android:background">@drawable/boxsdk_list_item_selector</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:padding">@dimen/box_browsesdk_horizontal_margin</item>
-        <item name="android:layout_marginRight">4dp</item>
+        <item name="android:paddingRight">20dp</item>
         <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
         <item name="android:layout_gravity">center</item>
     </style>
