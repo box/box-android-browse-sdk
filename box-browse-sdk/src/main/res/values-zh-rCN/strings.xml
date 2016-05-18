@@ -1,19 +1,20 @@
+<?xml version="1.0" encoding="null"?>
 <resources>
-    <string name="box_browsesdk_title" description="Default title for the Browse SDK">浏览</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">浏览</string>
     <string name="box_browsesdk_problem_fetching_folder">获取文件夹时出现问题。</string>
     <string name="box_browsesdk_problem_performing_search">执行搜索时出现问题。</string>
-    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">您无法查看本文件夹中的项目。</string>
-    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">网络出错。请重试。</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">对话未验证。</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">未选择项目。</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">您无法查看本文件夹中的项目。</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">网络出错。请重试。</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">会话未经验证</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">未选择项目</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">所有文件</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">所有文件</string>
 
-    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">设置</string>
-    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">搜索</string>
-    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">创建文件夹</string>
-    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">选择此文件夹</string>
-    <string name="box_browsesdk_dialog_ok">确认</string>
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">设置</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">搜索</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">创建文件夹</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">选择此文件夹</string>
+    <string name="box_browsesdk_dialog_ok">确定</string>
     <string name="box_browsesdk_dialog_cancel">取消</string>
 
     <string name="box_browsesdk_create_folder_conflict">已创建相同名称的文件夹。</string>
@@ -21,4 +22,5 @@
     <string name="box_browsesdk_tap_to_retry">点按以重试</string>
     <string name="box_browsesdk_performing_search">正在执行搜索…</string>
     <string name="box_browsesdk_see_additional_results">查看更多结果</string>
+    <string name="box_browsesdk_search_hint">搜索</string>
 </resources>
