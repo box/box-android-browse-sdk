@@ -78,7 +78,9 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     protected void onFolderFetched(BoxFolder folder) {
         if (folder != null && mFolder.getId().equals(folder.getId())) {
-            updateItems(folder.getItemCollection().getEntries());
+            if (folder.getItemCollection() != null && folder.getItemCollection().fullSize() != null) {
+                updateItems(folder.getItemCollection().getEntries());
+            }
             mFolder = createFolderWithoutItems(folder);
             notifyUpdateListeners();
         }
