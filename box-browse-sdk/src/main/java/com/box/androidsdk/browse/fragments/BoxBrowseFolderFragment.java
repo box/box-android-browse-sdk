@@ -19,7 +19,7 @@ import com.eclipsesource.json.JsonObject;
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
-    private static final String OUT_ITEM = "outItem";
+    public static final String ARG_FOLDER = "BoxBrowseFolderFragment.Folder";
     protected BoxFolder mFolder = null;
 
     @Override
@@ -33,7 +33,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
+            mFolder = (BoxFolder) savedInstanceState.getSerializable(ARG_FOLDER);
         } else if (getArguments() != null) {
             String folderId = getArguments().getString(ARG_ID);
             String folderName = getArguments().getString(ARG_NAME);
@@ -72,7 +72,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(OUT_ITEM, mFolder);
+        outState.putSerializable(ARG_FOLDER, mFolder);
         super.onSaveInstanceState(outState);
     }
 
