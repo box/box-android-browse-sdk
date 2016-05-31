@@ -89,7 +89,7 @@ public class BoxBrowseController implements BrowseController {
                     .setMinWidth(thumbSize)
                     .setMinHeight(thumbSize);
         } catch (IOException e) {
-            BoxLogUtils.e(TAG, e.getMessage());
+            BoxLogUtils.e(TAG, e);
         }
         return null;
     }
