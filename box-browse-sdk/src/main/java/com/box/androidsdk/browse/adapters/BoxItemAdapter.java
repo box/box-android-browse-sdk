@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.activities.BoxBrowseActivity;
-import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
@@ -40,7 +39,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected final Handler mHandler;
 
     protected int BOX_ITEM_VIEW_TYPE = 0;
-    protected static final int REMOVE_LIMIT = 20;
+    protected static final int REMOVE_LIMIT = 5;
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -103,12 +102,16 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
         final int index = mItemsPositionMap.get(id);
         mItems.remove(index);
+        mItemsPositionMap.remove(id);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 notifyItemRemoved(index);
             }
         });
+        for (int i = index; i < mItems.size(); ++i) {
+            mItemsPositionMap.put(mItems.get(i).getId(), i);
+        }
         return index;
     }
 
@@ -120,11 +123,14 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
         final HashMap<String, Integer> newPositionMap = new HashMap<String, Integer>(items.size());
+
         for (int i=0; i < items.size(); i++) {
             newPositionMap.put(items.get(i).getId(), i);
         }
         // if we are updating to a smaller size list we must delete old entries first.
-        if (oldPositionMap.size() > newPositionMap.size() ){
+
+        if (oldPositionMap.size() > newPositionMap.size() ) {
+
 
             Iterator<Map.Entry<String,Integer>> iterator = oldPositionMap.entrySet().iterator();
             while (iterator.hasNext()){
@@ -148,19 +154,19 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             // Otherwise once we remove the 1st item, index of all others would change
             // and we will end up removing incorrect items
             final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
-            for (Map.Entry<String, Integer> entry : oldPositionMap.entrySet()){
-                removedIndexes.add(entry.getValue());
-            }
+            removedIndexes.addAll(oldPositionMap.values());
             Collections.sort(removedIndexes);
 
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+
                     for (int i = removedIndexes.size() - 1; i >= 0; i--) {
+                        mItems.remove(removedIndexes.get(i)); //Remove individual items
                         notifyItemRemoved(removedIndexes.get(i));
                     }
                     mItems.clear();
-                    mItems.addAll(items);
+                    mItems.addAll(items); //Update everything since we have new info.
                     mItemsPositionMap = newPositionMap;
                     notifyItemRangeChanged(0, mItems.size());
                 }
