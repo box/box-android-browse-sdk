@@ -23,6 +23,7 @@ import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
+import com.box.androidsdk.content.utils.BoxLogUtils;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 
@@ -211,6 +212,8 @@ public class ThumbnailManager {
             file.createNewFile();
         } catch (IOException e){
             // Ignore errors in creating the file to store thumbnails to.
+            BoxLogUtils.e("getThumbnailForBoxFile " + boxFile , e);
+            BoxLogUtils.e("getThumbnailForBoxFile file " + file.getAbsolutePath() , e);
         }
         return file;
     }
@@ -274,7 +277,6 @@ public class ThumbnailManager {
             Bitmap placeHolderBitmap = (thumbnailFile.length() == 0 || !thumbnailFile.exists()) ?
                     BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item)) :
                     null;
-
             // Set the drawable to our loader drawable, which will show a placeholder before loading the thumbnail into the view
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), thumbnailFile);
             LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
