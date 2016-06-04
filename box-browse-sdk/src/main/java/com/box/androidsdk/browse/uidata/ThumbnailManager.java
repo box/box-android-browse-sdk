@@ -210,10 +210,14 @@ public class ThumbnailManager {
         File file = new File(getThumbnailDirectory(), getCacheName(boxFile));
         try{
             file.createNewFile();
+
         } catch (IOException e){
             // Ignore errors in creating the file to store thumbnails to.
-            BoxLogUtils.e("getThumbnailForBoxFile " + boxFile , e);
-            BoxLogUtils.e("getThumbnailForBoxFile file " + file.getAbsolutePath() , e);
+            BoxLogUtils.e("getThumbnailForBoxFile ",  "file.getAbsolutePath()  " + file.getAbsolutePath() + " isFile " + file.isFile());
+            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().exists() " + Boolean.toString(file.getParentFile().exists()) + " isDirectory " + file.getParentFile().isDirectory());
+            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().getParentFile.exists() " + Boolean.toString(file.getParentFile().getParentFile().exists()) + " isDirectory " + file.getParentFile().getParentFile().isDirectory());
+            BoxLogUtils.e("getThumbnailForBoxFile IOException " , e);
+
         }
         return file;
     }
