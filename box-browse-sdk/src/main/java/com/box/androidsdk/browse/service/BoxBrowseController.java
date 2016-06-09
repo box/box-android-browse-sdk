@@ -1,8 +1,6 @@
 package com.box.androidsdk.browse.service;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
@@ -12,7 +10,6 @@ import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.BoxFutureTask;
-import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequest;
@@ -149,7 +146,8 @@ public class BoxBrowseController implements BrowseController {
      *
      * @return executor
      */
-    protected ThreadPoolExecutor getThumbnailExecutor() {
+    @Override
+    public ThreadPoolExecutor getThumbnailExecutor() {
         if (mThumbnailExecutor == null || mThumbnailExecutor.isShutdown()) {
             mThumbnailExecutor = new ThreadPoolExecutor(1, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         }

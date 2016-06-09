@@ -1,13 +1,9 @@
 package com.box.androidsdk.browse.service;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.AsyncTask;
 
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
-import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
-import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
@@ -15,6 +11,7 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 
 import java.io.File;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /***
  * Controller interface for the Box Browse SDK. This defines all of the requests that will be used by the SDK.
@@ -72,4 +69,12 @@ public interface BrowseController {
     File getThumbnailCacheDir();
 
     ThumbnailManager getThumbnailManager();
+
+
+    /**
+     * Returns the executor used for thumbnail api requests
+     * @return
+     */
+
+    ThreadPoolExecutor getThumbnailExecutor();
 }

@@ -1,16 +1,5 @@
 package com.box.androidsdk.browse.uidata;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.WeakHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
@@ -25,6 +14,14 @@ import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 import com.box.androidsdk.content.utils.SdkUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.WeakHashMap;
 
 
 /**
@@ -41,9 +38,6 @@ public class ThumbnailManager {
 
     /** The path where files in thumbnail should be stored. */
     private File mThumbnailDirectory;
-    
-    /** Executor that we will submit our set thumbnail tasks to. */
-    private ThreadPoolExecutor thumbnailRequestExecutor;
 
     /** Maps the target image view to the thumbnail task. Provides ability to cancel tasks */
     WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
@@ -282,22 +276,11 @@ public class ThumbnailManager {
             LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
             targetImage.setImageDrawable(loaderDrawable);
             mTargetToTask.put(targetImage, loaderDrawable.getTask());
-            getRequestExecutor().execute(loaderDrawable.getTask());
+            mController.getThumbnailExecutor().execute(loaderDrawable.getTask());
         } else {
             targetImage.setImageResource(getDefaultIconResource(item));
         }
     }
 
-    /**
-     * Executor that we will submit our set thumbnail tasks to.
-     * 
-     * @return executor
-     */
-    private ThreadPoolExecutor getRequestExecutor() {
-        if (thumbnailRequestExecutor == null || thumbnailRequestExecutor.isShutdown()) {
-            thumbnailRequestExecutor = new ThreadPoolExecutor(4, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        }
-        return thumbnailRequestExecutor;
-    }
 
 }
