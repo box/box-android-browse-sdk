@@ -19,6 +19,7 @@ import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 
@@ -292,6 +293,17 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     prevItem.getModifiedAt().equals(itemToBind.getModifiedAt()) &&
                     prevItem.getSize() != null &&
                     prevItem.getSize().equals(itemToBind.getSize());
+
+            if (isSame) {
+                // Additional checks for folders
+                if(prevItem instanceof BoxFolder) {
+                    BoxFolder prevFolder = (BoxFolder) prevItem;
+                    BoxFolder folderToBind = (BoxFolder) itemToBind;
+
+                    isSame = prevFolder.getHasCollaborations() == folderToBind.getHasCollaborations();
+                }
+            }
+
             if (!isSame) {
                 holder.getNameView().setText(itemToBind.getName());
                 String modifiedAt = itemToBind.getModifiedAt() != null ?
