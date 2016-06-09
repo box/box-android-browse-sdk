@@ -54,7 +54,7 @@ public class BoxBrowseController implements BrowseController {
 
     private ThumbnailManager createThumbnailManager(BoxSession session) {
         try {
-            return new ThumbnailManager(this, session.getCacheDir());
+            return new ThumbnailManager(this);
         } catch (FileNotFoundException e) {
             BoxLogUtils.e(TAG, e);
         }

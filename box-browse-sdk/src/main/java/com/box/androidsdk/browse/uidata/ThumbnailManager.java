@@ -36,9 +36,6 @@ public class ThumbnailManager {
     /** Controller used for all requests */
     private final BrowseController mController;
 
-    /** The path where files in thumbnail should be stored. */
-    private File mThumbnailDirectory;
-
     /** Maps the target image view to the thumbnail task. Provides ability to cancel tasks */
     WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
 
@@ -122,29 +119,17 @@ public class ThumbnailManager {
      * 
      *
      * @param controller
-     * @param cacheDir
-     *            a file representing the directory to store thumbnail images.
      * @throws java.io.FileNotFoundException
      *             thrown if the directory given does not exist and cannot be created.
      */
-    public ThumbnailManager(BrowseController controller, final File cacheDir) throws FileNotFoundException {
+    public ThumbnailManager(BrowseController controller) throws FileNotFoundException {
         mController = controller;
 
         // Ensure that parent cache directory is present
-        if (!cacheDir.exists()) {
-            cacheDir.mkdir();
+        if (!mController.getThumbnailCacheDir().exists()) {
+            mController.getThumbnailCacheDir().mkdirs();
         }
 
-        // Create box thumbnail directory.
-        // This should be same as in preview to ensure preview can use thumbnails from here
-        mThumbnailDirectory = new File(cacheDir, "BoxThumbnails");
-        if (!mThumbnailDirectory.exists()) {
-            mThumbnailDirectory.mkdir();
-        }
-
-        if (!mThumbnailDirectory.exists() || !mThumbnailDirectory.isDirectory()) {
-            throw new FileNotFoundException();
-        }
     }
 
     /**
@@ -204,10 +189,14 @@ public class ThumbnailManager {
         File file = new File(getThumbnailDirectory(), getCacheName(boxFile));
         try{
             file.createNewFile();
+
         } catch (IOException e){
             // Ignore errors in creating the file to store thumbnails to.
-            BoxLogUtils.e("getThumbnailForBoxFile " + boxFile , e);
-            BoxLogUtils.e("getThumbnailForBoxFile file " + file.getAbsolutePath() , e);
+            BoxLogUtils.e("getThumbnailForBoxFile ",  "file.getAbsolutePath()  " + file.getAbsolutePath() + " isFile " + file.isFile());
+            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().exists() " + Boolean.toString(file.getParentFile().exists()) + " isDirectory " + file.getParentFile().isDirectory());
+            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().getParentFile.exists() " + Boolean.toString(file.getParentFile().getParentFile().exists()) + " isDirectory " + file.getParentFile().getParentFile().isDirectory());
+            BoxLogUtils.e("getThumbnailForBoxFile IOException " , e);
+
         }
         return file;
     }
@@ -223,14 +212,14 @@ public class ThumbnailManager {
      * @return the cacheDirectory of this thumbnail manager.
      */
     public File getThumbnailDirectory() {
-        return mThumbnailDirectory;
+        return mController.getThumbnailCacheDir();
     }
 
     /**
      * Convenience method to delete all files in the provided cache directory.
      */
     public void deleteFilesInCacheDirectory() {
-        File[] files = mThumbnailDirectory.listFiles();
+        File[] files = mController.getThumbnailCacheDir().listFiles();
         if (files != null) {
             for (int index = 0; index < files.length; index++) {
                 if (files[index].isFile()) {
