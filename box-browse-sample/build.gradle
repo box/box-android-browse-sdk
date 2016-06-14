@@ -5,7 +5,7 @@ android {
     buildToolsVersion '23.0.2'
 
     compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    buildToolsVersion '23.0.3'
 
     defaultConfig {
         applicationId "box.com.androidsdk.sample"
