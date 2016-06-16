@@ -109,7 +109,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private View mRootView;
     private BoxItemFilter mBoxItemFilter;
     private LocalBroadcastManager mLocalBroadcastmanager;
-    private ImageView mEmptyFolder;
 
     public BoxBrowseFragment() {
         // Required empty public constructor
@@ -175,10 +174,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    protected int getLayout() {
+        return R.layout.box_browsesdk_fragment_browse;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.box_browsesdk_fragment_browse, container, false);
-        mEmptyFolder = (ImageView) mRootView.findViewById(R.id.box_browsesdk_folder_empty);
+        mRootView = inflater.inflate(getLayout(), container, false);
         mSwipeRefresh = (SwipeRefreshLayout) mRootView.findViewById(R.id.box_browsesdk_swipe_reresh);
         mSwipeRefresh.setOnRefreshListener(this);
         mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
@@ -229,8 +230,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // UI should not be updated before the first load
             return;
         }
-        final int emptyFolderVisibility = mAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE;
-        mEmptyFolder.setVisibility(emptyFolderVisibility);
+        setEmptyState(mAdapter.getItemCount() == 0);
+
+    }
+
+    protected void setEmptyState(boolean isEmpty) {
+        ((ImageView) mRootView.findViewById(R.id.box_browsesdk_folder_empty)).setVisibility(
+                isEmpty ? View.VISIBLE : View.GONE);
     }
 
     protected BoxItemAdapter createAdapter() {
