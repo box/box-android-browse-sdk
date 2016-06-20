@@ -42,12 +42,10 @@
         <item name="android:layout_gravity">center_vertical</item>
     </style>
 
-    <style name="BoxListItem_SecondaryAction">
-        <item name="android:background">@drawable/boxsdk_list_item_selector</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:padding">@dimen/box_browsesdk_horizontal_margin</item>
-        <item name="android:paddingRight">20dp</item>
-        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
+    <style name="BoxListItem_SecondaryAction" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">@drawable/circular_touch_selector</item>
+        <item name="android:layout_width">@dimen/box_browsesdk_secondary_action_width</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_secondary_action_width</item>
         <item name="android:layout_gravity">center</item>
     </style>
 
