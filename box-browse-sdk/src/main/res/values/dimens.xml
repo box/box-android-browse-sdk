@@ -7,5 +7,6 @@
     <dimen name="box_browsesdk_list_footer_padding">60dp</dimen>
     <dimen name="box_browsesdk_list_item_description_margin">72dp</dimen>
 
+    <dimen name="box_browsesdk_secondary_action_width">56dp</dimen>
     <dimen name="box_browsesdk_persistent_footer_height">48dp</dimen>
 </resources>

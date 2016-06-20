@@ -48,8 +48,6 @@
                 />
             <ImageButton
                 android:id="@+id/secondaryAction"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 style="@style/BoxListItem_SecondaryAction"
