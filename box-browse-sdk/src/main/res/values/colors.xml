@@ -9,5 +9,6 @@
     <color name="box_browsesdk_divider">#14bdc3c7</color>
     <color name="box_browsesdk_shadow">#88333333</color>
     <color name="box_browsesdk_list_background">#ffffff</color>
+    <color name="box_browsesdk_list_item_color">#737F8B</color>
 
 </resources>

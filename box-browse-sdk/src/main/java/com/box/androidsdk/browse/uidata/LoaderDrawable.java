@@ -104,6 +104,7 @@ public class LoaderDrawable extends BitmapDrawable {
             mMainHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    target.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     if (animate) {
                         target.setAlpha(0f);
                         target.setImageBitmap(bm);

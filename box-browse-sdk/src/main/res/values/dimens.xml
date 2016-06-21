@@ -9,4 +9,8 @@
 
     <dimen name="box_browsesdk_secondary_action_width">56dp</dimen>
     <dimen name="box_browsesdk_persistent_footer_height">48dp</dimen>
+    <dimen name="box_browsesdk_thumb_width">40dp</dimen>
+    <dimen name="box_browsesdk_thumb_padding">3dp</dimen>
+    <dimen name="box_browsesdk_list_item_text_size">16sp</dimen>
+    <dimen name="box_browsesdk_list_item_description_size">14sp</dimen>
 </resources>
