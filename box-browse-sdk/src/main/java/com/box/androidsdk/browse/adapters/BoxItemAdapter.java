@@ -272,7 +272,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
 
-        private static final String DESCRIPTION_TEMPLATE = "%s  • %s  • %s";
+        private static final String DESCRIPTION_TEMPLATE = "%s  • %s";
 
         /**
          * Called when a {@link BoxItem} is bound to a ViewHolder. Customizations of UI elements
@@ -309,15 +309,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             if (!isSame) {
                 holder.getNameView().setText(itemToBind.getName());
                 String modifiedAt = itemToBind.getModifiedAt() != null ?
-                        DateFormat.getDateInstance(DateFormat.SHORT).format(itemToBind.getModifiedAt()) :
-                        "";
-                String modifiedTime = itemToBind.getModifiedAt() != null ?
-                        DateFormat.getTimeInstance(DateFormat.SHORT).format(itemToBind.getModifiedAt()) :
+                        DateFormat.getDateInstance(DateFormat.MEDIUM).format(itemToBind.getModifiedAt()) :
                         "";
                 String size = itemToBind.getSize() != null ?
                         localFileSizeToDisplay(itemToBind.getSize()) :
                         "";
-                String description = String.format(Locale.ENGLISH, DESCRIPTION_TEMPLATE, modifiedAt, modifiedTime, size);
+                String description = String.format(Locale.ENGLISH, DESCRIPTION_TEMPLATE, modifiedAt, size);
                 holder.getMetaDescription().setText(description);
                 mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             }
