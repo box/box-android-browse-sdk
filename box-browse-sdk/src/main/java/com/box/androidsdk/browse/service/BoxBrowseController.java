@@ -126,7 +126,15 @@ public class BoxBrowseController implements BrowseController {
 
     @Override
     public File getThumbnailCacheDir() {
-        return mSession.getCacheDir();
+
+        // Create box thumbnail directory.
+        // This should be same as in preview to ensure preview can use thumbnails from here
+        File thumbnailDirectory = new File(mSession.getCacheDir(), "BoxThumbnails");
+        if (!thumbnailDirectory.exists()) {
+            thumbnailDirectory.mkdir();
+        }
+
+        return thumbnailDirectory;
     }
 
     @Override
