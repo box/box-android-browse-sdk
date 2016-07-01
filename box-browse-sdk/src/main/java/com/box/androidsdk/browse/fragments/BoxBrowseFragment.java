@@ -350,8 +350,13 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             return;
         }
 
-        mProgress.setVisibility(View.GONE);
-        mSwipeRefresh.setRefreshing(false);
+        if (mProgress != null) {
+            mProgress.setVisibility(View.GONE);
+        }
+
+        if (mSwipeRefresh != null) {
+            mSwipeRefresh.setRefreshing(false);
+        }
 
         ArrayList<BoxItem> filteredItems = new ArrayList<BoxItem>();
         for (BoxItem item : items) {

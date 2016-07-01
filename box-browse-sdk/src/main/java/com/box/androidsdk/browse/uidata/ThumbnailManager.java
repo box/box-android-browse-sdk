@@ -249,7 +249,10 @@ public class ThumbnailManager {
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
         targetImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        if (item instanceof BoxFile && isThumbnailAvailable(item)) {
+        if (item instanceof BoxFile
+                && item.getPermissions() != null
+                && item.getPermissions().contains(BoxItem.Permission.CAN_PREVIEW)
+                && isThumbnailAvailable(item)) {
             // Cancel pending task upon recycle.
             BoxFutureTask task = mTargetToTask.remove(targetImage);
             if (task != null) {
