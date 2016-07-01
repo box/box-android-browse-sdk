@@ -273,7 +273,6 @@ public class ThumbnailManager {
                 mTargetToTask.put(targetImage, thumbnailTask);
                 mController.getThumbnailExecutor().execute(thumbnailTask);
             }
-
         } else {
             targetImage.setImageResource(getDefaultIconResource(item));
         }
