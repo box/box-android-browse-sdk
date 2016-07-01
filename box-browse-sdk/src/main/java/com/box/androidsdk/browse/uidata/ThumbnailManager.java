@@ -265,8 +265,12 @@ public class ThumbnailManager {
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), thumbnailFile);
             LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
             targetImage.setImageDrawable(loaderDrawable);
-            mTargetToTask.put(targetImage, loaderDrawable.getTask());
-            mController.getThumbnailExecutor().execute(loaderDrawable.getTask());
+            BoxFutureTask thumbnailTask = loaderDrawable.getTask();
+            if (thumbnailTask != null) {
+                mTargetToTask.put(targetImage, thumbnailTask);
+                mController.getThumbnailExecutor().execute(thumbnailTask);
+            }
+
         } else {
             targetImage.setImageResource(getDefaultIconResource(item));
         }
