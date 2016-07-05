@@ -22,6 +22,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.WeakHashMap;
+<<<<<<< Updated upstream
+=======
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+>>>>>>> Stashed changes
 
 
 /**
@@ -273,7 +279,6 @@ public class ThumbnailManager {
                 mTargetToTask.put(targetImage, thumbnailTask);
                 mController.getThumbnailExecutor().execute(thumbnailTask);
             }
-
         } else {
             targetImage.setImageResource(getDefaultIconResource(item));
         }
