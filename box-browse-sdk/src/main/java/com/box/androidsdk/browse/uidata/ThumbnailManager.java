@@ -192,10 +192,12 @@ public class ThumbnailManager {
 
         } catch (IOException e){
             // Ignore errors in creating the file to store thumbnails to.
-            BoxLogUtils.e("getThumbnailForBoxFile ",  "file.getAbsolutePath()  " + file.getAbsolutePath() + " isFile " + file.isFile());
-            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().exists() " + Boolean.toString(file.getParentFile().exists()) + " isDirectory " + file.getParentFile().isDirectory());
-            BoxLogUtils.e("getThumbnailForBoxFile ", "file.getParentFile().getParentFile.exists() " + Boolean.toString(file.getParentFile().getParentFile().exists()) + " isDirectory " + file.getParentFile().getParentFile().isDirectory());
-            BoxLogUtils.e("getThumbnailForBoxFile IOException " , e);
+            mController.Log("getThumbnailForBoxFile ",  "file.getAbsolutePath()  " + file.getAbsolutePath() + " isFile " + file.isFile(), null);
+            mController.Log("getThumbnailForBoxFile ", "file.getParentFile().exists() "
+                    + Boolean.toString(file.getParentFile().exists()) + " isDirectory " + file.getParentFile().isDirectory(), null);
+            mController.Log("getThumbnailForBoxFile ", "file.getParentFile().getParentFile.exists() " + Boolean.toString(
+                    file.getParentFile().getParentFile().exists()) + " isDirectory " + file.getParentFile().getParentFile().isDirectory(), null);
+            mController.Log("getThumbnailForBoxFile" , " IOException " , e);
 
         }
         return file;
