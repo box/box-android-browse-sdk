@@ -161,4 +161,9 @@ public class BoxBrowseController implements BrowseController {
         }
         return mThumbnailExecutor;
     }
+
+    @Override
+    public void Log(String tag, String msg, Throwable t) {
+        BoxLogUtils.e(tag, msg, t);
+    }
 }

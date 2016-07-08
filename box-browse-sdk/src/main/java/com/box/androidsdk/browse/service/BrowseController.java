@@ -77,4 +77,13 @@ public interface BrowseController {
      */
 
     ThreadPoolExecutor getThumbnailExecutor();
+
+    /**
+     * Use for any custom logging
+     * @param msg
+     * @param tag
+     * @param t
+     */
+
+    void Log(String tag, String msg, Throwable t);
 }
