@@ -383,13 +383,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 textSize = strSize + " " + BYTES;
             } else if ((numSize >= constKB) && (numSize < constMB)) {
                 size = numSize / floatKB;
-                textSize = String.format(Locale.ENGLISH, "%4.1f KB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f KB", size);
             } else if ((numSize >= constMB) && (numSize < constGB)) {
                 size = numSize / floatMB;
-                textSize = String.format(Locale.ENGLISH, "%4.1f MB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f MB", size);
             } else if (numSize >= constGB) {
                 size = numSize / floatGB;
-                textSize = String.format(Locale.ENGLISH, "%4.1f GB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f GB", size);
             }
             return textSize;
         }
