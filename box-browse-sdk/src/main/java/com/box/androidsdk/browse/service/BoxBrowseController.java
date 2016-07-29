@@ -52,6 +52,14 @@ public class BoxBrowseController implements BrowseController {
         mThumbnailManager = createThumbnailManager(mSession);
     }
 
+    public BoxBrowseController(BoxSession session) {
+        mSession = session;
+        mFileApi = new BoxApiFile(mSession);
+        mFolderApi =  new BoxApiFolder(mSession);
+        mSearchApi =  new BoxApiSearch(mSession);
+        mThumbnailManager = createThumbnailManager(mSession);
+    }
+
     private ThumbnailManager createThumbnailManager(BoxSession session) {
         try {
             return new ThumbnailManager(this);

@@ -68,7 +68,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
 
     protected ArrayList<BoxItem> mItems;
-    protected BoxSession mSession;
 
     protected OnItemClickListener mListener;
     protected OnSecondaryActionListener mSecondaryActionListener;
@@ -122,7 +121,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             if (SdkUtils.isBlank(userId)) {
                 throw new IllegalArgumentException("A valid session or user id must be provided");
             }
-            mSession = new BoxSession(getActivity(), userId);
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
@@ -267,8 +265,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     public BrowseController getController() {
         if (mController == null) {
-            mController = new BoxBrowseController(mSession, new BoxApiFile(mSession), new BoxApiFolder(mSession), new BoxApiSearch(mSession))
-                    .setCompletedListener(new CompletionListener(getLocalBroadcastManager()));
+            String userId = getArguments().getString(ARG_USER_ID);
+            mController = new BoxBrowseController(new BoxSession(getActivity(), userId));
         }
         return mController;
     }
