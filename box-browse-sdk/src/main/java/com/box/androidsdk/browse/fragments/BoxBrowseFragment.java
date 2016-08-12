@@ -406,7 +406,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
          *
          * @return a list of selected items.
          */
-        public List<BoxItem> getSelectedBoxItems() {
+        public ArrayList<BoxItem> getSelectedBoxItems() {
             ArrayList<BoxItem> items = new ArrayList<BoxItem>(mSelectedItems.size());
             items.addAll(mSelectedItems);
             return items;
