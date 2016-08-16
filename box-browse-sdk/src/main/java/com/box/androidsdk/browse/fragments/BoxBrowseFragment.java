@@ -266,7 +266,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public BrowseController getController() {
         if (mController == null) {
             String userId = getArguments().getString(ARG_USER_ID);
-            mController = new BoxBrowseController(new BoxSession(getActivity(), userId));
+            mController = new BoxBrowseController(new BoxSession(getActivity(), userId)).setCompletedListener(new CompletionListener(LocalBroadcastManager.getInstance(getActivity())));
         }
         return mController;
     }
