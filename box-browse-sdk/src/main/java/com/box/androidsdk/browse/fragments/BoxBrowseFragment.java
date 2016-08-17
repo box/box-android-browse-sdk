@@ -77,7 +77,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
-    private BrowseController mController;
+    protected BrowseController mController;
     private Set<OnUpdateListener> mUpdateListeners = new HashSet<OnUpdateListener>();
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -277,8 +277,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public BrowseController getController() {
         if (mController == null) {
             String userId = getArguments().getString(ARG_USER_ID);
-            mController = new BoxBrowseController(new BoxSession(getActivity(), userId)).setCompletedListener(new CompletionListener(LocalBroadcastManager.getInstance(getActivity())));
+            mController = new BoxBrowseController(new BoxSession(getActivity(), userId));
         }
+
+        mController.setCompletedListener(new CompletionListener(LocalBroadcastManager.getInstance(getActivity())));
         return mController;
     }
 

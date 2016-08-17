@@ -7,7 +7,9 @@ import android.view.View;
 
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
+import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
+import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
@@ -33,8 +35,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
-            mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
+        if (getArguments() != null) {
             mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
         }
         if (savedInstanceState != null) {
@@ -49,8 +50,8 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return filter;
     }
 
-    public void search(BoxRequestsSearch.Search request) {
-        mRequest = request;
+    public void search(String query) {
+        mRequest = mController.getSearchRequest(query);
         mAdapter.removeAll();
         loadItems();
         mAdapter.notifyDataSetChanged();
@@ -60,10 +61,12 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
-        mOffset = 0;
-        mRequest.setLimit(mLimit)
-                .setOffset(mOffset);
-        getController().execute(mRequest);
+        if (mRequest != null) {
+            mOffset = 0;
+            mRequest.setLimit(mLimit)
+                    .setOffset(mOffset);
+            getController().execute(mRequest);
+        }
     }
 
     @Override
@@ -181,11 +184,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
         /**
          * @param session
-         * @param query
          */
-        public Builder(BoxSession session, String query) {
+        public Builder(BoxSession session) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putSerializable(OUT_ITEM, mRequest);
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
         }
 
