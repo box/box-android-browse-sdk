@@ -13,6 +13,6 @@
         android:title="@string/box_browsesdk_action_search"
         android:icon="@drawable/ic_box_browsesdk_search_grey_24dp"
         app:showAsAction="always"
-        app:actionViewClass="com.box.androidsdk.browse.uidata.BoxCustomSearchView"
+        app:actionViewClass="com.box.androidsdk.browse.uidata.BoxSearchView"
         />
 </menu>

@@ -74,7 +74,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected SwipeRefreshLayout mSwipeRefresh;
     protected ProgressBar mProgress;
 
-    private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
     protected BrowseController mController;
@@ -164,7 +163,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(EXTRA_COLLECTION, mItems);
-        outState.putSerializable(EXTRA_TITLE, mTitle);
         if (mSecondaryActionListener instanceof Serializable) {
             outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable) mSecondaryActionListener);
         }

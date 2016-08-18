@@ -21,7 +21,6 @@ import com.box.androidsdk.browse.fragments.BoxSearchFragment;
 import com.box.androidsdk.browse.fragments.OnUpdateListener;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.uidata.BoxCustomSearchView;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
@@ -30,7 +29,6 @@ import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
 
@@ -38,7 +36,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxCustomSearchView.BoxCustomSearchListener {
+public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.BoxCustomSearchListener {
 
     protected static final String EXTRA_SHOULD_SEARCH_ALL = "extraShouldSearchAll";
 
@@ -126,15 +124,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         trans.commit();
     }
 
-
-//    @Override
-//    public void onBoxItemSelected(BoxItem boxItem) {
-//        clearSearch();
-//        if (boxItem instanceof BoxFolder) {
-//            handleBoxFolderClicked((BoxFolder) boxItem);
-//        }
-//    }
-
     /**
      * Creates a {@link BoxBrowseFolderFragment} that will be used in the activity to display
      * BoxItems. For a more customized experience, a custom implementation of the fragment can
@@ -176,7 +165,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
-        final BoxCustomSearchView searchView = (BoxCustomSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
+        final BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
         searchView.setOnBoxSearchListener(this);
         if (mRestoreSearch) {
             mSearchViewMenuItem.expandActionView();
@@ -200,24 +189,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         outState.putString(SEARCH_QUERY, searchView.getQuery().toString());
     }
 
-
-//    @Override
-//    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-//        if (!getIntent().getBooleanExtra(EXTRA_SHOULD_SEARCH_ALL, false)) {
-//            // if not specified by default search will only search the currently displayed folder.
-//            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-//            if (fragment != null && fragment instanceof BoxBrowseFolderFragment) {
-//                BoxFolder folder = ((BoxBrowseFolderFragment) fragment).getFolder();
-//                if (folder != null) {
-//                    searchRequest.limitAncestorFolderIds(new String[]{folder.getId()});
-//                }
-//            } else if (mItem != null) {
-//                searchRequest.limitAncestorFolderIds(new String[]{mItem.getId()});
-//            }
-//        }
-//        return searchRequest;
-//    }
-
     private void clearSearch() {
         if (mSearchViewMenuItem == null) {
             return;
@@ -225,23 +196,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
         searchView.onActionViewCollapsed();
     }
-
-//    @Override
-//    public void onMoreResultsRequested(BoxRequestsSearch.Search searchRequest) {
-//        clearSearch();
-//        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-//        if (fragment instanceof BoxSearchFragment) {
-//            ((BoxSearchFragment) fragment).search(onSearchRequested(searchRequest));
-//        } else {
-//            FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-//
-//            // All fragments will always navigate into folders
-//            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, onSearchRequested(searchRequest)).build();
-//            trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
-//                    .addToBackStack(BoxBrowseFragment.TAG)
-//                    .commit();
-//        }
-//    }
 
     @Override
     public void onItemClick(BoxItem item) {

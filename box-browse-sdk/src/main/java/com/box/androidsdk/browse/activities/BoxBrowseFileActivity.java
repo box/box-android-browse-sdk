@@ -38,7 +38,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
         setContentView(R.layout.box_browsesdk_activity_file);
         initToolbar();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1){
-            //onBoxItemSelected(mItem);
+            onItemClick(mItem);
             getSupportActionBar().setTitle(mItem.getName());
         }
 
@@ -56,31 +56,12 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
     }
 
 
-//    @Override
-//    public void onBoxItemSelected(BoxItem boxItem) {
-//        super.onBoxItemSelected(boxItem);
-//        if (!(boxItem instanceof BoxFolder)) {
-//            onItemClick(boxItem);
-//        }
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.box_browsesdk_menu_file, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-//    @Override
-//    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-//        if(getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER) != null){
-//            ArrayList<String> list = getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER);
-//            String[] extensions =  list.toArray(new String[list.size()]);
-//            searchRequest.limitFileExtensions(extensions);
-//        }
-//        return super.onSearchRequested(searchRequest);
-//    }
-
 
     /**
      * Create an intent to launch an instance of this activity to browse folders.
