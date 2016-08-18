@@ -73,6 +73,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     }
 
     @Override
+    public void onItemClick(BoxItem item) {
+        // TODO: Add search query to the recents
+    }
+
+    @Override
     protected BoxItemAdapter createAdapter() {
         return new BoxSearchAdapter(getActivity(), getController(), this);
     }

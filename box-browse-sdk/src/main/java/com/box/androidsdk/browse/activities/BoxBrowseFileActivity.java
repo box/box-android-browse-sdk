@@ -46,13 +46,12 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
 
     @Override
     public void onItemClick(BoxItem item) {
+        super.onItemClick(item);
         if (item instanceof BoxFile || item instanceof BoxBookmark) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_BOX_FILE, item);
             setResult(Activity.RESULT_OK, intent);
             finish();
-        } else {
-            super.onItemClick(item);
         }
     }
 

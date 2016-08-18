@@ -249,6 +249,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
+    public void onItemClick(BoxItem item) {
+
+    }
+
     protected void setEmptyState(boolean isEmpty) {
         ((ImageView) mRootView.findViewById(R.id.box_browsesdk_folder_empty)).setVisibility(
                 isEmpty ? View.VISIBLE : View.GONE);
