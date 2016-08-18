@@ -258,12 +258,9 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
             // All fragments will always navigate into folders
             BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession).build();
-            searchFragment.setController(mController);
             trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
                     .addToBackStack(BoxBrowseFragment.TAG)
                     .commit();
-        } else {
-            ((BoxSearchFragment)fragment).setController(mController);
         }
     }
 

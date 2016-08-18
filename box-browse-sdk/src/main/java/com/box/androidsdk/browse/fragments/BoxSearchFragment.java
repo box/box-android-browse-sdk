@@ -3,7 +3,9 @@ package com.box.androidsdk.browse.fragments;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
@@ -62,6 +64,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     @Override
     protected void loadItems() {
         if (mRequest != null) {
+            mProgress.setVisibility(View.VISIBLE);
             mOffset = 0;
             mRequest.setLimit(mLimit)
                     .setOffset(mOffset);
