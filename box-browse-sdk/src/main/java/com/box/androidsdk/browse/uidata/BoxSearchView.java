@@ -69,6 +69,9 @@ public class BoxSearchView extends SearchView {
         });
     }
 
+    public void setSearchTerm(String query) {
+        setQuery(query, false);
+    }
 
     private static final String EXTRA_ORIGINAL_PARCELABLE = "extraOriginalParcelable";
 

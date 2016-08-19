@@ -1,5 +1,6 @@
 package com.box.androidsdk.browse.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -7,8 +8,10 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.service.BoxBrowseController;
@@ -71,6 +74,16 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             // Show recents only if we are not using an old fragment
             if (mSearchQuery == null) {
                 mSearchRecentsListView.setVisibility(View.VISIBLE);
+                mSearchRecentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String query = mRecentSearches.get(position);
+                        Activity activity = getActivity();
+                        if (activity instanceof BoxBrowseActivity) {
+                            ((BoxBrowseActivity)activity).setSearchQuery(query);
+                        }
+                    }
+                });
             }
         }
         return view;

@@ -52,6 +52,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private String mSearchQuery;
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
+    private BoxSearchView mSearchView;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,16 +166,22 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
-        final BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
-        searchView.setOnBoxSearchListener(this);
+        mSearchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
+        mSearchView.setOnBoxSearchListener(this);
         if (mRestoreSearch) {
             mSearchViewMenuItem.expandActionView();
-            searchView.setIconified(false);
-            searchView.setQuery(mSearchQuery, false);
+            mSearchView.setIconified(false);
+            mSearchView.setQuery(mSearchQuery, false);
             mRestoreSearch = false;
         }
 
         return true;
+    }
+
+    public void setSearchQuery(String query) {
+        if (mSearchView != null) {
+            mSearchView.setSearchTerm(query);
+        }
     }
 
 
