@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.box.androidsdk.browse.R;
@@ -72,6 +73,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected BoxItemAdapter mAdapter;
     protected RecyclerView mItemsView;
     protected SwipeRefreshLayout mSwipeRefresh;
+    protected ListView mSearchRecentsListView;
     protected ProgressBar mProgress;
 
     private boolean mWaitingForConnection;
@@ -184,6 +186,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected int getLayout() {
         return R.layout.box_browsesdk_fragment_browse;
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(getLayout(), container, false);
@@ -192,6 +195,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
         // This is a work around to show the loading circle because SwipeRefreshLayout.onMeasure must be called before setRefreshing to show the animation
         mSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
+
+        // Hide the recent search view. This is specific to search fragment.
+        mSearchRecentsListView = (ListView) mRootView.findViewById(R.id.box_browsesdk_search_recents_listview);
+        mSearchRecentsListView.setVisibility(View.GONE);
 
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
