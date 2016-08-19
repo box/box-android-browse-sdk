@@ -95,7 +95,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
                 mIsConnected = (networkInfo != null && networkInfo.isConnected());
                 if (mWaitingForConnection && mIsConnected) {
@@ -133,7 +133,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
 
-        setRetainInstance(true);
     }
 
     @Override
