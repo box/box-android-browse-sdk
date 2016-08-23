@@ -37,6 +37,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
 
     private static final String OUT_ITEM = "outItem";
     private static final String OUT_OFFSET = "outOffset";
+    private static final String OUT_QUERY = "outQuery";
     private static final int DEFAULT_LIMIT = 200;
 
     private static final String RECENT_SEARCHES_SHARED_PREFERENCES = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesSharedPreferences";
@@ -57,6 +58,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         }
         if (savedInstanceState != null) {
             mOffset = savedInstanceState.getInt(OUT_OFFSET);
+            mSearchQuery = savedInstanceState.getString(OUT_QUERY, null);
         }
 
         mSearchQuery = null;
@@ -97,17 +99,30 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         return filter;
     }
 
-    public void search(String query) {
-        mSearchQuery = query.trim();
-        if (mSearchQuery != null && !mSearchQuery.equals("")) {
-            mRequest = mController.getSearchRequest(mSearchQuery);
-            mAdapter.removeAll();
-            loadItems();
-            mAdapter.notifyDataSetChanged();
-            notifyUpdateListeners();
+    public String getSearchQuery() {
+        if (mSearchQuery != null) {
+            return mSearchQuery;
+        }
 
-            if (mSearchRecentsListView != null) {
-                mSearchRecentsListView.setVisibility(View.GONE);
+        return "";
+    }
+
+    public void search(String query) {
+        if (query != null) {
+            String trimmedQuery = query.trim();
+            if (!trimmedQuery.equals(mSearchQuery)) {
+                mSearchQuery = trimmedQuery;
+                if (!mSearchQuery.equals("")) {
+                    mRequest = mController.getSearchRequest(mSearchQuery);
+                    mAdapter.removeAll();
+                    loadItems();
+                    mAdapter.notifyDataSetChanged();
+                    notifyUpdateListeners();
+
+                    if (mSearchRecentsListView != null) {
+                        mSearchRecentsListView.setVisibility(View.GONE);
+                    }
+                }
             }
         }
     }
@@ -173,6 +188,9 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(OUT_ITEM, mRequest);
         outState.putInt(OUT_OFFSET, mOffset);
+        if (mSearchQuery != null) {
+            outState.putString(OUT_QUERY, mSearchQuery);
+        }
         super.onSaveInstanceState(outState);
     }
 
