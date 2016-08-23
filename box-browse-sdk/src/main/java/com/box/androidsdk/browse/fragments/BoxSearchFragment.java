@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 
 import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
+import com.box.androidsdk.browse.adapters.BoxRecentSearchAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
@@ -46,7 +47,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     protected String mSearchQuery;
     protected static BoxRequestsSearch.Search mRequest;
     protected ArrayList<String> mRecentSearches;
-    protected ArrayAdapter<String> mRecentSearchesAdapter;
+    protected BoxRecentSearchAdapter mRecentSearchesAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mSearchQuery = null;
         mRequest = null;
         mRecentSearches = fetchRecentSearches();
-        mRecentSearchesAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, mRecentSearches);
+        mRecentSearchesAdapter = new BoxRecentSearchAdapter(getActivity(), mRecentSearches);
     }
 
     @Override
