@@ -15,7 +15,7 @@ import java.util.List;
 
 public class BoxRecentSearchAdapter extends ArrayAdapter<String> {
 
-    public static interface BoxRecentSearchListener {
+    public interface BoxRecentSearchListener {
         void onCloseClicked(int position);
     }
 
