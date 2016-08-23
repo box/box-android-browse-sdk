@@ -16,7 +16,7 @@ import com.box.androidsdk.browse.R;
  */
 public class BoxSearchView extends SearchView {
 
-    private BoxCustomSearchListener mBoxCustomSearchListener;
+    private BoxSearchListener mBoxSearchListener;
 
     public BoxSearchView(final Context context){
         super(context);
@@ -37,7 +37,7 @@ public class BoxSearchView extends SearchView {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                mBoxCustomSearchListener.onQueryTextSubmit(query);
+                mBoxSearchListener.onQueryTextSubmit(query);
 
                 // Don't perform default action, return true
                 return true;
@@ -46,7 +46,7 @@ public class BoxSearchView extends SearchView {
             @Override
             public boolean onQueryTextChange(String newText) {
 
-                mBoxCustomSearchListener.onQueryTextChange(newText);
+                mBoxSearchListener.onQueryTextChange(newText);
 
                 // Don't perform default action, return true
                 return true;
@@ -56,14 +56,14 @@ public class BoxSearchView extends SearchView {
         this.setOnSearchClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBoxCustomSearchListener.onSearchExpanded();
+                mBoxSearchListener.onSearchExpanded();
             }
         });
 
         this.setOnCloseListener(new OnCloseListener() {
             @Override
             public boolean onClose() {
-                mBoxCustomSearchListener.onSearchCollapsed();
+                mBoxSearchListener.onSearchCollapsed();
                 return false;
             }
         });
@@ -92,11 +92,11 @@ public class BoxSearchView extends SearchView {
         }
     }
 
-    public void setOnBoxSearchListener(final BoxCustomSearchListener boxCustomSearchListener){
-        mBoxCustomSearchListener = boxCustomSearchListener;
+    public void setOnBoxSearchListener(final BoxSearchListener boxSearchListener){
+        mBoxSearchListener = boxSearchListener;
     }
 
-    public interface BoxCustomSearchListener {
+    public interface BoxSearchListener {
 
         /**
          * User clicked on search icon and expanded search
