@@ -198,7 +198,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         // Hide the recent search view. This is specific to search fragment.
         mSearchRecentsListView = (ListView) mRootView.findViewById(R.id.box_browsesdk_search_recents_listview);
-        mSearchRecentsListView.setVisibility(View.GONE);
+        if (mSearchRecentsListView != null) {
+            mSearchRecentsListView.setVisibility(View.GONE);
+        }
 
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
