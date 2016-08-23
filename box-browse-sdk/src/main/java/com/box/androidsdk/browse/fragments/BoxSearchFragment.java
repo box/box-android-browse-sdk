@@ -33,7 +33,7 @@ import java.util.HashSet;
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
  * create an instance of this fragment.
  */
-public class BoxSearchFragment extends BoxBrowseFragment {
+public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSearchAdapter.BoxRecentSearchListener {
 
     private static final String OUT_ITEM = "outItem";
     private static final String OUT_OFFSET = "outOffset";
@@ -62,7 +62,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mSearchQuery = null;
         mRequest = null;
         mRecentSearches = fetchRecentSearches();
-        mRecentSearchesAdapter = new BoxRecentSearchAdapter(getActivity(), mRecentSearches);
+        mRecentSearchesAdapter = new BoxRecentSearchAdapter(getActivity(), mRecentSearches, this);
     }
 
     @Override
@@ -211,6 +211,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mSwipeRefresh.setRefreshing(false);
     }
 
+    @Override
+    public void onCloseClicked(int position) {
+        deleteFromRecentSearches(position);
+    }
+
     /**
      * If for some reason the server returns less than the right number of items
      * for instance if some results are hidden due to permissions offset based off of number of items
@@ -266,6 +271,12 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         protected BoxSearchFragment getInstance() {
             return new BoxSearchFragment();
         }
+    }
+
+    protected void deleteFromRecentSearches(int position) {
+        mRecentSearches.remove(position);
+        mRecentSearchesAdapter.notifyDataSetChanged();
+        saveRecentSearches(mRecentSearches);
     }
 
     protected void addToRecentSearches(String recent) {
