@@ -112,17 +112,21 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             String trimmedQuery = query.trim();
             if (!trimmedQuery.equals(mSearchQuery)) {
                 mSearchQuery = trimmedQuery;
-                if (!mSearchQuery.equals("")) {
-                    mRequest = mController.getSearchRequest(mSearchQuery);
-                    mAdapter.removeAll();
-                    loadItems();
-                    mAdapter.notifyDataSetChanged();
-                    notifyUpdateListeners();
+                search();
+            }
+        }
+    }
 
-                    if (mSearchRecentsListView != null) {
-                        mSearchRecentsListView.setVisibility(View.GONE);
-                    }
-                }
+    protected void search() {
+        if (mSearchQuery != null && !mSearchQuery.equals("")) {
+            mRequest = mController.getSearchRequest(mSearchQuery);
+            mAdapter.removeAll();
+            loadItems();
+            mAdapter.notifyDataSetChanged();
+            notifyUpdateListeners();
+
+            if (mSearchRecentsListView != null) {
+                mSearchRecentsListView.setVisibility(View.GONE);
             }
         }
     }
