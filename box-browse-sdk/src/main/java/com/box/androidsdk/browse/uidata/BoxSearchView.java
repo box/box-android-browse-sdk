@@ -8,6 +8,8 @@ import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.box.androidsdk.browse.R;
 
@@ -30,7 +32,12 @@ public class BoxSearchView extends SearchView {
 
     private void initSearchView(final Context context){
 
-        findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
+        LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
+        searchPlate.setBackgroundColor(Color.TRANSPARENT);
+
+        final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
+        searchCloseButton.setImageResource(R.drawable.ic_clear_black_24dp);
+
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setQueryHint(context.getString(R.string.box_browsesdk_search_hint));
         this.setOnQueryTextListener(new OnQueryTextListener() {
@@ -45,7 +52,6 @@ public class BoxSearchView extends SearchView {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
                 mBoxSearchListener.onQueryTextChange(newText);
 
                 // Don't perform default action, return true
