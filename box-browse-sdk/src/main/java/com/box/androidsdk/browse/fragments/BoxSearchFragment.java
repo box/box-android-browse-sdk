@@ -53,15 +53,16 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSearchQuery = null;
         if (getArguments() != null) {
             mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mSearchQuery = getArguments().getString(OUT_QUERY, null);
         }
         if (savedInstanceState != null) {
             mOffset = savedInstanceState.getInt(OUT_OFFSET);
             mSearchQuery = savedInstanceState.getString(OUT_QUERY, null);
         }
 
-        mSearchQuery = null;
         mRequest = null;
         mRecentSearches = fetchRecentSearches();
         mRecentSearchesAdapter = new BoxRecentSearchAdapter(getActivity(), mRecentSearches, this);
@@ -110,7 +111,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     public void search(String query) {
         if (query != null) {
             String trimmedQuery = query.trim();
-            if (!trimmedQuery.equals(mSearchQuery)) {
+            if (!trimmedQuery.equals(mSearchQuery) || mRequest == null) {
                 mSearchQuery = trimmedQuery;
                 search();
             }
@@ -278,6 +279,14 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
         }
 
+        /**
+         * @param session
+         */
+        public Builder(BoxSession session, String searchQuery) {
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mArgs.putString(OUT_QUERY, searchQuery);
+        }
 
         /**
          * Set the number of items that the results will be limited to when retrieving search results
