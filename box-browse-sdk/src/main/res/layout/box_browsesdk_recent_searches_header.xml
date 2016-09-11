@@ -6,6 +6,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/text"
         android:text="@string/box_browsesdk_recent_searches_header"
         android:textSize="14sp"
         android:textStyle="bold"

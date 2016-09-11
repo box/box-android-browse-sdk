@@ -15,9 +15,11 @@ import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxRecentSearchAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
+import com.box.androidsdk.browse.adapters.ResultsHeader;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxJsonObject;
@@ -35,6 +37,7 @@ import java.util.HashSet;
  */
 public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSearchAdapter.BoxRecentSearchListener {
 
+    private static String EXTRA_PARENT_FOLDER = "SearchFragment.ExtraParentFolder";
     private static final String OUT_ITEM = "outItem";
     private static final String OUT_OFFSET = "outOffset";
     private static final String OUT_QUERY = "outQuery";
@@ -50,6 +53,8 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     protected ArrayList<String> mRecentSearches;
     protected BoxRecentSearchAdapter mRecentSearchesAdapter;
 
+    protected BoxFolder mParentFolder;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +62,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         if (getArguments() != null) {
             mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
             mSearchQuery = getArguments().getString(OUT_QUERY, null);
+            mParentFolder = (BoxFolder) getArguments().getSerializable(EXTRA_PARENT_FOLDER);
         }
         if (savedInstanceState != null) {
             mOffset = savedInstanceState.getInt(OUT_OFFSET);
@@ -183,10 +189,9 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             mAdapter.add(filteredItems);
         } else {
             mItems = filteredItems;
+            mItems.add(0, new ResultsHeader(mParentFolder));
             mAdapter.updateTo(mItems);
         }
-
-
     }
 
     @Override
@@ -282,10 +287,11 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         /**
          * @param session
          */
-        public Builder(BoxSession session, String searchQuery) {
+        public Builder(BoxSession session, String searchQuery, BoxFolder parentFolder) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
             mArgs.putString(OUT_QUERY, searchQuery);
+            mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
         }
 
         /**

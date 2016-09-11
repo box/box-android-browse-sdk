@@ -4,9 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.eclipsesource.json.JsonObject;
@@ -19,6 +21,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
     public static final String LOAD_MORE_ID = "com.box.androidsdk.browse.LOAD_MORE";
     protected static final int LOAD_MORE_VIEW_TYPE = 1;
+    protected static final int RESULTS_HEADER_VIEW_TYPE = 2;
 
     public BoxSearchAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         super(context, controller, listener);
@@ -28,6 +31,9 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     public BoxItemViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view;
         switch (viewType) {
+            case RESULTS_HEADER_VIEW_TYPE:
+                view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.box_browsesdk_recent_searches_header, viewGroup, false);
+                return new ResultsHeaderViewHolder(view);
             case LOAD_MORE_VIEW_TYPE:
                 view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.box_browsesdk_load_more_item, viewGroup, false);
                 return new LoadMoreViewHolder(view);
@@ -40,9 +46,15 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     @Override
     public int getItemViewType(int position) {
         BoxItem item = mItems.get(position);
+
+        if (item instanceof ResultsHeader) {
+            return RESULTS_HEADER_VIEW_TYPE;
+        }
+
         if (item instanceof LoadMoreItem) {
             return LOAD_MORE_VIEW_TYPE;
         }
+
         return super.getItemViewType(position);
     }
 
@@ -94,6 +106,17 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         }
 
     }
+
+    class ResultsHeaderViewHolder extends BoxItemViewHolder {
+        public ResultsHeaderViewHolder(View view) {
+            super(view);
+        }
+
+        @Override
+        protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
+            ((TextView)holder.getView().findViewById(R.id.text)).setText(String.format(mContext.getResources().getString(R.string.box_browsesdk_search_results_header), itemToBind.getName()));
+        }
+    }
 }
 
 /**
@@ -125,3 +148,4 @@ class LoadMoreItem extends BoxItem {
         mRequest = request;
     }
 }
+
