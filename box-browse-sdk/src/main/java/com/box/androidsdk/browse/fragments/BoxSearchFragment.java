@@ -40,8 +40,8 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     private static final String OUT_QUERY = "outQuery";
     private static final int DEFAULT_LIMIT = 200;
 
-    private static final String RECENT_SEARCHES_SHARED_PREFERENCES = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesSharedPreferences";
-    private static final String RECENT_SEARCHES_KEY = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesKey";
+    public static final String RECENT_SEARCHES_SHARED_PREFERENCES = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesSharedPreferences";
+    public static final String RECENT_SEARCHES_KEY = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesKey";
     protected int mOffset = 0;
     protected int mLimit;
 
