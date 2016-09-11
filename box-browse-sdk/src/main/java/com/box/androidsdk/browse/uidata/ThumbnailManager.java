@@ -62,32 +62,35 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     protected final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
 
-    protected static final String[] DOCUMENTS_EXTENSIONS_ARRAY = {"csv", "doc", "docx", "gdoc", "gsheet", "htm", "html", "msg", "odp", "odt", "ods", "pdf",
+    public static final String[] DOCUMENTS_EXTENSIONS_ARRAY = {"csv", "doc", "docx", "gdoc", "gsheet", "htm", "html", "msg", "odp", "odt", "ods", "pdf",
             "ppt", "pptx", "rtf", "tsv", "wpd", "xhtml", "xls", "xlsm", "xlsx", "xml", "xsd", "xsl", "txt"};
-    protected static final String[] PRESENTATION_EXTENSIONS_ARRAY = {"ppt", "pptx"};
-    protected static final String[] SPREADSHEET_EXTENSIONS_ARRAY = {"csv", "gsheet", "xls", "xlsm", "xlsx", "xsd", "xsl"};
-    protected static final String[] WORD_EXTENSIONS_ARRAY = {"doc", "docx"};
+    public static final String[] PRESENTATION_EXTENSIONS_ARRAY = {"ppt", "pptx"};
+    public static final String[] SPREADSHEET_EXTENSIONS_ARRAY = {"csv", "gsheet", "xls", "xlsm", "xlsx", "xsd", "xsl"};
+    public static final String[] WORD_EXTENSIONS_ARRAY = {"doc", "docx"};
 
-    protected static final String[] AUDIO_EXTENSIONS_ARRAY = {"aac", "aif", "aifc", "aiff", "amr", "au", "flac", "m4a", "mp3", "ra", "wav", "wma"};
-    protected static final String[] CODE_EXTENSIONS_ARRAY = {"h", "c", "cp", "cpp", "c++", "cc", "cxx", "m", "strings", "hpp", "h++", "hxx", "mm", "java", "jav", "scala",
+    public static final String[] AUDIO_EXTENSIONS_ARRAY = {"aac", "aif", "aifc", "aiff", "amr", "au", "flac", "m4a", "mp3", "ra", "wav", "wma"};
+    public static final String[] CODE_EXTENSIONS_ARRAY = {"h", "c", "cp", "cpp", "c++", "cc", "cxx", "m", "strings", "hpp", "h++", "hxx", "mm", "java", "jav", "scala",
             "clj", "coffee", "cl", "css", "diff", "erl", "go", "groovy", "hs", "lhs", "hx", "asp", "aspx", "ejs", "jsp", "html", "htm", "js", "jscript", "javascript", "json",
             "ts", "less", "lua", "markdown", "mdown", "md", "mysql", "sql", "nt", "ocaml", "pas", "pp", "lpr", "dpr", "pascal", "pl", "php", "pig", "plsql", "properties", "ini",
             "py", "r", "rpm", "rst", "rb", "rs", "scheme", "sh", "siv", "sieve", "st", "smarty", "rq", "stex", "tiddlywiki", "vb", "frm", "cs", "vbs", "vm", "v", "vh", "xml",
             "xhtml", "xquery", "xq", "xqy", "yml", "yaml", "z80"};
 
-    protected static final String[] VIDEO_EXTENSIONS_ARRAY = {"3g2", "3gp", "avi", "m2v", "m2ts", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ogg", "mts",
+    public static final String[] VIDEO_EXTENSIONS_ARRAY = {"3g2", "3gp", "avi", "m2v", "m2ts", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ogg", "mts",
             "qt", "wmv"};
-    protected static final String[] COMPRESSED_EXTENSIONS_ARRAY = {"zip", "rar", "gz", "tar", "7z", "arc", "ace", "tbz"};
-    protected static final String[] INDESIGN_EXTENSIONS_ARRAY = {"indd", "indl", "indt", "indb", "inx", "idml", "pmd"};
-    protected static final String[] OBJ_EXTENSIONS_ARRAY = {"obj", "3ds", "x3d"};
-    protected static final String[] PHOTOSHOP_EXTENSIONS_ARRAY = {"psd", "psb"};
-    protected static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
+    public static final String[] COMPRESSED_EXTENSIONS_ARRAY = {"zip", "rar", "gz", "tar", "7z", "arc", "ace", "tbz"};
+    public static final String[] INDESIGN_EXTENSIONS_ARRAY = {"indd", "indl", "indt", "indb", "inx", "idml", "pmd"};
+    public static final String[] OBJ_EXTENSIONS_ARRAY = {"obj", "3ds", "x3d"};
+    public static final String[] PHOTOSHOP_EXTENSIONS_ARRAY = {"psd", "psb"};
+    public static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
+    public static final String[] BOXNOTE_EXTENSIONS_ARRAY = {"boxnote"};
+    public static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif", "ico"};
+    public static final String[] PDF_EXTENSIONS_ARRAY = {"pdf"};
 
     protected static final ArrayList<String> IMAGE_EXTENSIONS = new ArrayList<String>();
 
 
     static {
-        for (String ext : new String[] {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif"}){
+        for (String ext : IMAGE_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_image);
             IMAGE_EXTENSIONS.add(ext);
         }
@@ -127,12 +130,15 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         for (String ext : VECTOR_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_vector);
         }
+        for (String ext : BOXNOTE_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_box_note);
+        }
+        for (String ext : PDF_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_pdf);
+        }
         DEFAULT_ICON_RESORCE_MAP.put("ico", R.drawable.ic_box_browsesdk_icon);
 
-        DEFAULT_ICON_RESORCE_MAP.put("boxnote", R.drawable.ic_box_browsesdk_box_note);
         DEFAULT_ICON_RESORCE_MAP.put("ai", R.drawable.ic_box_browsesdk_illustrator);
-        DEFAULT_ICON_RESORCE_MAP.put("pdf", R.drawable.ic_box_browsesdk_pdf);
-
     }
 
 
