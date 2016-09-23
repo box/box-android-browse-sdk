@@ -189,7 +189,9 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             mAdapter.add(filteredItems);
         } else {
             mItems = filteredItems;
-            mItems.add(0, new ResultsHeader(mParentFolder));
+            if (filteredItems.size() > 0 && !(filteredItems.get(0) instanceof ResultsHeader)) {
+                mItems.add(0, new ResultsHeader(mParentFolder));
+            }
             mAdapter.updateTo(mItems);
         }
     }

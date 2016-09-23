@@ -155,6 +155,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // this call must be made after registering the receiver in order to handle very fast responses.
             updateItems(mItems);
         }
+        super.onResume();
+        updateUI();
     }
 
     protected void cleanupBoxReceivers(){
