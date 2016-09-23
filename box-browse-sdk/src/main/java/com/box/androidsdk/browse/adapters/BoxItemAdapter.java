@@ -22,14 +22,18 @@ import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.utils.BoxLogUtils;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
     protected final Context mContext;
@@ -88,6 +92,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     public synchronized void removeAll() {
         mItemsPositionMap.clear();
         mItems.clear();
+        notifyDataSetChanged();
     }
 
     public int remove(BoxItem item) {
@@ -101,6 +106,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         if (!mItemsPositionMap.containsKey(id)) {
             return -1;
         }
+        final Lock lock = new ReentrantLock();
         final int index = mItemsPositionMap.get(id);
         mItems.remove(index);
         mItemsPositionMap.remove(id);
@@ -108,19 +114,93 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             @Override
             public void run() {
                 notifyItemRemoved(index);
+                lock.unlock();
             }
         });
-        for (int i = index; i < mItems.size(); ++i) {
+        lock.lock();
+        for (int i = index; i < mItems.size(); i++) {
             mItemsPositionMap.put(mItems.get(i).getId(), i);
         }
         return index;
     }
+
+    public synchronized List<String> remove(List<String> ids){
+        final Lock lock = new ReentrantLock();
+        try {
+            lock.lockInterruptibly();
+        } catch (Exception e){
+            BoxLogUtils.e("lock interrupted", e);
+        }
+        ArrayList<String> idsRemoved = new ArrayList<String>(ids.size());
+        for (String id : ids){
+            if (mItemsPositionMap.containsKey(id)) {
+                idsRemoved.add(id);
+            }
+        }
+        final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(idsRemoved.size());
+
+        for (String id : idsRemoved){
+            final int index = mItemsPositionMap.get(id);
+            indexesRemoved.add(index);
+            mItemsPositionMap.remove(id);
+
+        }
+
+        Collections.sort(indexesRemoved);
+        for (int i= indexesRemoved.size()-1; i >= 0; i--){
+            Integer index = indexesRemoved.get(i);
+            mItems.remove(index.intValue());
+        }
+        if (indexesRemoved.size() > 0) {
+            int smallestIndex = indexesRemoved.get(0);
+            for (int i = smallestIndex; i < mItems.size(); i++) {
+                mItemsPositionMap.put(mItems.get(i).getId(), i);
+            }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (indexesRemoved.size() < 5){
+                        for (Integer index : indexesRemoved){
+                            notifyItemRemoved(index);
+                        }
+                    } else {
+                        notifyDataSetChanged();
+                    }
+                }
+            });
+
+        }
+        return idsRemoved;
+    }
+
 
     /**
      * Does the appropriate add and removes to display only provided items.
      * @param items
      */
     public synchronized void updateTo(final ArrayList<BoxItem> items){
+        final Lock lock = new ReentrantLock();
+        try {
+            lock.lockInterruptibly();
+        } catch (Exception e){
+            BoxLogUtils.e("lock interrupted", e);
+        }
+        if (items.size() == mItems.size() && items.size() > 0){
+            boolean isSame = true;
+            // check to see if this is a duplicate call if so ignore it.
+            for(int i=0; i < mItems.size(); i++){
+                if (items.get(i) != mItems.get(i)){
+                    if (!items.get(i).equals(mItems.get(i))){
+                        isSame = false;
+                        break;
+                    }
+                }
+            }
+            if (isSame){
+                return;
+            }
+        }
 
         final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
         final HashMap<String, Integer> newPositionMap = new HashMap<String, Integer>(items.size());
@@ -146,7 +226,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 mItems.clear();
                 mItems.addAll(items);
                 mItemsPositionMap = newPositionMap;
-                notifyDataSetChanged();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
                 return;
             }
 
@@ -157,19 +242,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
             removedIndexes.addAll(oldPositionMap.values());
             Collections.sort(removedIndexes);
-
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-
-                    for (int i = removedIndexes.size() - 1; i >= 0; i--) {
+                     for (int i = removedIndexes.size() - 1; i >= 0; i--) {
                         mItems.remove(removedIndexes.get(i)); //Remove individual items
                         notifyItemRemoved(removedIndexes.get(i));
                     }
                     mItems.clear();
                     mItems.addAll(items); //Update everything since we have new info.
                     mItemsPositionMap = newPositionMap;
-                    notifyItemRangeChanged(0, mItems.size());
+                    lock.unlock();
+
                 }
             });
 
@@ -177,18 +261,44 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             mItems.clear();
             mItems.addAll(items);
             mItemsPositionMap = newPositionMap;
-            notifyChange(0, mItems.size());
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyItemRangeChanged(0, mItems.size());
+                    lock.unlock();
+                }
+            });
+
         }
 
     }
 
     public void addAll(ArrayList<BoxItem> items) {
+        final Lock lock = new ReentrantLock();
+        try {
+            lock.lockInterruptibly();
+        } catch (Exception e){
+            BoxLogUtils.e("lock interrupted", e);
+        }
+        final int startingSize = mItems.size();
         for (BoxItem item : items) {
             add(item);
         }
+        final int endingSize = mItems.size();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyItemRangeInserted(startingSize - 1, endingSize -1);
+                lock.unlock();
+            }
+        });
     }
 
-    public synchronized void add(BoxItem item) {
+    /**
+     * This method will add an item to the end of the list, but will not notify of the change.
+     * @param item
+     */
+    protected synchronized void add(BoxItem item) {
         mItems.add(item);
         mItemsPositionMap.put(item.getId(), mItems.size() - 1);
     }
@@ -197,10 +307,22 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         if (item == null || !mItemsPositionMap.containsKey(item.getId())) {
             return -1;
         }
+        final Lock lock = new ReentrantLock();
+        try {
+            lock.lockInterruptibly();
+        } catch (Exception e){
+            BoxLogUtils.e("lock interrupted", e);
+        }
 
-        int index = mItemsPositionMap.get(item.getId());
+        final int index = mItemsPositionMap.get(item.getId());
         mItems.set(index, item);
-        notifyChange(index);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyItemChanged(index);
+                lock.unlock();
+            }
+        });
         return index;
     }
 
@@ -216,23 +338,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return mItems;
     }
 
-    private void notifyChange(final int index) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyItemChanged(index);
-            }
-        });
+    @Override
+    public long getItemId(int position) {
+        try {
+            return Long.parseLong(mItems.get(position).getId());
+        } catch (NumberFormatException e){
+            return mItems.get(position).getId().hashCode();
+        }
     }
 
-    private void notifyChange(final int startIndex, final int endIndex) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyItemRangeChanged(startIndex, endIndex);
-            }
-        });
-    }
 
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         BoxItem mItem;

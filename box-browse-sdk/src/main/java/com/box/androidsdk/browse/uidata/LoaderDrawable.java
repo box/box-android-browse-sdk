@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.util.LruCache;
 import android.view.ViewPropertyAnimator;
 import android.widget.ImageView;
 
@@ -14,6 +15,7 @@ import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxResponse;
+import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -25,6 +27,7 @@ import java.util.concurrent.Callable;
 public class LoaderDrawable extends BitmapDrawable {
 
     WeakReference<ThumbnailTask> mTaskRef;
+    private LruCache<File, Bitmap> mBitmapLruCache;
 
     private LoaderDrawable(ThumbnailTask task, Resources resources, Bitmap placeHolder) {
         super(resources, placeHolder);
@@ -43,8 +46,8 @@ public class LoaderDrawable extends BitmapDrawable {
      * @param placeHolder
      * @return
      */
-    public static LoaderDrawable create(BoxRequestsFile.DownloadThumbnail request, ImageView imageView, Bitmap placeHolder) {
-        return new LoaderDrawable(ThumbnailTask.create(request, imageView),imageView.getResources(), placeHolder);
+    public static LoaderDrawable create(BoxRequestsFile.DownloadThumbnail request, ImageView imageView, Bitmap placeHolder, final LruCache<File, Bitmap> bitmapLruCache) {
+        return new LoaderDrawable(ThumbnailTask.create(request, imageView, bitmapLruCache),imageView.getResources(), placeHolder);
     }
 
     private static class ThumbnailTask extends BoxFutureTask<BoxDownload> {
@@ -68,7 +71,7 @@ public class LoaderDrawable extends BitmapDrawable {
             return mKey;
         }
 
-        public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final ImageView target) {
+        public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final ImageView target, final LruCache<File, Bitmap> bitmapLruCache) {
             final WeakReference<ImageView> targetRef = new WeakReference<ImageView>(target);
             Callable<BoxResponse<BoxDownload>> callable = new Callable<BoxResponse<BoxDownload>>() {
                 @Override
@@ -83,7 +86,17 @@ public class LoaderDrawable extends BitmapDrawable {
                             ret = request.send();
                         }
                         final ImageView target = targetRef.get();
-                        final Bitmap bm = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                        Bitmap bm = null;
+                        if (bitmapLruCache != null){
+                            bm = bitmapLruCache.get(imageFile);
+                        }
+                        if (bm == null) {
+                            bm = (target.getMeasuredWidth() <= 0 || target.getMeasuredHeight() <= 0) ? BitmapFactory.decodeFile(imageFile.getAbsolutePath()) :
+                                    SdkUtils.decodeSampledBitmapFromFile(imageFile, target.getMeasuredWidth(), target.getMeasuredHeight());
+                            if (bitmapLruCache != null){
+                                bitmapLruCache.put(imageFile, bm);
+                            }
+                        }
 
                         // Ensure that the image view has not been recycled before setting the image
                         final String key = createRequestKey(request);
@@ -117,5 +130,7 @@ public class LoaderDrawable extends BitmapDrawable {
             });
         }
     }
+
+
 
 }

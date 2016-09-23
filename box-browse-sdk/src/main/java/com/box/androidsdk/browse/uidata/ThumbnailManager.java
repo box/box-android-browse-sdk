@@ -1,7 +1,13 @@
 package com.box.androidsdk.browse.uidata;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.util.LruCache;
 import android.widget.ImageView;
 
 import com.box.androidsdk.browse.R;
@@ -39,7 +45,7 @@ public class ThumbnailManager {
     /** Maps the target image view to the thumbnail task. Provides ability to cancel tasks */
     WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
 
-    private final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
+    protected final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
 
     protected static final String[] DOCUMENTS_EXTENSIONS_ARRAY = {"csv", "doc", "docx", "gdoc", "gsheet", "htm", "html", "msg", "odp", "odt", "ods", "pdf",
             "ppt", "pptx", "rtf", "tsv", "wpd", "xhtml", "xls", "xlsm", "xlsx", "xml", "xsd", "xsl", "txt"};
@@ -63,6 +69,7 @@ public class ThumbnailManager {
     protected static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
 
     protected static final ArrayList<String> IMAGE_EXTENSIONS = new ArrayList<String>();
+
 
     static {
         for (String ext : new String[] {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif"}){
@@ -261,14 +268,31 @@ public class ThumbnailManager {
                 task.cancel(false);
             }
 
-            // Placeholder should not be displayed (ie. set to null) if the file has already been fetched
             File thumbnailFile = getThumbnailForBoxFile((BoxFile) item);
-            Bitmap placeHolderBitmap = (thumbnailFile.length() == 0 || !thumbnailFile.exists()) ?
-                    BitmapFactory.decodeResource(targetImage.getResources(), getDefaultIconResource(item)) :
-                    null;
+            if (mController.getThumbnailCache() != null && mController.getThumbnailCache().get(thumbnailFile) != null){
+                targetImage.setImageBitmap(mController.getThumbnailCache().get(thumbnailFile));
+                return;
+            }
+
+            Bitmap placeHolderBitmap = null;
+            int iconResId = getDefaultIconResource(item);
+            if (mController.getIconResourceCache() != null){
+                placeHolderBitmap = mController.getIconResourceCache().get(iconResId);
+            }
+            if (placeHolderBitmap == null) {
+                if (targetImage.getMeasuredWidth() > 0 && targetImage.getMeasuredHeight() > 0) {
+                    placeHolderBitmap = SdkUtils.decodeSampledBitmapFromFile(targetImage.getResources(), iconResId, targetImage.getMeasuredWidth(), targetImage.getMeasuredHeight());
+                } else {
+                    placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), iconResId);
+                }
+                if ( mController.getIconResourceCache() != null) {
+                    mController.getIconResourceCache().put(iconResId, placeHolderBitmap);
+                }
+            }
+
             // Set the drawable to our loader drawable, which will show a placeholder before loading the thumbnail into the view
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), thumbnailFile);
-            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap);
+            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap,  mController.getThumbnailCache());
             targetImage.setImageDrawable(loaderDrawable);
             BoxFutureTask thumbnailTask = loaderDrawable.getTask();
             if (thumbnailTask != null) {
@@ -279,6 +303,7 @@ public class ThumbnailManager {
             targetImage.setImageResource(getDefaultIconResource(item));
         }
     }
+
 
 
 }
