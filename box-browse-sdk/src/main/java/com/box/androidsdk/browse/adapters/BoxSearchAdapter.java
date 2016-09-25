@@ -1,6 +1,7 @@
 package com.box.androidsdk.browse.adapters;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,7 +115,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
-            ((TextView)holder.getView().findViewById(R.id.text)).setText(String.format(mContext.getResources().getString(R.string.box_browsesdk_search_results_header), itemToBind.getName()));
+            ((TextView)holder.getView().findViewById(R.id.text)).setText(Html.fromHtml(String.format(mContext.getResources().getString(R.string.box_browsesdk_search_results_header), itemToBind.getName())));
         }
     }
 }

@@ -9,7 +9,7 @@
         android:id="@+id/text"
         android:text="@string/box_browsesdk_recent_searches_header"
         android:textSize="14sp"
-        android:textColor="#FF999EA4"
+        android:textColor="#737F8B"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="16dp"
