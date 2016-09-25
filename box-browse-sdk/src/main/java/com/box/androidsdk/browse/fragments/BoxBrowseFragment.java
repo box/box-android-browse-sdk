@@ -156,7 +156,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             updateItems(mItems);
         }
         super.onResume();
-        updateUI();
     }
 
     protected void cleanupBoxReceivers(){
