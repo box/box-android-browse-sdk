@@ -45,6 +45,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     protected int BOX_ITEM_VIEW_TYPE = 0;
     protected static final int REMOVE_LIMIT = 5;
+    protected static final int INSERT_LIMIT = 10;
+
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -106,7 +108,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         if (!mItemsPositionMap.containsKey(id)) {
             return -1;
         }
+        final long start = System.currentTimeMillis();
         final Lock lock = new ReentrantLock();
+        try {
+            lock.lockInterruptibly();
+        } catch (Exception e){
+            BoxLogUtils.e("lock interrupted", e);
+        }
         final int index = mItemsPositionMap.get(id);
         mItems.remove(index);
         mItemsPositionMap.remove(id);
@@ -117,7 +125,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 lock.unlock();
             }
         });
-        lock.lock();
         for (int i = index; i < mItems.size(); i++) {
             mItemsPositionMap.put(mItems.get(i).getId(), i);
         }
@@ -167,6 +174,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     } else {
                         notifyDataSetChanged();
                     }
+                    lock.unlock();
                 }
             });
 
@@ -204,15 +212,37 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
         final HashMap<String, Integer> newPositionMap = new HashMap<String, Integer>(items.size());
-
+        final ArrayList<BoxItem> newItems = new ArrayList<BoxItem>();
         for (int i=0; i < items.size(); i++) {
+            if (oldPositionMap.get(items.get(i).getId()) == null){
+                newItems.add(items.get(i));
+            }
             newPositionMap.put(items.get(i).getId(), i);
         }
-        // if we are updating to a smaller size list we must delete old entries first.
 
-        if (oldPositionMap.size() > newPositionMap.size() ) {
+        // there are only additions and no deletions, and if there aren't too many inserts
+        if (newItems.size() + oldPositionMap.size() == items.size() && newItems.size() <= INSERT_LIMIT){
 
+            mItems.clear();
+            mItems.addAll(items);
+            mItemsPositionMap = newPositionMap;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    // in order to show animations of new items
+                    if (oldPositionMap.size() > 0  && oldPositionMap.size() + newItems.size() == mItems.size()){
+                        for (BoxItem item : newItems){
+                            notifyItemInserted(mItemsPositionMap.get(item.getId()));
+                        }
+                    }
+                    notifyItemRangeChanged(0, mItems.size());
+                    lock.unlock();
+                }
+            });
+            return;
 
+        } else if (newItems.size() == 0) {
+            // if there are no additions figure out the number of deletions.
             Iterator<Map.Entry<String,Integer>> iterator = oldPositionMap.entrySet().iterator();
             while (iterator.hasNext()){
                 Map.Entry<String,Integer> entry = iterator.next();
@@ -221,55 +251,48 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 }
             }
 
-            // if the user is removing over the remove limit it's not worth removing them individually.
-            if (oldPositionMap.size() > REMOVE_LIMIT){
-                mItems.clear();
-                mItems.addAll(items);
-                mItemsPositionMap = newPositionMap;
+            // if the user is removing too many things just rely on fallback.
+            if (oldPositionMap.size() <= REMOVE_LIMIT){
+                // NOTE:
+                // We need to notify item removed in descending order of index
+                // Otherwise once we remove the 1st item, index of all others would change
+                // and we will end up removing incorrect items
+                final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
+                removedIndexes.addAll(oldPositionMap.values());
+                Collections.sort(removedIndexes);
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyDataSetChanged();
+                        for (int i = removedIndexes.size() - 1; i >= 0; i--) {
+                            mItems.remove(removedIndexes.get(i)); //Remove individual items
+                            notifyItemRemoved(removedIndexes.get(i));
+                        }
+                        mItems.clear();
+                        mItems.addAll(items);
+                        mItemsPositionMap = newPositionMap;
+                        notifyItemRangeChanged(0, mItems.size());
+                        lock.unlock();
+
                     }
                 });
                 return;
             }
 
-            // NOTE:
-            // We need to notify item removed in descending order of index
-            // Otherwise once we remove the 1st item, index of all others would change
-            // and we will end up removing incorrect items
-            final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
-            removedIndexes.addAll(oldPositionMap.values());
-            Collections.sort(removedIndexes);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                     for (int i = removedIndexes.size() - 1; i >= 0; i--) {
-                        mItems.remove(removedIndexes.get(i)); //Remove individual items
-                        notifyItemRemoved(removedIndexes.get(i));
-                    }
-                    mItems.clear();
-                    mItems.addAll(items); //Update everything since we have new info.
-                    mItemsPositionMap = newPositionMap;
-                    lock.unlock();
-
-                }
-            });
-
-        } else {
-            mItems.clear();
-            mItems.addAll(items);
-            mItemsPositionMap = newPositionMap;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    notifyItemRangeChanged(0, mItems.size());
-                    lock.unlock();
-                }
-            });
 
         }
+
+        // fall back for cases we aren't handling individually. for example mixed deletions and additions.
+        mItems.clear();
+        mItems.addAll(items);
+        mItemsPositionMap = newPositionMap;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+                lock.unlock();
+            }
+        });
+
 
     }
 
