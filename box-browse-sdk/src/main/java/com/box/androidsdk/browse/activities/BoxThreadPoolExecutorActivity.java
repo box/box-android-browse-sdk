@@ -108,7 +108,12 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
             @Override
             public void onAuthFailure(BoxAuthentication.BoxAuthenticationInfo info, Exception ex) {
                 finish();
-                Toast.makeText(BoxThreadPoolExecutorActivity.this, R.string.box_browsesdk_session_is_not_authenticated, Toast.LENGTH_LONG).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(BoxThreadPoolExecutorActivity.this, R.string.box_browsesdk_session_is_not_authenticated, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
