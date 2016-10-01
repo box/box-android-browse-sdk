@@ -4,10 +4,10 @@
     <string name="box_browsesdk_problem_performing_search">Problem performing search.</string>
     <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">You cannot view the items in this folder.</string>
     <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">Network error. Please try again.</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid" >Session is not authenticated</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on" >No item selected</string>
+    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">Session is not authenticated</string>
+    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">No item selected</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level" >All Files</string>
+    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">All Files</string>
 
     <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Settings</string>
     <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">Search</string>
@@ -57,4 +57,7 @@
     <string name="item_size_25_to_100">25-100 MB</string>
     <string name="item_size_100_to_1000">1000 MB - 1 GB</string>
     <string name="search_filter_label_delimiter">,&#160;</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
