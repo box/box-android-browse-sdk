@@ -144,7 +144,8 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             mProgress.setVisibility(View.VISIBLE);
             mOffset = 0;
             mRequest.setLimit(mLimit)
-                    .setOffset(mOffset);
+                    .setOffset(mOffset)
+                    .limitAncestorFolderIds(new String[]{mParentFolder.getId()});
             getController().execute(mRequest);
         }
     }
@@ -270,29 +271,10 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
 
         /**
          * @param session
-         * @param searchRequest
          */
-        public Builder(BoxSession session, BoxRequestsSearch.Search searchRequest) {
-            mRequest = searchRequest;
-            mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putSerializable(OUT_ITEM, mRequest);
-        }
-
-        /**
-         * @param session
-         */
-        public Builder(BoxSession session) {
+        public Builder(BoxSession session, BoxFolder parentFolder) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
-        }
-
-        /**
-         * @param session
-         */
-        public Builder(BoxSession session, String searchQuery, BoxFolder parentFolder) {
-            mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
-            mArgs.putString(OUT_QUERY, searchQuery);
             mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
         }
 

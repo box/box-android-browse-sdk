@@ -53,6 +53,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
     private BoxSearchView mSearchView;
+    private BoxFolder mCurrentBoxFolder;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +64,9 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         if (savedInstanceState != null) {
             mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
             mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
+            mCurrentBoxFolder = (BoxFolder) savedInstanceState.getSerializable(EXTRA_ITEM);
+        } else if (getIntent() != null) {
+            mCurrentBoxFolder = (BoxFolder) getIntent().getSerializableExtra(EXTRA_ITEM);
         }
     }
 
@@ -214,7 +218,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
         // If click is on a folder, navigate to that folder
         if (item instanceof BoxFolder) {
-            handleBoxFolderClicked((BoxFolder) item);
+            mCurrentBoxFolder = (BoxFolder) item;
+            handleBoxFolderClicked(mCurrentBoxFolder);
         }
     }
 
@@ -225,7 +230,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
             // All fragments will always navigate into folders
-            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession).build();
+            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, mCurrentBoxFolder).build();
             trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
                     .addToBackStack(BoxBrowseFragment.TAG)
                     .commit();
