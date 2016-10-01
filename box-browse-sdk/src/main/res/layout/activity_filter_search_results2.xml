@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.box.androidsdk.browse.activities.FilterSearchResults"
+    android:background="#FFFFFF">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/clear_apply_bar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- File types -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fileTypeLabel"
+                    android:text="@string/file_type_label"
+                    android:textSize="14sp"
+                    android:textColor="#FF737F8B"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="20dp"/>
+
+                <include
+                    android:id="@+id/audioFileTypeContainer"
+                    layout="@layout/filter_search_results_file_type_item" />
+
+                <include
+                    android:id="@+id/boxnoteFileTypeContainer"
+                    layout="@layout/filter_search_results_file_type_item" />
+
+                <include
+                    android:id="@+id/documentFileTypeContainer"
+                    layout="@layout/filter_search_results_file_type_item" />
+
+                <include
+                    android:id="@+id/folderFileTypeContainer"
+                    layout="@layout/filter_search_results_file_type_item" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/seeMoreFileType"
+                    android:text="@string/search_filter_file_type_see_more"
+                    android:textSize="16sp"
+                    android:textColor="#FF737F8B"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingBottom="16dp"
+                    />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/hiddenFileTypes"
+                    android:visibility="gone">
+                    <include
+                        android:id="@+id/imageFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                    <include
+                        android:id="@+id/pdfFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                    <include
+                        android:id="@+id/presentationFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                    <include
+                        android:id="@+id/spreadsheetFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                    <include
+                        android:id="@+id/videoFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33BDC3C7"/>
+
+            <!-- Date modified -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/dateModifiedLabel"
+                    android:text="@string/date_modified_label"
+                    android:textSize="14sp"
+                    android:textColor="#FF737F8B"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="20dp"/>
+
+                <include
+                    android:id="@+id/dateModifiedContainerAnyTime"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/dateModifiedContainerPastDay"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/dateModifiedContainerPastWeek"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/dateModifiedContainerPastMonth"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/dateModifiedContainerPastYear"
+                    layout="@layout/filter_search_results_expandable_item" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33BDC3C7"/>
+
+            <!-- Size -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/itemSizeLabel"
+                    android:text="@string/item_size_label"
+                    android:textSize="14sp"
+                    android:textColor="#FF737F8B"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="20dp"/>
+
+                <include
+                    android:id="@+id/itemSizeContainerAny"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/itemSizeContainerLessThanOne"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/itemSizeContainerOneToFive"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/itemSizeContainerFiveToTwentyFive"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/itemSizeContainerTwentyFiveToOneHundred"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+                <include
+                    android:id="@+id/itemSizeContainerOneHundredToOneThousand"
+                    layout="@layout/filter_search_results_expandable_item" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/white"
+        android:id="@+id/clear_apply_bar"
+        android:layout_height="48dp">
+        <Button
+            style="@style/BorderlessButton"
+            android:paddingLeft="24dp"
+            android:layout_toLeftOf="@+id/apply_button"
+            android:text="@string/clear_filters"
+            android:textColor="#1992D4"
+            android:id="@+id/clear_filters_button"
+            android:layout_centerVertical="true" />
+        <Button
+            android:id="@+id/apply_button"
+            android:text="@string/apply"
+            android:paddingRight="24dp"
+            style="@style/BorderlessButton"
+            android:textColor="#1992D4"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+        <View
+            android:layout_width="match_parent"
+            android:background="?android:attr/listDivider"
+            android:layout_alignParentTop="true"
+            android:layout_height="1dp"/>
+    </RelativeLayout>
+</RelativeLayout>

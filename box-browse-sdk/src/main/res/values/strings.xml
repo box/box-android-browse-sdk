@@ -24,4 +24,37 @@
     <string name="box_browsesdk_search_hint">Search</string>
     <string name="box_browsesdk_recent_searches_header">Recent Searches</string>
     <string name="box_browsesdk_search_results_header">Results in <![CDATA[<b>%1$s</b>]]></string>
+
+    <string name="search_hint">Search in %1$s</string>
+    <string name="filter_results_header">Filter Results</string>
+    <string name="filter_search_results">Refine Search Results</string>
+    <string name="apply">Apply</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="file_type_header">File Type</string>
+    <string name="any_type">Any Type</string>
+    <string name="file_type_label">File Type</string>
+    <string name="search_filter_file_type_pdf">PDF</string>
+    <string name="search_filter_file_type_spreadsheet">Spreadsheet</string>
+    <string name="search_filter_file_type_presentation">Presentation</string>
+    <string name="search_filter_file_type_image">Image</string>
+    <string name="search_filter_file_type_folder">Folder</string>
+    <string name="search_filter_file_type_document">Document</string>
+    <string name="search_filter_file_type_boxnote">Box Note</string>
+    <string name="search_filter_file_type_video">Video</string>
+    <string name="search_filter_file_type_audio">Audio</string>
+    <string name="search_filter_file_type_see_more">See more...</string>
+    <string name="date_modified_label">Date Modified</string>
+    <string name="any_time">Any Time</string>
+    <string name="past_day">Past Day</string>
+    <string name="past_week">Past Week</string>
+    <string name="past_month">Past Month</string>
+    <string name="past_year">Past Year</string>
+    <string name="item_size_label">Size</string>
+    <string name="item_size_any">Any Size</string>
+    <string name="item_size_0_to_1">0-1 MB</string>
+    <string name="item_size_1_to_5">1-5 MB</string>
+    <string name="item_size_5_to_25">1-25 MB</string>
+    <string name="item_size_25_to_100">25-100 MB</string>
+    <string name="item_size_100_to_1000">1000 MB - 1 GB</string>
+    <string name="search_filter_label_delimiter">,&#160;</string>
 </resources>

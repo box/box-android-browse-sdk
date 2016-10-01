@@ -10,5 +10,7 @@
     <color name="box_browsesdk_shadow">#88333333</color>
     <color name="box_browsesdk_list_background">#ffffff</color>
     <color name="box_browsesdk_list_item_color">#737F8B</color>
+    <color name="primary">#1992D4</color>
+    <color name="black">#FF212121</color>
 
 </resources>
