@@ -67,7 +67,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     public static final String EXTRA_SEARCH_FILTERS = "SearchFragment.SearchFilters";
 
     private View mSearchFiltersHeader;
-    private BoxSearchFilters mSearchFilters;
+    protected BoxSearchFilters mSearchFilters;
     private HashMap<BoxSearchFilters.ItemType, String[]> mItemTypeToExtensions;
 
     // Size of 1MB as per search API
