@@ -110,6 +110,11 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     }
 
     @Override
+    protected int getLayout() {
+        return R.layout.box_browsesdk_fragment_search;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 

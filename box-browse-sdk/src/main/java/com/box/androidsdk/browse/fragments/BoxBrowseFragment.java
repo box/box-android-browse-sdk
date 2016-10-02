@@ -197,12 +197,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         // This is a work around to show the loading circle because SwipeRefreshLayout.onMeasure must be called before setRefreshing to show the animation
         mSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
 
-        // Hide the recent search view. This is specific to search fragment.
-        mSearchRecentsListView = (ListView) mRootView.findViewById(R.id.box_browsesdk_search_recents_listview);
-        if (mSearchRecentsListView != null) {
-            mSearchRecentsListView.setVisibility(View.GONE);
-        }
-
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
         mItemsView.addItemDecoration(new FooterDecoration(getResources()));
