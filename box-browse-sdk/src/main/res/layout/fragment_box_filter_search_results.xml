@@ -10,7 +10,8 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/clear_apply_bar">
+            android:layout_above="@+id/clear_apply_bar"
+            android:id="@+id/scrollView">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -100,7 +101,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/dateModified">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -144,7 +146,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:id="@+id/size">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -198,7 +201,7 @@
                 android:paddingLeft="24dp"
                 android:layout_toLeftOf="@+id/apply_button"
                 android:text="@string/clear_filters"
-                android:textColor="#1992D4"
+                android:textColor="@color/filter_search_buttons"
                 android:id="@+id/clear_filters_button"
                 android:layout_centerVertical="true" />
             <Button
@@ -206,7 +209,7 @@
                 android:text="@string/apply"
                 android:paddingRight="24dp"
                 style="@style/BorderlessButton"
-                android:textColor="#1992D4"
+                android:textColor="@color/filter_search_buttons"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true" />

@@ -1,9 +1,7 @@
 package com.box.androidsdk.browse.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -13,7 +11,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
@@ -28,6 +28,9 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     private HashMap<BoxSearchFilters.ItemType, FileTypeData> mFileTypeMap;
     private boolean mDateModifiedExpanded;
     private boolean mItemSizeExpanded;
+    private ScrollView mScrollView;
+    private LinearLayout mDateModifiedView;
+    private LinearLayout mSizeView;
 
     public BoxFilterSearchResultsFragment() {
         // Required empty public constructor
@@ -55,6 +58,9 @@ public class BoxFilterSearchResultsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_box_filter_search_results, container, false);
+        mScrollView = (ScrollView) view.findViewById(R.id.scrollView);
+        mDateModifiedView = (LinearLayout) view.findViewById(R.id.dateModified);
+        mSizeView = (LinearLayout) view.findViewById(R.id.size);
 
         mDateModifiedExpanded = false;
         mItemSizeExpanded = false;
@@ -96,6 +102,13 @@ public class BoxFilterSearchResultsFragment extends Fragment {
                 mFilters.setItemSize(itemSize);
                 setupSizeRange(view);
                 enableDisableClearButton(view);
+
+                mScrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScrollView.smoothScrollTo(0, mSizeView.getBottom());
+                    }
+                });
             }
         });
 
@@ -138,6 +151,13 @@ public class BoxFilterSearchResultsFragment extends Fragment {
                 mFilters.setItemModifiedDate(dateModified);
                 setupDateModified(view);
                 enableDisableClearButton(view);
+
+                mScrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScrollView.smoothScrollTo(0, mDateModifiedView.getBottom());
+                    }
+                });
             }
         });
 
@@ -176,10 +196,18 @@ public class BoxFilterSearchResultsFragment extends Fragment {
         seeMoreTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeMoreTextView.setVisibility(View.GONE);
-                view.findViewById(R.id.hiddenFileTypes).setVisibility(View.VISIBLE);
+                showHiddenFileTypes(seeMoreTextView, view);
             }
         });
+
+        if (mFilters.mItemTypes.size() > 0) {
+            showHiddenFileTypes(seeMoreTextView, view);
+        }
+    }
+
+    private void showHiddenFileTypes(TextView seeMoreTextView, View view) {
+        seeMoreTextView.setVisibility(View.GONE);
+        view.findViewById(R.id.hiddenFileTypes).setVisibility(View.VISIBLE);
     }
 
     private void setupFileType(final View view, final BoxSearchFilters.ItemType type, int containerId, int icon, int text) {
