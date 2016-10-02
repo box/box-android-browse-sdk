@@ -200,7 +200,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
 
             switch (mSearchFilters.mItemModifiedDate) {
                 case Any:
-                    filters.add(getResources().getString(R.string.any_time));
                     break;
                 case PastDay:
                     filters.add(getResources().getString(R.string.past_day));
@@ -218,7 +217,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
 
             switch (mSearchFilters.mItemSize) {
                 case Any:
-                    filters.add(getResources().getString(R.string.item_size_any));
                     break;
                 case lessThanOneMb:
                     filters.add(getResources().getString(R.string.item_size_0_to_1));
