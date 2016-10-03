@@ -11,9 +11,12 @@ import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.content.BoxConfig;
+import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.requests.BoxCacheableRequest;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
@@ -117,7 +120,18 @@ public class BoxBrowseController implements BrowseController {
         if (request == null) {
             return;
         }
+        if (BoxConfig.getCache() != null && request instanceof BoxCacheableRequest){
+            try {
+                BoxFutureTask cacheTask = ((BoxCacheableRequest) request).toTaskForCachedResult();
+                if (mListener != null){
+                    cacheTask.addOnCompletedListener(mListener);
+                }
+                getApiExecutor().execute(cacheTask);
+            } catch (BoxException e){
+                BoxLogUtils.e("cache task error ", e);
+            }
 
+        }
         BoxFutureTask task = request.toTask();
         if (mListener != null) {
             task.addOnCompletedListener(mListener);
@@ -128,6 +142,10 @@ public class BoxBrowseController implements BrowseController {
                 getThumbnailExecutor() :
                 getApiExecutor();
         executor.submit(task);
+    }
+
+    private <T extends BoxRequest & BoxCacheableRequest > T getCachR(BoxRequest request){
+        return (T)request;
     }
 
     @Override

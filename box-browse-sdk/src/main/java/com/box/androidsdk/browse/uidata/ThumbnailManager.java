@@ -6,35 +6,50 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
+import android.media.ThumbnailUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.LruCache;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewParent;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxBookmark;
+import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
+import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.WeakHashMap;
+import java.util.concurrent.ExecutionException;
 
 
 /**
  * 
  * This class manages thumbnails to display to users. This class does not do network calls.
  */
-public class ThumbnailManager {
+public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     /** The extension added for thumbnails in this manager. */
     private static final String THUMBNAIL_FILE_EXTENSION = ".thumbnail";
@@ -270,6 +285,7 @@ public class ThumbnailManager {
 
             File thumbnailFile = getThumbnailForBoxFile((BoxFile) item);
             if (mController.getThumbnailCache() != null && mController.getThumbnailCache().get(thumbnailFile) != null){
+                Bitmap bm = mController.getThumbnailCache().get(thumbnailFile);
                 targetImage.setImageBitmap(mController.getThumbnailCache().get(thumbnailFile));
                 return;
             }
@@ -292,7 +308,7 @@ public class ThumbnailManager {
 
             // Set the drawable to our loader drawable, which will show a placeholder before loading the thumbnail into the view
             BoxRequestsFile.DownloadThumbnail request = mController.getThumbnailRequest(item.getId(), thumbnailFile);
-            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, targetImage, placeHolderBitmap,  mController.getThumbnailCache());
+            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, item, targetImage, placeHolderBitmap, this);
             targetImage.setImageDrawable(loaderDrawable);
             BoxFutureTask thumbnailTask = loaderDrawable.getTask();
             if (thumbnailTask != null) {
@@ -304,6 +320,98 @@ public class ThumbnailManager {
         }
     }
 
+    @Override
+    public void onImageReady(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view) {
+        if (bitmap == null || bitmapSourceFile == null || view == null){
+            return;
+        }
+        if (view.getMeasuredWidth() > 0 && view.getMeasuredHeight() > 0){
+            mController.getThumbnailCache().put(bitmapSourceFile, ThumbnailUtils.extractThumbnail(bitmap, view.getMeasuredWidth(), view.getMeasuredHeight()));
+            bitmap.recycle();
+        } else {
+            postLaterToView(bitmapSourceFile, request, bitmap, view);
+            return;
 
+        }
+        Bitmap scaledBitmap = mController.getThumbnailCache().get(bitmapSourceFile);
+        if (scaledBitmap != null && isRequestStillApplicable(request, view)){
+            loadThumbnail(scaledBitmap, view);
+        }
+    }
+
+    // this is a work around to get view to post this only view is attached. Must be done on ui thread.
+    protected void postLaterToView(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view){
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mController.getThumbnailExecutor().execute(new Runnable(){
+                            @Override
+                            public void run() {
+                                onImageReady(bitmapSourceFile, request, bitmap, view);
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
+    }
+
+    public void loadThumbnail(final Bitmap bitmap, final ImageView imageView){
+        ViewParent parent = imageView.getParent();
+        boolean isScrolling = false;
+        while (parent != null){
+            parent = parent.getParent();
+            if (parent instanceof RecyclerView){
+                isScrolling = ((RecyclerView) parent).getScrollState() != RecyclerView.SCROLL_STATE_IDLE;
+                if (isScrolling) {
+                    final WeakReference<ImageView> imageViewRef = new WeakReference(imageView);
+                    ((RecyclerView) parent).addOnScrollListener(new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                            if (imageViewRef.get() == null){
+                                recyclerView.removeOnScrollListener(this);
+                                return;
+                            }
+                            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                                ImageView view = imageViewRef.get();
+                                if (view != null && view.getDrawable() instanceof LoaderDrawable) {
+                                    loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                }
+                                recyclerView.removeOnScrollListener(this);
+
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        if (isScrolling){
+            // do nothing we will handle this with the scroll listener.
+        } else {
+            imageView.post(new Runnable() {
+                @Override
+                public void run() {
+                    //TODO decide whether to use two views for crossfading animation.
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+
+    }
+
+
+
+    private boolean isRequestStillApplicable(final BoxRequest request, final ImageView view){
+        if (view.getDrawable() instanceof LoaderDrawable){
+            return ((LoaderDrawable) view.getDrawable()).matchesRequest(request);
+        }
+        return false;
+
+    }
 
 }

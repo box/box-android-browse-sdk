@@ -33,9 +33,6 @@ import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.browse.service.CompletionListener;
-import com.box.androidsdk.content.BoxApiFile;
-import com.box.androidsdk.content.BoxApiFolder;
-import com.box.androidsdk.content.BoxApiSearch;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
@@ -45,7 +42,6 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -87,6 +83,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent instanceof BoxResponseIntent) {
+                System.out.println("mBroadcastReceiver " + intent);
                 handleResponse((BoxResponseIntent) intent);
             }
         }
@@ -136,17 +133,33 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     @Override
-    public void onResume() {
-        getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        getLocalBroadcastManager().registerReceiver(mBroadcastReceiver, getIntentFilter());
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+        initBoxReceivers();
+
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
+        cleanupBoxReceivers();
+        super.onStop();
+    }
+
+    protected void initBoxReceivers(){
+        getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        getLocalBroadcastManager().registerReceiver(mBroadcastReceiver, getIntentFilter());
+        if (mItems == null) {
+            mProgress.setVisibility(View.VISIBLE);
+            loadItems();
+        } else {
+            // this call must be made after registering the receiver in order to handle very fast responses.
+            updateItems(mItems);
+        }
+    }
+
+    protected void cleanupBoxReceivers(){
         getLocalBroadcastManager().unregisterReceiver(mBroadcastReceiver);
         getActivity().unregisterReceiver(mConnectivityReceiver);
-        super.onPause();
     }
 
     @Override
@@ -194,6 +207,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mAdapter = createAdapter();
 
         mAdapter.registerAdapterDataObserver(new AdapterDataObserver() {
+
+            @Override
+            public void onChanged() {
+                updateUI();
+            }
+
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
                 updateUI();
@@ -210,13 +229,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
 
-
-        if (mItems == null) {
-            mProgress.setVisibility(View.VISIBLE);
-            loadItems();
-        } else {
-            updateItems(mItems);
-        }
         return mRootView;
     }
 
@@ -227,6 +239,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // UI should not be updated before the first load
             return;
         }
+
         setEmptyState(mAdapter.getItemCount() == 0);
 
     }
@@ -539,6 +552,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void notifyUpdateListeners() {
+        System.out.println("notifyUpdateListeners " );
         synchronized (mUpdateListeners) {
             for (OnUpdateListener listener : mUpdateListeners) {
                 listener.onUpdate();
