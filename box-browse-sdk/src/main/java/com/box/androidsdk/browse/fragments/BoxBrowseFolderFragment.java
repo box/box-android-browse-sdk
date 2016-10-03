@@ -79,20 +79,8 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     protected void onFolderFetched(BoxFolder folder) {
         if (folder != null && mFolder.getId().equals(folder.getId())) {
             BoxIteratorItems items = folder.getItemCollection();
-            System.out.println("onFolderfetched " + folder.getName());
             if (items != null && items.getEntries() != null && items.fullSize() != null && (items.size() > 0 || items.fullSize() == 0)) {
                 updateItems(folder.getItemCollection().getEntries());
-            } else {
-                System.out.println("onFolderFetched faileda!! " + items);
-                System.out.println("onFolderFetched failedb!! " + items.getEntries());
-                System.out.println("onFolderFetched failedc!! " + items.fullSize());
-                try {
-                    System.out.println("onFolderFetched failedd!! " + (items.size() > 0 || items.fullSize() == 0));
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-
-
             }
             mFolder = createFolderWithoutItems(folder);
             notifyUpdateListeners();

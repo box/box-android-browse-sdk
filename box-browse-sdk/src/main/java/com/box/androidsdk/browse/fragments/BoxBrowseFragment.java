@@ -83,7 +83,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent instanceof BoxResponseIntent) {
-                System.out.println("mBroadcastReceiver " + intent);
                 handleResponse((BoxResponseIntent) intent);
             }
         }
@@ -552,7 +551,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     protected void notifyUpdateListeners() {
-        System.out.println("notifyUpdateListeners " );
         synchronized (mUpdateListeners) {
             for (OnUpdateListener listener : mUpdateListeners) {
                 listener.onUpdate();

@@ -18,7 +18,6 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     public BoxResponseIntent(BoxResponse<E> response) {
         mResponse = response;
         if (mResponse.getRequest() != null) {
-            System.out.println("BoxResponseIntent setAction " + mResponse.getRequest().getClass().getName());
             setAction(mResponse.getRequest().getClass().getName());
         }
     }

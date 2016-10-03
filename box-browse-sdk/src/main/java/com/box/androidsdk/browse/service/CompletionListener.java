@@ -19,11 +19,9 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
     @Override
     public void onCompleted(BoxResponse response) {
         BoxResponseIntent intent = new BoxResponseIntent(response);
-        System.out.println("onCompleted " + response + " * " + response.getRequest() + " xx " + response.getResult());
         if (!response.isSuccess()) {
             BoxLogUtils.e(TAG, response.getException());
         }
-        System.out.println("onCompleted before send " + intent + " mBroadcastManager " + mBroadcastManager);
 
         mBroadcastManager.sendBroadcast(intent);
     }

@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
 import com.box.androidsdk.browse.activities.BoxBrowseFolderActivity;
+import com.box.androidsdk.browse.service.BoxSimpleLocalCache;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxConfig;
 import com.box.androidsdk.content.models.BoxDownload;
@@ -38,6 +39,10 @@ public class SampleBrowseActivity extends AppCompatActivity {
         BoxConfig.IS_LOG_ENABLED = true;
         BoxConfig.CLIENT_ID = "your-client-id";
         BoxConfig.CLIENT_SECRET = "your-client-secret";
+
+        // Optional: Setting an implementation of a cache will allow the browse sdk to immediately show
+        // data to the user while waiting for server data.
+        BoxConfig.setCache(new BoxSimpleLocalCache());
         initUI();
 
         session = new BoxSession(this);
