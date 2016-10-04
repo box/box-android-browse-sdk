@@ -22,6 +22,7 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
         if (!response.isSuccess()) {
             BoxLogUtils.e(TAG, response.getException());
         }
+
         mBroadcastManager.sendBroadcast(intent);
     }
 

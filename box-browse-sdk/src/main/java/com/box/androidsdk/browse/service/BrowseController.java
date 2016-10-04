@@ -1,6 +1,8 @@
 package com.box.androidsdk.browse.service;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxFutureTask;
@@ -70,6 +72,9 @@ public interface BrowseController {
 
     ThumbnailManager getThumbnailManager();
 
+    LruCache<File, Bitmap> getThumbnailCache();
+
+    LruCache<Integer, Bitmap> getIconResourceCache();
 
     /**
      * Returns the executor used for thumbnail api requests

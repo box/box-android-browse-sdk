@@ -27,20 +27,24 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
     protected final Context mContext;
     protected final BrowseController mController;
     protected final OnInteractionListener mListener;
-    protected ArrayList<BoxItem> mItems = new ArrayList<BoxItem>();
-    protected HashMap<String, Integer> mItemsPositionMap = new HashMap<String, Integer>();
+    protected final ArrayList<BoxItem> mItems = new ArrayList<BoxItem>();
     protected final Handler mHandler;
 
     protected int BOX_ITEM_VIEW_TYPE = 0;
     protected static final int REMOVE_LIMIT = 5;
+    protected static final int INSERT_LIMIT = 10;
+    protected ReadWriteLock mLock = new ReentrantReadWriteLock();
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -62,6 +66,14 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         boxItemHolder.bindItem(item);
     }
 
+    protected HashMap<String, Integer> getPositionMap(final List<BoxItem> items){
+        HashMap<String, Integer> map = new HashMap<String, Integer>(items.size());
+        for (int i= 0;i < items.size(); i++){
+            map.put(items.get(i).getId(), i);
+        }
+        return map;
+    }
+
     @Override
     public int getItemCount() {
         return mItems != null ? mItems.size() : 0;
@@ -73,166 +85,312 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
 
-    public synchronized void setItems(ArrayList<BoxItem> items) {
-        mItemsPositionMap.clear();
-        mItems = items;
-        for (int i = 0; i < mItems.size(); ++i) {
-            mItemsPositionMap.put(mItems.get(i).getId(), i);
+    public void setItems(ArrayList<BoxItem> items) {
+        Lock lock = mLock.writeLock();
+        lock.lock();
+        try {
+            mItems.clear();
+            mItems.addAll(items);
+        } finally {
+            lock.unlock();
         }
+
     }
 
     public boolean contains(BoxItem item) {
-        return mItemsPositionMap.containsKey(item.getId());
-    }
-
-    public synchronized void removeAll() {
-        mItemsPositionMap.clear();
-        mItems.clear();
-    }
-
-    public int remove(BoxItem item) {
-        if (item == null) {
-            return -1;
+        Lock lock = mLock.readLock();
+        lock.lock();
+        try {
+            for (BoxItem containedItem : mItems) {
+                if (item.getId().equals(containedItem.getId())) {
+                    return true;
+                }
+            }
+        } finally {
+            lock.unlock();
         }
-        return remove(item.getId());
+        return false;
     }
 
-    public synchronized int remove(String id) {
-        if (!mItemsPositionMap.containsKey(id)) {
-            return -1;
+    public void removeAll() {
+        Lock lock = mLock.writeLock();
+        lock.lock();
+        try {
+            mItems.clear();
+        } finally {
+            lock.unlock();
         }
-        final int index = mItemsPositionMap.get(id);
-        mItems.remove(index);
-        mItemsPositionMap.remove(id);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                notifyItemRemoved(index);
+                mLock.readLock().lock();
+                notifyDataSetChanged();
+                mLock.readLock().unlock();
             }
         });
-        for (int i = index; i < mItems.size(); ++i) {
-            mItemsPositionMap.put(mItems.get(i).getId(), i);
+    }
+
+
+    /**
+     * Removes the ids from this folder if applicable.
+     * @param ids
+     */
+    public void remove(final List<String> ids){
+        mLock.readLock().lock();
+        try {
+            // check to see if any of the ids are applicable to the data set.
+            HashMap<String, Integer> itemsPositionMap = getPositionMap(mItems);
+            boolean foundInItems = false;
+            for (String id: ids){
+                if (itemsPositionMap.containsKey(id)){
+                    foundInItems = true;
+                    break;
+                }
+            }
+            if (!foundInItems){
+                // none of the ids are applicable for this data set no need to proceed.
+                return;
+            }
+
+        } finally{
+            mLock.readLock().unlock();
         }
-        return index;
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    final Lock writeLock = mLock.writeLock();
+                    writeLock.lock();
+                    HashSet<String> idsRemoved = new HashSet<String>(ids.size());
+                    try {
+                        final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
+                        HashMap<String, Integer> mItemsPositionMap = getPositionMap(mItems);
+                        for (String id : ids) {
+                            Integer index = mItemsPositionMap.get(id);
+                            if (index != null) {
+                                idsRemoved.add(id);
+                                indexesRemoved.add(index);
+                            }
+                        }
+                        // because we are using an array list we don't want to do multiple removes (as this needs to create a new array and does array copies).
+                        final ArrayList<BoxItem> listWithoutRemovedIds = new ArrayList<BoxItem>(mItems.size() - idsRemoved.size());
+                        for (BoxItem item : mItems) {
+                            if (!idsRemoved.contains(item.getId())) {
+                                listWithoutRemovedIds.add(item);
+                            }
+                        }
+
+                        boolean removedItems = false;
+                        if (indexesRemoved.size() <= REMOVE_LIMIT) {
+                            Collections.sort(indexesRemoved);
+                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                                notifyItemRemoved(indexesRemoved.get(i));
+                            }
+                            removedItems = true;
+                        }
+                        // we need to alter the list after the remove.
+                        mItems.clear();
+                        mItems.addAll(listWithoutRemovedIds);
+                        if (removedItems && mItems.size() > 0) {
+                            notifyItemRangeChanged(0, mItems.size());
+                        } else {
+                            notifyDataSetChanged();
+                        }
+                    } finally {
+                        writeLock.unlock();
+                    }
+                }
+            });
     }
 
     /**
      * Does the appropriate add and removes to display only provided items.
      * @param items
      */
-    public synchronized void updateTo(final ArrayList<BoxItem> items){
-
-        final HashMap<String, Integer> oldPositionMap = mItemsPositionMap;
-        final HashMap<String, Integer> newPositionMap = new HashMap<String, Integer>(items.size());
-
-        for (int i=0; i < items.size(); i++) {
-            newPositionMap.put(items.get(i).getId(), i);
-        }
-        // if we are updating to a smaller size list we must delete old entries first.
-
-        if (oldPositionMap.size() > newPositionMap.size() ) {
-
-
-            Iterator<Map.Entry<String,Integer>> iterator = oldPositionMap.entrySet().iterator();
-            while (iterator.hasNext()){
-                Map.Entry<String,Integer> entry = iterator.next();
-                if (newPositionMap.containsKey(entry.getKey())){
-                    iterator.remove();
-                }
-            }
-
-            // if the user is removing over the remove limit it's not worth removing them individually.
-            if (oldPositionMap.size() > REMOVE_LIMIT){
+    public void updateTo(final ArrayList<BoxItem> items){
+        final Lock writeLock = mLock.writeLock();
+        writeLock.lock();
+        try {
+            if (mItems.size() == 0){
+                // if going from completely empty to having something do not bother animating.
                 mItems.clear();
                 mItems.addAll(items);
-                mItemsPositionMap = newPositionMap;
-                notifyDataSetChanged();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLock.readLock().lock();
+                        notifyDataSetChanged();
+                        mLock.readLock().unlock();
+                    }
+                });
                 return;
             }
 
-            // NOTE:
-            // We need to notify item removed in descending order of index
-            // Otherwise once we remove the 1st item, index of all others would change
-            // and we will end up removing incorrect items
-            final ArrayList<Integer> removedIndexes = new ArrayList<Integer>(oldPositionMap.size());
-            removedIndexes.addAll(oldPositionMap.values());
-            Collections.sort(removedIndexes);
+            final HashMap<String, Integer> oldPositionMap = getPositionMap(mItems);
+            final ArrayList<Integer> newItemPositions = new ArrayList<Integer>();
+            boolean needsContentUpdate = false;
+            for (int i=0; i < items.size(); i++){
+                Integer index = oldPositionMap.remove(items.get(i).getId());
+                if (index == null){
+                    needsContentUpdate = true;
+                    newItemPositions.add(i);
+                } else if (!needsContentUpdate){
 
+                    if (index.equals(i)){
+                        if (!(mItems.get(i) == items.get(i))) {
+                            // check to see if the contents have changed for items with the same index.
+                            needsContentUpdate = !mItems.get(i).equals(items.get(i));
+                        }
+                    } else {
+                        needsContentUpdate = true;
+                    }
+                }
+            }
+            needsContentUpdate |= oldPositionMap.size() > 0 || newItemPositions.size() > 0 || items.size() == 0;
+            if (!needsContentUpdate ){
+                return;
+            } else {
+                if (oldPositionMap.size() == 0 && newItemPositions.size() > 0 && newItemPositions.size() <= INSERT_LIMIT){
+                    mItems.clear();
+                    mItems.addAll(items);
+                    // for inserts less than max.
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLock.readLock().lock();
+                            // in order to show animations of new items
+                            for (Integer insertIndex : newItemPositions){
+                                notifyItemInserted(insertIndex);
+                            }
+                            notifyItemRangeChanged(0, mItems.size());
+                            mLock.readLock().unlock();
+                        }
+                    });
+
+                } else if (oldPositionMap.size() > 0 && oldPositionMap.size() <= REMOVE_LIMIT){
+                    final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(oldPositionMap.size());
+                    indexesRemoved.addAll(oldPositionMap.values());
+                    Collections.sort(indexesRemoved);
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLock.writeLock().lock();
+                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                                notifyItemRemoved(indexesRemoved.get(i));
+                            }
+                            mItems.clear();
+                            mItems.addAll(items);
+                            notifyItemRangeChanged(0, mItems.size());
+                            mLock.writeLock().unlock();
+                        }
+                    });
+
+
+                } else {
+                    // for everything else, mixed operations or oeprations beyond limits
+                    mItems.clear();
+                    mItems.addAll(items);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLock.readLock().lock();
+                            notifyDataSetChanged();
+                            mLock.readLock().unlock();
+                        }
+                    });
+                }
+            }
+        } finally {
+            writeLock.unlock();
+        }
+
+
+
+
+    }
+
+    public void add(List<BoxItem> items) {
+        Lock lock = mLock.writeLock();
+        lock.lock();
+        try{
+            final int startingSize = mItems.size();
+            for (BoxItem item : items) {
+                mItems.add(item);
+            }
+            final int endingSize = mItems.size();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-
-                    for (int i = removedIndexes.size() - 1; i >= 0; i--) {
-                        mItems.remove(removedIndexes.get(i)); //Remove individual items
-                        notifyItemRemoved(removedIndexes.get(i));
-                    }
-                    mItems.clear();
-                    mItems.addAll(items); //Update everything since we have new info.
-                    mItemsPositionMap = newPositionMap;
-                    notifyItemRangeChanged(0, mItems.size());
+                    mLock.readLock().lock();
+                    notifyItemRangeInserted(startingSize - 1, endingSize -1);
+                    mLock.readLock().unlock();
                 }
             });
-
-        } else {
-            mItems.clear();
-            mItems.addAll(items);
-            mItemsPositionMap = newPositionMap;
-            notifyChange(0, mItems.size());
+        } finally{
+            lock.unlock();
         }
 
-    }
-
-    public void addAll(ArrayList<BoxItem> items) {
-        for (BoxItem item : items) {
-            add(item);
-        }
-    }
-
-    public synchronized void add(BoxItem item) {
-        mItems.add(item);
-        mItemsPositionMap.put(item.getId(), mItems.size() - 1);
     }
 
     public int update(BoxItem item) {
-        if (item == null || !mItemsPositionMap.containsKey(item.getId())) {
-            return -1;
-        }
+        final Lock lock = mLock.writeLock();
+        lock.lock();
+        try{
+            for (int i=0; i < mItems.size(); i++){
+                if(mItems.get(i).equals(item.getId())){
+                    final int index = i;
+                    mItems.set(index, item);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLock.readLock().lock();
+                            notifyItemChanged(index);
+                            mLock.readLock().unlock();
+                        }
+                    });
+                    return index;
+                }
+            }
 
-        int index = mItemsPositionMap.get(item.getId());
-        mItems.set(index, item);
-        notifyChange(index);
-        return index;
+            return -1;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public int indexOf(String id) {
-        if (!mItemsPositionMap.containsKey(id)) {
-            return -1;
+        mLock.readLock().lock();
+        for (int i=0; i < mItems.size(); i++){
+            if (mItems.get(i).getId().equals((id))){
+                return i;
+            }
         }
-
-        return mItemsPositionMap.get(id);
+        mLock.readLock().unlock();
+        return -1;
     }
 
     public ArrayList<BoxItem> getItems() {
-        return mItems;
+        mLock.readLock().lock();
+        try {
+            return (ArrayList<BoxItem>) mItems.clone();
+        } finally{
+            mLock.readLock().unlock();
+        }
     }
 
-    private void notifyChange(final int index) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyItemChanged(index);
-            }
-        });
+    @Override
+    public long getItemId(int position) {
+        mLock.readLock().lock();
+        try {
+            return Long.parseLong(mItems.get(position).getId());
+        } catch (NumberFormatException e){
+            return mItems.get(position).getId().hashCode();
+        } finally {
+            mLock.readLock().unlock();
+        }
     }
 
-    private void notifyChange(final int startIndex, final int endIndex) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyItemRangeChanged(startIndex, endIndex);
-            }
-        });
-    }
 
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         BoxItem mItem;

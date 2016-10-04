@@ -89,7 +89,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             filteredItems.add(item);
         }
         if (startRange > 0) {
-            mAdapter.addAll(filteredItems);
+            mAdapter.add(filteredItems);
         } else {
             mItems = filteredItems;
             mAdapter.setItems(mItems);
@@ -125,7 +125,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             checkConnectivity();
             return;
         }
-        mAdapter.remove(BoxSearchAdapter.LOAD_MORE_ID);
+        ArrayList<String> removeIds = new ArrayList<String>(1);
+        removeIds.add(BoxSearchAdapter.LOAD_MORE_ID);
+        mAdapter.remove(removeIds);
 
         if (response.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems items = (BoxIteratorItems) response.getResult();

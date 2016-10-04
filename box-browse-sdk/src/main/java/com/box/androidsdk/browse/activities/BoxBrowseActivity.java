@@ -59,6 +59,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         mController = new BoxBrowseController(mSession, new BoxApiFile(mSession),
                 new BoxApiFolder(mSession),
                 new BoxApiSearch(mSession));
+
         if (savedInstanceState != null) {
             mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
             mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);

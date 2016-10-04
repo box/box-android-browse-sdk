@@ -12,6 +12,7 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.eclipsesource.json.JsonObject;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class BoxSearchAdapter extends BoxItemAdapter {
 
@@ -46,7 +47,9 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     }
 
     public void addLoadMoreItem(BoxRequestsSearch.Search searchReq) {
-        this.add(LoadMoreItem.create(searchReq));
+        ArrayList<BoxItem> list = new ArrayList<BoxItem>(1);
+        list.add(LoadMoreItem.create(searchReq));
+        this.add(list);
     }
 
     class SearchViewHolder extends BoxItemViewHolder {

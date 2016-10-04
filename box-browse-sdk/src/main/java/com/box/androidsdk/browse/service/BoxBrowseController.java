@@ -1,6 +1,8 @@
 package com.box.androidsdk.browse.service;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
@@ -9,9 +11,12 @@ import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
 import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.content.BoxConfig;
+import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.requests.BoxCacheableRequest;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
@@ -42,6 +47,10 @@ public class BoxBrowseController implements BrowseController {
     protected final BoxSession mSession;
     protected final ThumbnailManager mThumbnailManager;
     protected BoxFutureTask.OnCompletedListener mListener;
+    protected static final int BITMAP_CACHE_DEFAULT_SIZE = 10000;
+
+    protected BitmapLruCache mThumbnailCache = new BitmapLruCache(BITMAP_CACHE_DEFAULT_SIZE);
+    protected LruCache<Integer, Bitmap> mIconResCache = new LruCache<Integer, Bitmap>(10);
 
 
     public BoxBrowseController(BoxSession session, BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {
@@ -50,6 +59,13 @@ public class BoxBrowseController implements BrowseController {
         mFolderApi = apiFolder;
         mSearchApi = apiSearch;
         mThumbnailManager = createThumbnailManager(mSession);
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+        if (cacheSize < BITMAP_CACHE_DEFAULT_SIZE){
+            mThumbnailCache = new BitmapLruCache(cacheSize);
+        }
     }
 
     public BoxBrowseController(BoxSession session) {
@@ -104,7 +120,18 @@ public class BoxBrowseController implements BrowseController {
         if (request == null) {
             return;
         }
+        if (BoxConfig.getCache() != null && request instanceof BoxCacheableRequest){
+            try {
+                BoxFutureTask cacheTask = ((BoxCacheableRequest) request).toTaskForCachedResult();
+                if (mListener != null){
+                    cacheTask.addOnCompletedListener(mListener);
+                }
+                getApiExecutor().execute(cacheTask);
+            } catch (BoxException e){
+                BoxLogUtils.e("cache task error ", e);
+            }
 
+        }
         BoxFutureTask task = request.toTask();
         if (mListener != null) {
             task.addOnCompletedListener(mListener);
@@ -157,6 +184,16 @@ public class BoxBrowseController implements BrowseController {
         return mApiExecutor;
     }
 
+    @Override
+    public LruCache<File, Bitmap> getThumbnailCache() {
+        return mThumbnailCache;
+    }
+
+    @Override
+    public LruCache<Integer, Bitmap> getIconResourceCache() {
+        return mIconResCache;
+    }
+
     /**
      * Executor that we will submit thumbnail tasks to.
      *
@@ -173,5 +210,17 @@ public class BoxBrowseController implements BrowseController {
     @Override
     public void Log(String tag, String msg, Throwable t) {
         BoxLogUtils.e(tag, msg, t);
+    }
+
+    protected class BitmapLruCache extends LruCache<File, Bitmap> {
+
+        public BitmapLruCache(int sizeInKb){
+            super(sizeInKb);
+        }
+
+        @Override
+        protected int sizeOf(File key, Bitmap value) {
+            return value.getByteCount() / 1024;
+        }
     }
 }
