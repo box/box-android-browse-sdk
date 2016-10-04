@@ -15,6 +15,7 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
@@ -82,8 +83,13 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 0;
 
         ArrayList<BoxItem> filteredItems = new ArrayList<BoxItem>();
+        ArrayList<BoxItem> adapterItems = mAdapter.getItems();
+        HashSet<String> itemIdsInAdapter = new HashSet<String>(adapterItems.size());
+        for (BoxItem item : adapterItems){
+            itemIdsInAdapter.add(item.getId());
+        }
         for (BoxItem item : items) {
-            if ((getItemFilter() != null && !getItemFilter().accept(item)) || mAdapter.contains(item)) {
+            if ((getItemFilter() != null && !getItemFilter().accept(item)) || itemIdsInAdapter.contains(item.getId())) {
                 continue;
             }
             filteredItems.add(item);
