@@ -258,14 +258,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                         public void run() {
                             try {
                                 for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
-                                    System.out.println("updateTo notifyItemRemoved ** " + indexesRemoved.get(i));
-
                                     notifyItemRemoved(indexesRemoved.get(i));
-
                                 }
                                 mItems.clear();
                                 mItems.addAll(items);
-                                System.out.println("updateTo notifyItemRangeChanged ** " + mItems.size());
                                 notifyItemRangeChanged(0, mItems.size());
                             } finally {
                                 writeLock.unlock();
@@ -296,12 +292,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     public void add(List<BoxItem> items) {
+        if (items.size() == 0){
+            return;
+        }
+
         final Lock lock = mLock.writeLock();
         lock.lock();
-            if (items.size() == 0){
-                return;
-            }
-            final int startingSize = mItems.size();
+        final int startingSize = mItems.size();
             for (BoxItem item : items) {
                 mItems.add(item);
             }
@@ -347,12 +344,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     public int indexOf(String id) {
         mLock.readLock().lock();
-        for (int i=0; i < mItems.size(); i++){
-            if (mItems.get(i).getId().equals((id))){
-                return i;
+        try {
+            for (int i = 0; i < mItems.size(); i++) {
+                if (mItems.get(i).getId().equals((id))) {
+                    return i;
+                }
             }
+        } finally {
+            mLock.readLock().unlock();
         }
-        mLock.readLock().unlock();
         return -1;
     }
 
