@@ -95,20 +95,14 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             filteredItems.add(item);
         }
         if (startRange > 0) {
+            mItems.addAll(filteredItems);
             mAdapter.add(filteredItems);
         } else {
             mItems = filteredItems;
-            mAdapter.setItems(mItems);
+            mAdapter.updateTo(mItems);
         }
 
-        final int endRange = mAdapter.getItemCount();
 
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.notifyItemRangeChanged(startRange, endRange);
-            }
-        });
     }
 
     @Override
@@ -138,11 +132,12 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         if (response.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems items = (BoxIteratorItems) response.getResult();
             updateItems(items.getEntries());
-
             mOffset += items.size();
+
             // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
             if (items.fullSize() != null && mOffset < items.fullSize()) {
                 // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
+                mOffset = calculateBestOffset(mOffset, mLimit);
                 BoxRequestsSearch.Search incrementalSearchTask = mRequest
                         .setOffset(mOffset)
                         .setLimit(mLimit);
@@ -150,6 +145,23 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             }
         }
         mSwipeRefresh.setRefreshing(false);
+    }
+
+    /**
+     * If for some reason the server returns less than the right number of items
+     * for instance if some results are hidden due to permissions offset based off of number of items
+     * will not be a multiple of limit.
+     * @param itemsSize
+     * @param limit
+     * @return
+     */
+    private static int calculateBestOffset(int itemsSize, int limit){
+        if (limit % itemsSize == 0){
+            return itemsSize;
+        }
+        int multiple = itemsSize / limit;
+        return (multiple + 1) * limit;
+
     }
 
     /**
