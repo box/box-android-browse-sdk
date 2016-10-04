@@ -52,13 +52,6 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         this.add(list);
     }
 
-    @Override
-    public void add(List<BoxItem> items) {
-        super.add(items);
-    }
-
-
-
     class SearchViewHolder extends BoxItemViewHolder {
         public SearchViewHolder(View itemView) {
             super(itemView);

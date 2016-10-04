@@ -96,11 +96,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
         if (startRange > 0) {
             mItems.addAll(filteredItems);
-
             mAdapter.add(filteredItems);
-            System.out.println("before add " + mItems.size() + " " + filteredItems.size());
-            System.out.println("after add " + mItems.size() + " " + filteredItems.size());
-
         } else {
             mItems = filteredItems;
             mAdapter.updateTo(mItems);
@@ -136,7 +132,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         if (response.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems items = (BoxIteratorItems) response.getResult();
             updateItems(items.getEntries());
-            System.out.println("mOffset calculated before " + mOffset + " add " + items.size() + " fullSize " + items.fullSize());
             mOffset += items.size();
 
             // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
@@ -165,8 +160,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             return itemsSize;
         }
         int multiple = itemsSize / limit;
-        System.out.println("best offset ** " + multiple + " " + itemsSize + " " + limit);
-
         return (multiple + 1) * limit;
 
     }
