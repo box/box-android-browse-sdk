@@ -22,7 +22,6 @@ import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.utils.BoxLogUtils;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -181,8 +179,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
                         boolean removedItems = false;
                         if (indexesRemoved.size() <= REMOVE_LIMIT) {
-                            for (Integer index : indexesRemoved) {
-                                notifyItemRemoved(index);
+                            Collections.sort(indexesRemoved);
+                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                                notifyItemRemoved(indexesRemoved.get(i));
                             }
                             removedItems = true;
                         }
@@ -274,8 +273,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                         @Override
                         public void run() {
                             mLock.writeLock().lock();
-                            for (Integer index : indexesRemoved) {
-                                notifyItemRemoved(index);
+                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                                notifyItemRemoved(indexesRemoved.get(i));
                             }
                             mItems.clear();
                             mItems.addAll(items);
