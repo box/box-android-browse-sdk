@@ -25,6 +25,7 @@ import com.box.androidsdk.content.models.BoxSession;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,19 +85,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return BOX_ITEM_VIEW_TYPE;
     }
 
-
-    public void setItems(ArrayList<BoxItem> items) {
-        Lock lock = mLock.writeLock();
-        lock.lock();
-        try {
-            mItems.clear();
-            mItems.addAll(items);
-        } finally {
-            lock.unlock();
-        }
-
-    }
-
     public void removeAll() {
         Lock lock = mLock.writeLock();
         lock.lock();
@@ -140,12 +128,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         } finally{
             mLock.readLock().unlock();
         }
-
+        final Lock writeLock = mLock.writeLock();
+        writeLock.lock();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    final Lock writeLock = mLock.writeLock();
-                    writeLock.lock();
+
+
                     HashSet<String> idsRemoved = new HashSet<String>(ids.size());
                     try {
                         final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
@@ -174,8 +163,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                             removedItems = true;
                         }
                         // we need to alter the list after the remove.
+
                         mItems.clear();
                         mItems.addAll(listWithoutRemovedIds);
+
                         if (removedItems && mItems.size() > 0) {
                             notifyItemRangeChanged(0, mItems.size());
                         } else {
@@ -195,6 +186,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     public void updateTo(final ArrayList<BoxItem> items){
         final Lock writeLock = mLock.writeLock();
         writeLock.lock();
+        boolean shouldUnlockInFinally = true;
+
         try {
             if (mItems.size() == 0){
                 // if going from completely empty to having something do not bother animating.
@@ -236,19 +229,22 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 return;
             } else {
                 if (oldPositionMap.size() == 0 && newItemPositions.size() > 0 && newItemPositions.size() <= INSERT_LIMIT){
+                    shouldUnlockInFinally = false;
                     mItems.clear();
                     mItems.addAll(items);
                     // for inserts less than max.
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mLock.readLock().lock();
-                            // in order to show animations of new items
-                            for (Integer insertIndex : newItemPositions){
-                                notifyItemInserted(insertIndex);
+                            try {
+                                // in order to show animations of new items
+                                for (Integer insertIndex : newItemPositions) {
+                                    notifyItemInserted(insertIndex);
+                                }
+                                notifyItemRangeChanged(0, mItems.size());
+                            } finally {
+                                writeLock.unlock();
                             }
-                            notifyItemRangeChanged(0, mItems.size());
-                            mLock.readLock().unlock();
                         }
                     });
 
@@ -256,18 +252,24 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(oldPositionMap.size());
                     indexesRemoved.addAll(oldPositionMap.values());
                     Collections.sort(indexesRemoved);
-
+                    shouldUnlockInFinally = false;
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mLock.writeLock().lock();
-                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
-                                notifyItemRemoved(indexesRemoved.get(i));
+                            try {
+                                for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
+                                    System.out.println("updateTo notifyItemRemoved ** " + indexesRemoved.get(i));
+
+                                    notifyItemRemoved(indexesRemoved.get(i));
+
+                                }
+                                mItems.clear();
+                                mItems.addAll(items);
+                                System.out.println("updateTo notifyItemRangeChanged ** " + mItems.size());
+                                notifyItemRangeChanged(0, mItems.size());
+                            } finally {
+                                writeLock.unlock();
                             }
-                            mItems.clear();
-                            mItems.addAll(items);
-                            notifyItemRangeChanged(0, mItems.size());
-                            mLock.writeLock().unlock();
                         }
                     });
 
@@ -287,18 +289,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 }
             }
         } finally {
-            writeLock.unlock();
+            if (shouldUnlockInFinally){
+                writeLock.unlock();
+            }
         }
-
-
-
-
     }
 
     public void add(List<BoxItem> items) {
-        Lock lock = mLock.writeLock();
+        final Lock lock = mLock.writeLock();
         lock.lock();
-        try{
+            if (items.size() == 0){
+                return;
+            }
             final int startingSize = mItems.size();
             for (BoxItem item : items) {
                 mItems.add(item);
@@ -307,14 +309,13 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mLock.readLock().lock();
-                    notifyItemRangeInserted(startingSize - 1, endingSize -1);
-                    mLock.readLock().unlock();
+                    try {
+                        notifyItemRangeInserted(startingSize - 1, endingSize - 1);
+                    }finally{
+                        lock.unlock();
+                    }
                 }
             });
-        } finally{
-            lock.unlock();
-        }
 
     }
 

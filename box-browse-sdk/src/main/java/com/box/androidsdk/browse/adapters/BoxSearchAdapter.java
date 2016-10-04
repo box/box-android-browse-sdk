@@ -13,6 +13,7 @@ import com.eclipsesource.json.JsonObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BoxSearchAdapter extends BoxItemAdapter {
 
@@ -34,7 +35,6 @@ public class BoxSearchAdapter extends BoxItemAdapter {
                 view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.box_browsesdk_list_item, viewGroup, false);
                 return new SearchViewHolder(view);
         }
-
     }
 
     @Override
@@ -51,6 +51,13 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         list.add(LoadMoreItem.create(searchReq));
         this.add(list);
     }
+
+    @Override
+    public void add(List<BoxItem> items) {
+        super.add(items);
+    }
+
+
 
     class SearchViewHolder extends BoxItemViewHolder {
         public SearchViewHolder(View itemView) {
