@@ -87,6 +87,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     public void setItems(ArrayList<BoxItem> items) {
         Lock lock = mLock.writeLock();
+        lock.lock();
         try {
             mItems.clear();
             mItems.addAll(items);
@@ -98,6 +99,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     public boolean contains(BoxItem item) {
         Lock lock = mLock.readLock();
+        lock.lock();
         try {
             for (BoxItem containedItem : mItems) {
                 if (item.getId().equals(containedItem.getId())) {
@@ -112,6 +114,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     public void removeAll() {
         Lock lock = mLock.writeLock();
+        lock.lock();
         try {
             mItems.clear();
         } finally {

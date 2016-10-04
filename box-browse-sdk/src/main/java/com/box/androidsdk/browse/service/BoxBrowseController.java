@@ -144,10 +144,6 @@ public class BoxBrowseController implements BrowseController {
         executor.submit(task);
     }
 
-    private <T extends BoxRequest & BoxCacheableRequest > T getCachR(BoxRequest request){
-        return (T)request;
-    }
-
     @Override
     public BrowseController setCompletedListener(BoxFutureTask.OnCompletedListener listener) {
         mListener = listener;
