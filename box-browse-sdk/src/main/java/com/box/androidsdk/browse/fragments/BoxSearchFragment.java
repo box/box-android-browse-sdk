@@ -390,24 +390,24 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mAdapter.remove(removeIds);
 
         if (response.getResult() instanceof BoxIteratorItems) {
-            if (((BoxRequestsSearch.Search) response.getRequest()).getOffset() == 0) {
-                BoxIteratorItems items = (BoxIteratorItems) response.getResult();
-                updateTo(items.getEntries());
-                mOffset = 0;
-            } else {
-                BoxIteratorItems items = (BoxIteratorItems) response.getResult();
-                updateItems(items.getEntries());
-                mOffset += items.size();
+            BoxIteratorItems items = (BoxIteratorItems) response.getResult();
 
-                // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-                if (items.fullSize() != null && mOffset < items.fullSize()) {
-                    // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
-                    mOffset = calculateBestOffset(mOffset, mLimit);
-                    BoxRequestsSearch.Search incrementalSearchTask = mRequest
-                            .setOffset(mOffset)
-                            .setLimit(mLimit);
-                    ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
-                }
+            if (((BoxRequestsSearch.Search) response.getRequest()).getOffset() == 0) {
+                mOffset = 0;
+                updateTo(items.getEntries());
+            } else {
+                updateItems(items.getEntries());
+            }
+            mOffset += items.size();
+
+            // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
+            if (items.fullSize() != null && mOffset < items.fullSize()) {
+                // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
+                mOffset = calculateBestOffset(mOffset, mLimit);
+                BoxRequestsSearch.Search incrementalSearchTask = mRequest
+                        .setOffset(mOffset)
+                        .setLimit(mLimit);
+                ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
             }
         }
         mSwipeRefresh.setRefreshing(false);
