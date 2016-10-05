@@ -6,13 +6,16 @@ import android.support.v4.util.LruCache;
 
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.models.BoxUser;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
+import com.eclipsesource.json.JsonArray;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /***
@@ -67,6 +70,11 @@ public interface BrowseController {
      * @param response response returned from the server that contains the request, result, and exception
      */
     void onError(Context context, BoxResponse response);
+
+    ArrayList<String> getRecentSearches(Context context, BoxUser user);
+    ArrayList<String> addToRecentSearches(Context context, BoxUser user, String recentSearch);
+    ArrayList<String> deleteFromRecentSearches(Context context, BoxUser user, int indexToRemove);
+    void saveRecentSearches(Context context, BoxUser user, ArrayList<String> searches);
 
     File getThumbnailCacheDir();
 

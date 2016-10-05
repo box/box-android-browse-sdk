@@ -73,7 +73,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected BoxItemAdapter mAdapter;
     protected RecyclerView mItemsView;
     protected SwipeRefreshLayout mSwipeRefresh;
-    protected ListView mSearchRecentsListView;
     protected ProgressBar mProgress;
 
     private boolean mWaitingForConnection;

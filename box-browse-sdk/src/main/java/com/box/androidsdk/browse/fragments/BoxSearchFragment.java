@@ -45,7 +45,7 @@ import java.util.HashSet;
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to
  * create an instance of this fragment.
  */
-public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSearchAdapter.BoxRecentSearchListener {
+public class BoxSearchFragment extends BoxBrowseFragment {
 
     private static String EXTRA_PARENT_FOLDER = "SearchFragment.ExtraParentFolder";
 
@@ -60,15 +60,11 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
 
     private static final int DEFAULT_LIMIT = 200;
 
-    public static final String RECENT_SEARCHES_SHARED_PREFERENCES = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesSharedPreferences";
-    public static final String RECENT_SEARCHES_KEY = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesKey";
     protected int mOffset = 0;
     protected int mLimit;
 
     protected String mSearchQuery;
     protected static BoxRequestsSearch.Search mRequest;
-    protected ArrayList<String> mRecentSearches;
-    protected BoxRecentSearchAdapter mRecentSearchesAdapter;
 
     public static final int REQUEST_FILTER_SEARCH_RESULTS = 228;
     public static final String EXTRA_SEARCH_FILTERS = "SearchFragment.SearchFilters";
@@ -112,8 +108,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Video, ThumbnailManager.VIDEO_EXTENSIONS_ARRAY);
 
         mRequest = null;
-        mRecentSearches = fetchRecentSearches();
-        mRecentSearchesAdapter = new BoxRecentSearchAdapter(getActivity(), mRecentSearches, this);
     }
 
     @Override
@@ -124,25 +118,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-
-        if (mSearchRecentsListView != null) {
-            mSearchRecentsListView.setAdapter(mRecentSearchesAdapter);
-
-            // Show recents only if we are not using an old fragment
-            if (mSearchQuery == null) {
-                mSearchRecentsListView.setVisibility(View.VISIBLE);
-                mSearchRecentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String query = mRecentSearches.get(position);
-                        Activity activity = getActivity();
-                        if (activity instanceof BoxBrowseActivity) {
-                            ((BoxBrowseActivity)activity).setSearchQuery(query);
-                        }
-                    }
-                });
-            }
-        }
 
         mSearchFiltersHeader = view.findViewById(R.id.filterResultsHeader);
         mSearchFiltersHeader.setOnClickListener(new View.OnClickListener() {
@@ -241,10 +216,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             loadItems();
             mAdapter.notifyDataSetChanged();
             notifyUpdateListeners();
-
-            if (mSearchRecentsListView != null) {
-                mSearchRecentsListView.setVisibility(View.GONE);
-            }
         }
     }
 
@@ -347,6 +318,7 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             return;
         }
         mProgress.setVisibility(View.GONE);
+        mSearchFiltersHeader.setVisibility(View.VISIBLE);
 
         // Search can potentially have a lot of results so incremental loading and de-duping logic is needed
         final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 0;
@@ -422,11 +394,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         mSwipeRefresh.setRefreshing(false);
     }
 
-    @Override
-    public void onCloseClicked(int position) {
-        deleteFromRecentSearches(position);
-    }
-
     /**
      * If for some reason the server returns less than the right number of items
      * for instance if some results are hidden due to permissions offset based off of number of items
@@ -481,42 +448,5 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
         protected BoxSearchFragment getInstance() {
             return new BoxSearchFragment();
         }
-    }
-
-    protected void deleteFromRecentSearches(int position) {
-        mRecentSearches.remove(position);
-        mRecentSearchesAdapter.notifyDataSetChanged();
-        saveRecentSearches(mRecentSearches);
-    }
-
-    protected void addToRecentSearches(String recent) {
-        mRecentSearches.remove(recent);
-        if (mRecentSearches.size() >= 50) {
-            mRecentSearches.remove(49);
-        }
-        mRecentSearches.add(0, recent);
-        saveRecentSearches(mRecentSearches);
-    }
-
-    protected ArrayList<String> fetchRecentSearches() {
-        String string = getContext().getSharedPreferences(RECENT_SEARCHES_SHARED_PREFERENCES, Context.MODE_PRIVATE).getString(RECENT_SEARCHES_KEY, null);
-        ArrayList<String> recentSearches = new ArrayList<String>();
-
-        if (string != null) {
-            JsonArray jsonArray = JsonArray.readFrom(string);
-            for (int i = 0; i < jsonArray.size(); i++) {
-                recentSearches.add(jsonArray.get(i).asString());
-            }
-        }
-
-        return recentSearches;
-    }
-
-    protected void saveRecentSearches(ArrayList<String> searches) {
-        JsonArray jsonArray = new JsonArray();
-        for(int i = 0; i < searches.size(); i++) {
-            jsonArray.add(searches.get(i));
-        }
-        getContext().getSharedPreferences(RECENT_SEARCHES_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit().putString(RECENT_SEARCHES_KEY, jsonArray.toString()).commit();
     }
 }
