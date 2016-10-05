@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Similar to button_settings_states.xml but the pressed state will have no gradient -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Disabled states -->
+    <item android:drawable="@drawable/rectangle_light_grey" android:state_enabled="false"/>
+
+    <!-- Non focused states -->
+    <item android:drawable="@drawable/rectangle_transparent" android:state_focused="false" android:state_pressed="false" android:state_selected="false"/>
+    <item android:drawable="@drawable/rectangle_transparent" android:state_focused="false" android:state_pressed="false" android:state_selected="true"/>
+
+    <!-- Pressed -->
+    <item android:drawable="@drawable/rectangle_blue_line" android:state_pressed="true"/>
+
+</selector>

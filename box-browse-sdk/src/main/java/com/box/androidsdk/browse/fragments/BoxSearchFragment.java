@@ -1,20 +1,44 @@
 package com.box.androidsdk.browse.fragments;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
+import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.activities.BoxBrowseActivity;
+import com.box.androidsdk.browse.activities.FilterSearchResults;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
+import com.box.androidsdk.browse.adapters.BoxRecentSearchAdapter;
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
+import com.box.androidsdk.browse.adapters.ResultsHeader;
+import com.box.androidsdk.browse.models.BoxSearchFilters;
+import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
+import com.box.androidsdk.browse.uidata.ThumbnailManager;
+import com.box.androidsdk.content.BoxApiSearch;
+import com.box.androidsdk.content.BoxConstants;
+import com.box.androidsdk.content.models.BoxFile;
+import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
+import com.box.androidsdk.content.models.BoxJsonObject;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
+import com.eclipsesource.json.JsonArray;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -22,23 +46,141 @@ import java.util.HashSet;
  * create an instance of this fragment.
  */
 public class BoxSearchFragment extends BoxBrowseFragment {
+
+    private static String EXTRA_PARENT_FOLDER = "SearchFragment.ExtraParentFolder";
+
+    // parent folder for the search
     private static final String OUT_ITEM = "outItem";
+
+    // Offset for the next search request
     private static final String OUT_OFFSET = "outOffset";
+
+    // Current search term
+    private static final String OUT_QUERY = "outQuery";
+
     private static final int DEFAULT_LIMIT = 200;
 
-    protected static BoxRequestsSearch.Search mRequest;
     protected int mOffset = 0;
     protected int mLimit;
+
+    protected String mSearchQuery;
+    protected static BoxRequestsSearch.Search mRequest;
+
+    public static final int REQUEST_FILTER_SEARCH_RESULTS = 228;
+    public static final String EXTRA_SEARCH_FILTERS = "SearchFragment.SearchFilters";
+
+    private View mSearchFiltersHeader;
+    protected BoxSearchFilters mSearchFilters;
+    private HashMap<BoxSearchFilters.ItemType, String[]> mItemTypeToExtensions;
+
+    // Size of 1MB as per search API
+    private final static long ONE_MB = 1000000;
+
+    protected BoxFolder mParentFolder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null && getArguments().getSerializable(OUT_ITEM) instanceof BoxRequestsSearch.Search) {
-            mRequest = (BoxRequestsSearch.Search) getArguments().getSerializable(OUT_ITEM);
+        mSearchQuery = null;
+        if (getArguments() != null) {
             mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mSearchQuery = getArguments().getString(OUT_QUERY, null);
+            mParentFolder = (BoxFolder) getArguments().getSerializable(EXTRA_PARENT_FOLDER);
         }
         if (savedInstanceState != null) {
             mOffset = savedInstanceState.getInt(OUT_OFFSET);
+            mSearchQuery = savedInstanceState.getString(OUT_QUERY, null);
+            mSearchFilters = (BoxSearchFilters) savedInstanceState.getSerializable(EXTRA_SEARCH_FILTERS);
+        }
+
+        if (mSearchFilters == null) {
+            mSearchFilters = new BoxSearchFilters();
+        }
+
+        mItemTypeToExtensions = new HashMap<BoxSearchFilters.ItemType, String[]>();
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Audio, ThumbnailManager.AUDIO_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.BoxNote, ThumbnailManager.BOXNOTE_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Document, ThumbnailManager.DOCUMENTS_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Image, ThumbnailManager.IMAGE_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Pdf, ThumbnailManager.PDF_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Presentation, ThumbnailManager.PRESENTATION_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Spreadsheet, ThumbnailManager.SPREADSHEET_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Video, ThumbnailManager.VIDEO_EXTENSIONS_ARRAY);
+
+        mRequest = null;
+    }
+
+    @Override
+    protected int getLayout() {
+        return R.layout.box_browsesdk_fragment_search;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        mSearchFiltersHeader = view.findViewById(R.id.filterResultsHeader);
+        mSearchFiltersHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startFilterActivity();
+            }
+        });
+        setupSearchFiltersHeader();
+
+        return view;
+    }
+
+    protected void startFilterActivity() {
+        startActivityForResult(FilterSearchResults.newFilterSearchResultsIntent(getActivity(), mSearchFilters), REQUEST_FILTER_SEARCH_RESULTS);
+    }
+
+    private void setupSearchFiltersHeader() {
+        if (mSearchFiltersHeader == null || mSearchFilters == null) {
+            return;
+        }
+
+        if (mSearchFilters.anyFiltersSet()) {
+            mSearchFiltersHeader.findViewById(R.id.filterResultsHeaderUnset).setVisibility(View.GONE);
+            mSearchFiltersHeader.findViewById(R.id.filterResultsHeaderSet).setVisibility(View.VISIBLE);
+
+            TextView textView = (TextView) mSearchFiltersHeader.findViewById(R.id.filterResults);
+            ArrayList<String> filters = new ArrayList<String>();
+            for (BoxSearchFilters.ItemType type: BoxSearchFilters.ItemType.values()) {
+                if (mSearchFilters.mItemTypes.contains(type)) {
+                    filters.add(type.getString(getContext()));
+                }
+            }
+
+            if (mSearchFilters.mItemModifiedDate != BoxSearchFilters.ItemModifiedDate.Any) {
+                filters.add(mSearchFilters.mItemModifiedDate.getString(getContext()));
+            }
+
+            if (mSearchFilters.mItemSize != BoxSearchFilters.ItemSize.Any) {
+                filters.add(mSearchFilters.mItemSize.getString(getContext()));
+            }
+
+            String label = android.text.TextUtils.join(getResources().getString(R.string.search_filter_label_delimiter), filters);
+            textView.setText(label);
+        } else {
+            mSearchFiltersHeader.findViewById(R.id.filterResultsHeaderUnset).setVisibility(View.VISIBLE);
+            mSearchFiltersHeader.findViewById(R.id.filterResultsHeaderSet).setVisibility(View.GONE);
+        }
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        if (requestCode == REQUEST_FILTER_SEARCH_RESULTS) {
+            mSearchFilters = (BoxSearchFilters) data.getSerializableExtra(EXTRA_SEARCH_FILTERS);
+            setupSearchFiltersHeader();
+            search();
         }
     }
 
@@ -49,21 +191,117 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return filter;
     }
 
-    public void search(BoxRequestsSearch.Search request) {
-        mRequest = request;
-        mAdapter.removeAll();
-        loadItems();
-        mAdapter.notifyDataSetChanged();
-        notifyUpdateListeners();
+    public String getSearchQuery() {
+        if (mSearchQuery != null) {
+            return mSearchQuery;
+        }
 
+        return "";
+    }
+
+    public void search(String query) {
+        if (query != null) {
+            String trimmedQuery = query.trim();
+            if (!trimmedQuery.equals(mSearchQuery) || mRequest == null) {
+                mSearchQuery = trimmedQuery;
+                search();
+            }
+        }
+    }
+
+    protected void search() {
+        if (mSearchQuery != null && !mSearchQuery.equals("")) {
+            mRequest = mController.getSearchRequest(mSearchQuery);
+            mAdapter.removeAll();
+            loadItems();
+            mAdapter.notifyDataSetChanged();
+            notifyUpdateListeners();
+        }
+    }
+
+    protected void executeRequest() {
+        getController().execute(mRequest);
     }
 
     @Override
     protected void loadItems() {
-        mOffset = 0;
-        mRequest.setLimit(mLimit)
-                .setOffset(mOffset);
-        getController().execute(mRequest);
+        if (mRequest != null) {
+            mProgress.setVisibility(View.VISIBLE);
+            mSearchFiltersHeader.setVisibility(View.GONE);
+            mOffset = 0;
+            mRequest.setLimit(mLimit)
+                    .setOffset(mOffset)
+                    .limitAncestorFolderIds(new String[]{mParentFolder.getId()});
+
+            // Set filters
+            if (mSearchFilters != null) {
+                HashSet<BoxSearchFilters.ItemType> itemTypes = mSearchFilters.mItemTypes;
+                if (itemTypes != null && itemTypes.size() > 0) {
+                    // We need to add type filter
+                    if (itemTypes.contains(BoxSearchFilters.ItemType.Folder)) {
+                        // Set only folder
+                        mRequest.limitType(BoxFolder.TYPE);
+                    } else {
+                        // Set extension types
+                        mRequest.limitType(BoxFile.TYPE);
+
+                        HashSet<String> extensions = new HashSet<String>();
+                        for(BoxSearchFilters.ItemType type : itemTypes) {
+                            for (String extension : mItemTypeToExtensions.get(type)) {
+                                extensions.add(extension);
+                            }
+                        }
+                        mRequest.limitFileExtensions(extensions.toArray(new String[extensions.size()]));
+                    }
+                }
+
+                if (mSearchFilters.mItemModifiedDate != BoxSearchFilters.ItemModifiedDate.Any) {
+                    // Add filter for modified date
+                    Calendar cal = Calendar.getInstance();
+
+                    switch (mSearchFilters.mItemModifiedDate) {
+                        case PastDay:
+                            cal.add(Calendar.DATE, -1);
+                            break;
+                        case PastWeek:
+                            cal.add(Calendar.DATE, -7);
+                            break;
+                        case PastMonth:
+                            cal.add(Calendar.MONTH, -1);
+                            break;
+                        case PastYear:
+                            cal.add(Calendar.YEAR, -1);
+                            break;
+                        default:
+                            break;
+                    }
+                    mRequest.limitLastUpdateTime(cal.getTime(), null);
+                }
+
+                if (mSearchFilters.mItemSize != BoxSearchFilters.ItemSize.Any) {
+                    // Add filter for size
+                    switch (mSearchFilters.mItemSize) {
+                        case lessThanOneMb:
+                            mRequest.limitSizeRange(0, ONE_MB);
+                            break;
+                        case OneMbToFiveMb:
+                            mRequest.limitSizeRange(ONE_MB, 5*ONE_MB);
+                            break;
+                        case FiveMbToTwentyFiveMb:
+                            mRequest.limitSizeRange(5*ONE_MB, 25*ONE_MB);
+                            break;
+                        case TwentyFiveMbToHundredMb:
+                            mRequest.limitSizeRange(25*ONE_MB, 100*ONE_MB);
+                            break;
+                        case HundredMbToOneGB:
+                            mRequest.limitSizeRange(100*ONE_MB, 1000*ONE_MB);
+                            break;
+                    }
+                }
+            }
+
+            executeRequest();
+        }
     }
 
     @Override
@@ -78,6 +316,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             return;
         }
         mProgress.setVisibility(View.GONE);
+        mSearchFiltersHeader.setVisibility(View.VISIBLE);
 
         // Search can potentially have a lot of results so incremental loading and de-duping logic is needed
         final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 0;
@@ -99,16 +338,22 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mAdapter.add(filteredItems);
         } else {
             mItems = filteredItems;
+            if (filteredItems.size() > 0 && !(filteredItems.get(0) instanceof ResultsHeader)) {
+                mItems.add(0, new ResultsHeader(mParentFolder));
+            }
             mAdapter.updateTo(mItems);
         }
-
-
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(OUT_ITEM, mRequest);
         outState.putInt(OUT_OFFSET, mOffset);
+        if (mSearchQuery != null) {
+            outState.putString(OUT_QUERY, mSearchQuery);
+        }
+
+        outState.putSerializable(EXTRA_SEARCH_FILTERS, mSearchFilters);
         super.onSaveInstanceState(outState);
     }
 
@@ -169,26 +414,23 @@ public class BoxSearchFragment extends BoxBrowseFragment {
      */
     public static class Builder extends BoxBrowseFragment.Builder<BoxSearchFragment> {
 
-        /**
-         * @param session
-         * @param searchRequest
-         */
-        public Builder(BoxSession session, BoxRequestsSearch.Search searchRequest) {
-            mRequest = searchRequest;
-            mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putSerializable(OUT_ITEM, mRequest);
-        }
 
-        /**
-         * @param session
-         * @param query
-         */
-        public Builder(BoxSession session, String query) {
+        public Builder(BoxSession session, String searchQuery, BoxFolder parentFolder) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
-            mArgs.putSerializable(OUT_ITEM, mRequest);
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mArgs.putString(OUT_QUERY, searchQuery);
+            mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
         }
 
+
+            /**
+             * @param session
+             */
+        public Builder(BoxSession session, BoxFolder parentFolder) {
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
+        }
 
         /**
          * Set the number of items that the results will be limited to when retrieving search results

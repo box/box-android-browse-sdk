@@ -1,37 +1,28 @@
 package com.box.androidsdk.browse.uidata;
 
 import android.content.Context;
-import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
-
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.adapters.BoxSearchListAdapter;
-import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.service.CompletionListener;
-import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsSearch;
 
 /**
- * This is a view used to show search results.
+ * Custom Search view to support new search design
  */
-public class BoxSearchView extends SearchView implements BoxSearchListAdapter.OnBoxSearchListener{
+public class BoxSearchView extends SearchView {
 
-    private BrowseController mController;
-    private OnQueryTextListener mOnQueryTextListener;
-    private OnBoxSearchListener mBoxSearchListener;
-    private String mLastQuery = null;
+    private OnBoxSearchListener mOnBoxSearchListener;
 
     public BoxSearchView(final Context context){
-       super(context);
-       initSearchView(context);
+        super(context);
+        initSearchView(context);
     }
 
     public BoxSearchView(final Context context, final AttributeSet attrs){
@@ -41,73 +32,54 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
 
     private void initSearchView(final Context context){
 
-        setSuggestionsAdapter(new BoxSearchListAdapter(context, R.layout.abc_list_menu_item_layout, 0));
-        ((BoxSearchListAdapter)getSuggestionsAdapter()).setOnBoxSearchListener(this);
-        findViewById(R.id.search_plate).setBackgroundColor(Color.TRANSPARENT);
+        LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
+        searchPlate.setBackgroundColor(Color.TRANSPARENT);
+
+        final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
+        searchCloseButton.setImageResource(R.drawable.ic_clear_black_24dp);
+
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setQueryHint(context.getString(R.string.box_browsesdk_search_hint));
-        if (mController == null){
-            // this widget cannot be used until a controller has been set
-            this.setEnabled(false);
-        }
-        this.setOnSuggestionListener(new OnSuggestionListener() {
-            @Override
-            public boolean onSuggestionSelect(int position) {
-                return false;
-            }
-
-            @Override
-            public boolean onSuggestionClick(int position) {
-                if (mBoxSearchListener == null) {
-                    return false;
-                }
-                BoxSearchListAdapter.BoxSearchCursor cursor = (BoxSearchListAdapter.BoxSearchCursor) ((BoxSearchListAdapter) getSuggestionsAdapter()).getItem(position);
-                if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_NORMAL) {
-                    mBoxSearchListener.onBoxItemSelected(cursor.getBoxItem());
-                } else if (cursor.getType() == BoxSearchListAdapter.BoxSearchCursor.TYPE_ADDITIONAL_RESULT) {
-                    mBoxSearchListener.onMoreResultsRequested(mController.getSearchRequest(mLastQuery));
-                }
-
-                return false;
-            }
-        });
         this.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mLastQuery = query;
-                if (mBoxSearchListener != null) {
-                    mBoxSearchListener.onMoreResultsRequested(mController.getSearchRequest(mLastQuery));
-                }
-                return false;
+
+                mOnBoxSearchListener.onQueryTextSubmit(query);
+
+                // Don't perform default action, return true
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mLastQuery = newText;
+                mOnBoxSearchListener.onQueryTextChange(newText);
+
+                // Don't perform default action, return true
+                return true;
+            }
+        });
+
+        this.setOnSearchClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnBoxSearchListener.onSearchExpanded();
+            }
+        });
+
+        this.setOnCloseListener(new OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                mOnBoxSearchListener.onSearchCollapsed();
                 return false;
             }
         });
     }
 
-    @Override
-    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-        if (mBoxSearchListener != null){
-            return mBoxSearchListener.onSearchRequested(searchRequest);
-        }
-        return searchRequest;
+    public void setSearchTerm(String query) {
+        setQuery(query, false);
     }
-
-    public void setController(final BrowseController controller){
-        mController = controller;
-        if (mController != null){
-            this.setEnabled(true);
-        }
-        ((BoxSearchListAdapter)getSuggestionsAdapter()).setController(mController);
-    }
-
 
     private static final String EXTRA_ORIGINAL_PARCELABLE = "extraOriginalParcelable";
-    private static final String EXTRA_USER_ID = "extraUserId";
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -126,30 +98,32 @@ public class BoxSearchView extends SearchView implements BoxSearchListAdapter.On
         }
     }
 
-    public class SearchItemCursor extends MatrixCursor {
-        SearchItemCursor(String[] columnNames){
-            super(columnNames);
-        }
-    }
-
     public void setOnBoxSearchListener(final OnBoxSearchListener onBoxSearchListener){
-        mBoxSearchListener = onBoxSearchListener;
+        mOnBoxSearchListener = onBoxSearchListener;
     }
 
-    public static interface OnBoxSearchListener extends BoxSearchListAdapter.OnBoxSearchListener {
+    public interface OnBoxSearchListener {
 
         /**
-         * This is called if a user clicks on a file, folder, or bookmark from the suggestions.
-         * @param boxItem The item the user clicks on from the suggestions.
+         * User clicked on search icon and expanded search
          */
-        public void onBoxItemSelected(final BoxItem boxItem);
+        void onSearchExpanded();
 
         /**
-         * This is called if a user clicks on the search icon, hits enter/search button on keyboard, or clicks on the more results item at the bottom of the suggestions.
-         * @param searchRequest The request that this search was desired for.
+         * User clicked on back and collapsed search
          */
-        public void onMoreResultsRequested(BoxRequestsSearch.Search searchRequest);
+        void onSearchCollapsed();
 
+        /**
+         * The text in search field has changed
+         * @param text
+         */
+        void onQueryTextChange(String text);
+
+        /**
+         * User pressed enter (or search button on keyboard) and submitted the search query
+         * @param text
+         */
+        void onQueryTextSubmit(String text);
     }
-
 }

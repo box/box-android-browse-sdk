@@ -160,14 +160,6 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
     }
 
     @Override
-    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-        // Search will be limited to folders only.
-        searchRequest.limitType(BoxFolder.TYPE);
-        getSupportActionBar().setTitle(searchRequest.getQuery());
-        return super.onSearchRequested(searchRequest);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.box_browsesdk_menu_folder, menu);

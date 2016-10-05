@@ -27,6 +27,9 @@ public class SampleBrowseActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_FILE_PICKER = 1;
     private static final int REQUEST_CODE_FOLDER_PICKER = 2;
 
+    public static final String ROOT_FOLDER_ID = "0";
+    public static final String ROOT_FOLDER_NAME = "All Files";
+
     private Button btnFilePicker;
     private Button btnFolderPicker;
 
@@ -50,11 +53,11 @@ public class SampleBrowseActivity extends AppCompatActivity {
     }
 
     private void launchFilePicker() {
-        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(this, BoxFolder.createFromId("0"), session), REQUEST_CODE_FILE_PICKER);
+        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName(ROOT_FOLDER_ID, ROOT_FOLDER_NAME), session), REQUEST_CODE_FILE_PICKER);
     }
 
     private void launchFolderPicker() {
-        startActivityForResult(BoxBrowseFolderActivity.getLaunchIntent(this, BoxFolder.createFromId("0"), session), REQUEST_CODE_FOLDER_PICKER);
+        startActivityForResult(BoxBrowseFolderActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName(ROOT_FOLDER_ID, ROOT_FOLDER_NAME), session), REQUEST_CODE_FOLDER_PICKER);
     }
 
     @Override

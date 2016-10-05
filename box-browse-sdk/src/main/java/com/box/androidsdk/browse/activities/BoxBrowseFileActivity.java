@@ -19,7 +19,7 @@ import com.eclipsesource.json.JsonObject;
 
 import java.util.ArrayList;
 
-public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearchView.OnBoxSearchListener{
+public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
      * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFile} to the intent
      */
@@ -38,7 +38,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
         setContentView(R.layout.box_browsesdk_activity_file);
         initToolbar();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1){
-            onBoxItemSelected(mItem);
+            onItemClick(mItem);
             getSupportActionBar().setTitle(mItem.getName());
         }
 
@@ -46,24 +46,15 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
 
     @Override
     public void onItemClick(BoxItem item) {
+        super.onItemClick(item);
         if (item instanceof BoxFile || item instanceof BoxBookmark) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_BOX_FILE, item);
             setResult(Activity.RESULT_OK, intent);
             finish();
-        } else {
-            super.onItemClick(item);
         }
     }
 
-
-    @Override
-    public void onBoxItemSelected(BoxItem boxItem) {
-        super.onBoxItemSelected(boxItem);
-        if (!(boxItem instanceof BoxFolder)) {
-            onItemClick(boxItem);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,17 +62,6 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
         getMenuInflater().inflate(R.menu.box_browsesdk_menu_file, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Override
-    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-        if(getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER) != null){
-            ArrayList<String> list = getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER);
-            String[] extensions =  list.toArray(new String[list.size()]);
-            searchRequest.limitFileExtensions(extensions);
-        }
-        return super.onSearchRequested(searchRequest);
-    }
-
 
     /**
      * Create an intent to launch an instance of this activity to browse folders.

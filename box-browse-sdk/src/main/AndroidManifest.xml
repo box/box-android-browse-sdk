@@ -20,6 +20,10 @@
             android:label="@string/box_browsesdk_title"
             android:theme="@style/BrowseTheme" >
         </activity>
+        <activity android:name=".activities.FilterSearchResults"
+            android:label="Filter Search Results"
+            android:theme="@style/BrowseTheme" >
+        </activity>
     </application>
 
 </manifest>

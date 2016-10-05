@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.box.androidsdk.browse.R;
@@ -74,10 +75,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected SwipeRefreshLayout mSwipeRefresh;
     protected ProgressBar mProgress;
 
-    private String mTitle;
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
-    private BrowseController mController;
+    protected BrowseController mController;
     private Set<OnUpdateListener> mUpdateListeners = new HashSet<OnUpdateListener>();
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -154,6 +154,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // this call must be made after registering the receiver in order to handle very fast responses.
             updateItems(mItems);
         }
+        super.onResume();
     }
 
     protected void cleanupBoxReceivers(){
@@ -164,7 +165,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(EXTRA_COLLECTION, mItems);
-        outState.putSerializable(EXTRA_TITLE, mTitle);
         if (mSecondaryActionListener instanceof Serializable) {
             outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable) mSecondaryActionListener);
         }
@@ -186,6 +186,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     protected int getLayout() {
         return R.layout.box_browsesdk_fragment_browse;
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(getLayout(), container, false);
@@ -226,6 +227,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mItemsView.setAdapter(mAdapter);
         if (getMultiSelectHandler() != null) {
             getMultiSelectHandler().setItemAdapter(mAdapter);
+        }
+
+        if (mItems == null) {
+            loadItems();
+        } else {
+            updateItems(mItems);
         }
 
         return mRootView;
@@ -279,6 +286,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             String userId = getArguments().getString(ARG_USER_ID);
             mController = new BoxBrowseController(new BoxSession(getActivity(), userId)).setCompletedListener(new CompletionListener(LocalBroadcastManager.getInstance(getActivity())));
         }
+
         return mController;
     }
 

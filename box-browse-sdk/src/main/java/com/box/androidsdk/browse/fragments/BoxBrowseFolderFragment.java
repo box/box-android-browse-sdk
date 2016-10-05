@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.fragments;
 
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.View;
 
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
@@ -60,6 +61,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
     @Override
     protected void loadItems() {
+        mProgress.setVisibility(View.VISIBLE);
         getController().execute(getController().getFolderWithAllItems(mFolder.getId()));
     }
 

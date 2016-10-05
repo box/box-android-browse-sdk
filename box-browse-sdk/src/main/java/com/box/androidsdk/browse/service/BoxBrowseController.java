@@ -16,6 +16,7 @@ import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.models.BoxUser;
 import com.box.androidsdk.content.requests.BoxCacheableRequest;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
@@ -23,10 +24,14 @@ import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
+import com.eclipsesource.json.JsonArray;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +40,11 @@ import java.util.concurrent.TimeUnit;
  * Default implementation for the {@link BrowseController}.
  */
 public class BoxBrowseController implements BrowseController {
+
+    private static final String RECENT_SEARCHES_KEY = "BoxBrowseController.RecentSearchesKey";
+    private static final int MAX_RECENT_SEARCHES = 10;
     private static final String TAG = BoxBrowseController.class.getName();
+
 
     // Static executors so that requests can be retained though activity/fragment lifecycle
     private static ThreadPoolExecutor mApiExecutor;
@@ -192,6 +201,57 @@ public class BoxBrowseController implements BrowseController {
     @Override
     public LruCache<Integer, Bitmap> getIconResourceCache() {
         return mIconResCache;
+    }
+
+    @Override
+    public ArrayList<String> getRecentSearches(Context context, BoxUser user) {
+        String recentSearchesString = context.getSharedPreferences(RECENT_SEARCHES_KEY + user.getId(), Context.MODE_PRIVATE).getString(RECENT_SEARCHES_KEY, null);
+        ArrayList<String> recentSearches = new ArrayList<String>();
+
+        if (recentSearchesString != null) {
+            JsonArray recentSearchesJsonArray = JsonArray.readFrom(recentSearchesString);
+            for (int i = 0; i < recentSearchesJsonArray.size(); i++) {
+                recentSearches.add(recentSearchesJsonArray.get(i).asString());
+            }
+        }
+
+        return recentSearches;
+    }
+
+    @Override
+    public ArrayList<String> addToRecentSearches(Context context, BoxUser user, String recentSearch) {
+        ArrayList<String> recentSearches = getRecentSearches(context, user);
+
+        if (StringUtils.isEmpty(recentSearch)) {
+            return recentSearches;
+        }
+
+        recentSearches.remove(recentSearch);
+
+        if (recentSearches.size() >= MAX_RECENT_SEARCHES) {
+            recentSearches.remove(recentSearches.size() - 1);
+        }
+
+        recentSearches.add(0, recentSearch);
+        saveRecentSearches(context, user, recentSearches);
+        return recentSearches;
+    }
+
+    @Override
+    public ArrayList<String> deleteFromRecentSearches(Context context, BoxUser user, int indexToRemove) {
+        ArrayList<String> recentSearches = getRecentSearches(context, user);
+        recentSearches.remove(indexToRemove);
+        saveRecentSearches(context, user, recentSearches);
+        return recentSearches;
+    }
+
+    @Override
+    public void saveRecentSearches(Context context, BoxUser user, ArrayList<String> searches) {
+        JsonArray jsonArray = new JsonArray();
+        for(int i = 0; i < searches.size(); i++) {
+            jsonArray.add(searches.get(i));
+        }
+        context.getSharedPreferences(RECENT_SEARCHES_KEY + user.getId(), Context.MODE_PRIVATE).edit().putString(RECENT_SEARCHES_KEY, jsonArray.toString()).commit();
     }
 
     /**
