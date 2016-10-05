@@ -25,39 +25,34 @@
     <string name="box_browsesdk_recent_searches_header">Recent Searches</string>
     <string name="box_browsesdk_search_results_header">Results in <![CDATA[<b>%1$s</b>]]></string>
 
-    <string name="search_hint">Search in %1$s</string>
-    <string name="filter_results_header">Filter Results</string>
-    <string name="filter_search_results">Refine Search Results</string>
-    <string name="apply">Apply</string>
-    <string name="clear_filters">Clear Filters</string>
-    <string name="file_type_header">File Type</string>
-    <string name="any_type">Any Type</string>
-    <string name="file_type_label">File Type</string>
-    <string name="search_filter_file_type_pdf">PDF</string>
-    <string name="search_filter_file_type_spreadsheet">Spreadsheet</string>
-    <string name="search_filter_file_type_presentation">Presentation</string>
-    <string name="search_filter_file_type_image">Image</string>
-    <string name="search_filter_file_type_folder">Folder</string>
-    <string name="search_filter_file_type_document">Document</string>
-    <string name="search_filter_file_type_boxnote">Box Note</string>
-    <string name="search_filter_file_type_video">Video</string>
-    <string name="search_filter_file_type_audio">Audio</string>
-    <string name="search_filter_file_type_see_more">See more...</string>
-    <string name="date_modified_label">Date Modified</string>
-    <string name="any_time">Any Time</string>
-    <string name="past_day">Past Day</string>
-    <string name="past_week">Past Week</string>
-    <string name="past_month">Past Month</string>
-    <string name="past_year">Past Year</string>
-    <string name="item_size_label">Size</string>
+    <string name="search_hint" description="hint text for Search View. Argument represents a folder name">Search in %1$s</string>
+    <string name="filter_results_header" description="Label for button that launches screen to filter search results">Filter Results</string>
+    <string name="filter_search_results" description="Header text for refine search results activity">Refine Search Results</string>
+    <string name="apply" description="label for apply button in refine search results activity">Apply</string>
+    <string name="clear_filters" description="label for clear filters button in refine search results activity">Clear Filters</string>
+    <string name="file_type_label" description="Header for section that let you select file types to search for">File Type</string>
+    <string name="search_filter_file_type_pdf" description="File type to search for">PDF</string>
+    <string name="search_filter_file_type_spreadsheet" description="File type to search for">Spreadsheet</string>
+    <string name="search_filter_file_type_presentation" description="File type to search for">Presentation</string>
+    <string name="search_filter_file_type_image" description="File type to search for">Image</string>
+    <string name="search_filter_file_type_folder" description="File type to search for">Folder</string>
+    <string name="search_filter_file_type_document" description="File type to search for">Document</string>
+    <string name="search_filter_file_type_boxnote" description="File type to search for">Box Note</string>
+    <string name="search_filter_file_type_video" description="File type to search for">Video</string>
+    <string name="search_filter_file_type_audio" description="File type to search for">Audio</string>
+    <string name="search_filter_file_type_see_more" desctiption="Hyperlink to show hidden file types">See more...</string>
+    <string name="date_modified_label"  description="Header for section that limit search based on last modified date of the files and folders">Date Modified</string>
+    <string name="any_time"  description="Label for setting to search for files modified at any time">Any Time</string>
+    <string name="past_day" description="Label for setting to search for files modified in last day">Past Day</string>
+    <string name="past_week" description="Label for setting to search for files modified in last week">Past Week</string>
+    <string name="past_month" description="Label for setting to search for files modified in last month">Past Month</string>
+    <string name="past_year" description="Label for setting to search for files modified in last year">Past Year</string>
+    <string name="item_size_label" description="Header for section that limit search based on size of the files and folders">Size</string>
     <string name="item_size_any">Any Size</string>
-    <string name="item_size_0_to_1">0-1 MB</string>
-    <string name="item_size_1_to_5">1-5 MB</string>
-    <string name="item_size_5_to_25">1-25 MB</string>
-    <string name="item_size_25_to_100">25-100 MB</string>
-    <string name="item_size_100_to_1000">1000 MB - 1 GB</string>
-    <string name="search_filter_label_delimiter">,&#160;</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="item_size_0_to_1" description="Label for setting to search for files with size in given range">0-1 MB</string>
+    <string name="item_size_1_to_5" description="Label for setting to search for files with size in given range">1-5 MB</string>
+    <string name="item_size_5_to_25" description="Label for setting to search for files with size in given range">1-25 MB</string>
+    <string name="item_size_25_to_100" description="Label for setting to search for files with size in given range">25-100 MB</string>
+    <string name="item_size_100_to_1000" description="Label for setting to search for files with size in given range">1000 MB - 1 GB</string>
+    <string name="search_filter_label_delimiter" desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter">,&#160;</string>
 </resources>

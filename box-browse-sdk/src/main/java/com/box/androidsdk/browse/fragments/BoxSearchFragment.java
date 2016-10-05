@@ -248,9 +248,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                         HashSet<String> extensions = new HashSet<String>();
                         for(BoxSearchFilters.ItemType type : itemTypes) {
                             for (String extension : mItemTypeToExtensions.get(type)) {
-                                if (!extensions.contains(extension)) {
-                                    extensions.add(extension);
-                                }
+                                extensions.add(extension);
                             }
                         }
                         mRequest.limitFileExtensions(extensions.toArray(new String[extensions.size()]));

@@ -18,7 +18,7 @@ import com.box.androidsdk.browse.R;
  */
 public class BoxSearchView extends SearchView {
 
-    private BoxSearchListener mBoxSearchListener;
+    private OnBoxSearchListener mOnBoxSearchListener;
 
     public BoxSearchView(final Context context){
         super(context);
@@ -44,7 +44,7 @@ public class BoxSearchView extends SearchView {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                mBoxSearchListener.onQueryTextSubmit(query);
+                mOnBoxSearchListener.onQueryTextSubmit(query);
 
                 // Don't perform default action, return true
                 return true;
@@ -52,7 +52,7 @@ public class BoxSearchView extends SearchView {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mBoxSearchListener.onQueryTextChange(newText);
+                mOnBoxSearchListener.onQueryTextChange(newText);
 
                 // Don't perform default action, return true
                 return true;
@@ -62,14 +62,14 @@ public class BoxSearchView extends SearchView {
         this.setOnSearchClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBoxSearchListener.onSearchExpanded();
+                mOnBoxSearchListener.onSearchExpanded();
             }
         });
 
         this.setOnCloseListener(new OnCloseListener() {
             @Override
             public boolean onClose() {
-                mBoxSearchListener.onSearchCollapsed();
+                mOnBoxSearchListener.onSearchCollapsed();
                 return false;
             }
         });
@@ -98,11 +98,11 @@ public class BoxSearchView extends SearchView {
         }
     }
 
-    public void setOnBoxSearchListener(final BoxSearchListener boxSearchListener){
-        mBoxSearchListener = boxSearchListener;
+    public void setOnBoxSearchListener(final OnBoxSearchListener onBoxSearchListener){
+        mOnBoxSearchListener = onBoxSearchListener;
     }
 
-    public interface BoxSearchListener {
+    public interface OnBoxSearchListener {
 
         /**
          * User clicked on search icon and expanded search
