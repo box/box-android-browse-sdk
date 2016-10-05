@@ -48,9 +48,16 @@ import java.util.HashSet;
 public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSearchAdapter.BoxRecentSearchListener {
 
     private static String EXTRA_PARENT_FOLDER = "SearchFragment.ExtraParentFolder";
+
+    // parent folder for the search
     private static final String OUT_ITEM = "outItem";
+
+    // Offset for the next search request
     private static final String OUT_OFFSET = "outOffset";
+
+    // Current search term
     private static final String OUT_QUERY = "outQuery";
+
     private static final int DEFAULT_LIMIT = 200;
 
     public static final String RECENT_SEARCHES_SHARED_PREFERENCES = "com.box.androidsdk.browse.fragments.BoxSearchFragment.RecentSearchesSharedPreferences";
@@ -166,73 +173,16 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             ArrayList<String> filters = new ArrayList<String>();
             for (BoxSearchFilters.ItemType type: BoxSearchFilters.ItemType.values()) {
                 if (mSearchFilters.mItemTypes.contains(type)) {
-                    switch (type) {
-                        case Audio:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_audio));
-                            break;
-                        case BoxNote:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_boxnote));
-                            break;
-                        case Document:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_document));
-                            break;
-                        case Folder:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_folder));
-                            break;
-                        case Image:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_image));
-                            break;
-                        case Pdf:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_pdf));
-                            break;
-                        case Presentation:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_presentation));
-                            break;
-                        case Spreadsheet:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_spreadsheet));
-                            break;
-                        case Video:
-                            filters.add(getResources().getString(R.string.search_filter_file_type_video));
-                            break;
-                    }
+                    filters.add(type.getString(getContext()));
                 }
             }
 
-            switch (mSearchFilters.mItemModifiedDate) {
-                case Any:
-                    break;
-                case PastDay:
-                    filters.add(getResources().getString(R.string.past_day));
-                    break;
-                case PastWeek:
-                    filters.add(getResources().getString(R.string.past_week));
-                    break;
-                case PastMonth:
-                    filters.add(getResources().getString(R.string.past_month));
-                    break;
-                case PastYear:
-                    filters.add(getResources().getString(R.string.past_year));
-                    break;
+            if (mSearchFilters.mItemModifiedDate != BoxSearchFilters.ItemModifiedDate.Any) {
+                filters.add(mSearchFilters.mItemModifiedDate.getString(getContext()));
             }
 
-            switch (mSearchFilters.mItemSize) {
-                case Any:
-                    break;
-                case lessThanOneMb:
-                    filters.add(getResources().getString(R.string.item_size_0_to_1));
-                    break;
-                case OneMbToFiveMb:
-                    filters.add(getResources().getString(R.string.item_size_1_to_5));
-                    break;
-                case FiveMbToTwentyFiveMb:
-                    filters.add(getResources().getString(R.string.item_size_5_to_25));
-                    break;
-                case TwentyFiveMbToHundredMb:
-                    filters.add(getResources().getString(R.string.item_size_25_to_100));
-                    break;
-                case HundredMbToOneGB:
-                    filters.add(getResources().getString(R.string.item_size_100_to_1000));
-                    break;
+            if (mSearchFilters.mItemSize != BoxSearchFilters.ItemSize.Any) {
+                filters.add(mSearchFilters.mItemSize.getString(getContext()));
             }
 
             String label = android.text.TextUtils.join(getResources().getString(R.string.search_filter_label_delimiter), filters);
@@ -382,13 +332,6 @@ public class BoxSearchFragment extends BoxBrowseFragment implements BoxRecentSea
             }
 
             executeRequest();
-        }
-    }
-
-    @Override
-    public void onItemClick(BoxItem item) {
-        if (mSearchQuery != null && !mSearchQuery.equals("")) {
-            addToRecentSearches(mSearchQuery);
         }
     }
 

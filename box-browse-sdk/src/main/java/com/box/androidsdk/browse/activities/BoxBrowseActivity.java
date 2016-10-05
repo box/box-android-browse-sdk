@@ -210,11 +210,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     @Override
     public void onItemClick(BoxItem item) {
-        // Notify fragment about item click
-        BoxBrowseFragment browseFrag = getTopBrowseFragment();
-        if (browseFrag != null) {
-            browseFrag.onItemClick(item);
-        }
+
+        // TODO: If current fragment is search fragment, add search term to recent searches
 
         // If click is on a folder, navigate to that folder
         if (item instanceof BoxFolder) {

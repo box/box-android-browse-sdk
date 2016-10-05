@@ -27,6 +27,9 @@ public class SampleBrowseActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_FILE_PICKER = 1;
     private static final int REQUEST_CODE_FOLDER_PICKER = 2;
 
+    public static final String ROOT_FOLDER_ID = "0";
+    public static final String ROOT_FOLDER_NAME = "All Files";
+
     private Button btnFilePicker;
     private Button btnFolderPicker;
 
@@ -37,8 +40,8 @@ public class SampleBrowseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_browse);
         BoxConfig.IS_LOG_ENABLED = true;
-        BoxConfig.CLIENT_ID = "186mddjxxv7vlyjxli70ur0tmdpkdgsi";
-        BoxConfig.CLIENT_SECRET = "psi8wEOuP5s9lDtfoKOUDvchjNcjxaFX";
+        BoxConfig.CLIENT_ID = "your-client-id";
+        BoxConfig.CLIENT_SECRET = "your-client-secret";
 
         // Optional: Setting an implementation of a cache will allow the browse sdk to immediately show
         // data to the user while waiting for server data.
@@ -50,11 +53,11 @@ public class SampleBrowseActivity extends AppCompatActivity {
     }
 
     private void launchFilePicker() {
-        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName("0", "All Files"), session), REQUEST_CODE_FILE_PICKER);
+        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName(ROOT_FOLDER_ID, ROOT_FOLDER_NAME), session), REQUEST_CODE_FILE_PICKER);
     }
 
     private void launchFolderPicker() {
-        startActivityForResult(BoxBrowseFolderActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName("0", "All Files"), session), REQUEST_CODE_FOLDER_PICKER);
+        startActivityForResult(BoxBrowseFolderActivity.getLaunchIntent(this, BoxFolder.createFromIdAndName(ROOT_FOLDER_ID, ROOT_FOLDER_NAME), session), REQUEST_CODE_FOLDER_PICKER);
     }
 
     @Override

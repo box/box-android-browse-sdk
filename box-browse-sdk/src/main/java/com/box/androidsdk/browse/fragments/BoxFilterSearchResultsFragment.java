@@ -22,7 +22,6 @@ import com.box.androidsdk.browse.models.BoxSearchFilters;
 import java.util.HashMap;
 
 public class BoxFilterSearchResultsFragment extends Fragment {
-
     private static String EXTRA_FILTERS = "extraFilters";
     private BoxSearchFilters mFilters;
     private HashMap<BoxSearchFilters.ItemType, FileTypeData> mFileTypeMap;
@@ -31,6 +30,7 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     private ScrollView mScrollView;
     private LinearLayout mDateModifiedView;
     private LinearLayout mSizeView;
+
 
     public BoxFilterSearchResultsFragment() {
         // Required empty public constructor
@@ -81,12 +81,9 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     }
 
     private void setupSizeRange(View view) {
-        setupSizeRange(view, BoxSearchFilters.ItemSize.Any, R.id.itemSizeContainerAny, R.string.item_size_any);
-        setupSizeRange(view, BoxSearchFilters.ItemSize.lessThanOneMb, R.id.itemSizeContainerLessThanOne, R.string.item_size_0_to_1);
-        setupSizeRange(view, BoxSearchFilters.ItemSize.OneMbToFiveMb, R.id.itemSizeContainerOneToFive, R.string.item_size_1_to_5);
-        setupSizeRange(view, BoxSearchFilters.ItemSize.FiveMbToTwentyFiveMb, R.id.itemSizeContainerFiveToTwentyFive, R.string.item_size_5_to_25);
-        setupSizeRange(view, BoxSearchFilters.ItemSize.TwentyFiveMbToHundredMb, R.id.itemSizeContainerTwentyFiveToOneHundred, R.string.item_size_25_to_100);
-        setupSizeRange(view, BoxSearchFilters.ItemSize.HundredMbToOneGB, R.id.itemSizeContainerOneHundredToOneThousand, R.string.item_size_100_to_1000);
+        for (BoxSearchFilters.ItemSize itemSize: BoxSearchFilters.ItemSize.values()) {
+            setupSizeRange(view, itemSize, itemSize.getContainerId(), itemSize.getStringId());
+        }
     }
 
     private void setupSizeRange(final View view, final BoxSearchFilters.ItemSize itemSize, int containerViewId, int textResourceId) {
@@ -131,11 +128,9 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     }
 
     private void setupDateModified(View view) {
-        setupDateModified(view, BoxSearchFilters.ItemModifiedDate.Any, R.id.dateModifiedContainerAnyTime, R.string.any_time);
-        setupDateModified(view, BoxSearchFilters.ItemModifiedDate.PastDay, R.id.dateModifiedContainerPastDay, R.string.past_day);
-        setupDateModified(view, BoxSearchFilters.ItemModifiedDate.PastWeek, R.id.dateModifiedContainerPastWeek, R.string.past_week);
-        setupDateModified(view, BoxSearchFilters.ItemModifiedDate.PastMonth, R.id.dateModifiedContainerPastMonth, R.string.past_month);
-        setupDateModified(view, BoxSearchFilters.ItemModifiedDate.PastYear, R.id.dateModifiedContainerPastYear, R.string.past_year);
+        for (BoxSearchFilters.ItemModifiedDate modifiedDate: BoxSearchFilters.ItemModifiedDate.values()) {
+            setupDateModified(view, modifiedDate, modifiedDate.getContainerId(), modifiedDate.getStringId());
+        }
     }
 
     private void setupDateModified(final View view, final BoxSearchFilters.ItemModifiedDate dateModified, int containerViewId, int textResourceId) {
@@ -182,15 +177,9 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     private void setupFileTypes(final View view) {
         mFileTypeMap = new HashMap<BoxSearchFilters.ItemType, FileTypeData>();
 
-        setupFileType(view, BoxSearchFilters.ItemType.Audio, R.id.audioFileTypeContainer, R.drawable.ic_box_browsesdk_audio, R.string.search_filter_file_type_audio);
-        setupFileType(view, BoxSearchFilters.ItemType.BoxNote, R.id.boxnoteFileTypeContainer, R.drawable.ic_box_browsesdk_box_note, R.string.search_filter_file_type_boxnote);
-        setupFileType(view, BoxSearchFilters.ItemType.Document, R.id.documentFileTypeContainer, R.drawable.ic_box_browsesdk_doc, R.string.search_filter_file_type_document);
-        setupFileType(view, BoxSearchFilters.ItemType.Folder, R.id.folderFileTypeContainer, R.drawable.ic_box_browsesdk_folder_shared, R.string.search_filter_file_type_folder);
-        setupFileType(view, BoxSearchFilters.ItemType.Image, R.id.imageFileTypeContainer, R.drawable.ic_box_browsesdk_image, R.string.search_filter_file_type_image);
-        setupFileType(view, BoxSearchFilters.ItemType.Pdf, R.id.pdfFileTypeContainer, R.drawable.ic_box_browsesdk_pdf, R.string.search_filter_file_type_pdf);
-        setupFileType(view, BoxSearchFilters.ItemType.Presentation, R.id.presentationFileTypeContainer, R.drawable.ic_box_browsesdk_presentation, R.string.search_filter_file_type_presentation);
-        setupFileType(view, BoxSearchFilters.ItemType.Spreadsheet, R.id.spreadsheetFileTypeContainer, R.drawable.ic_box_browsesdk_spreadsheet, R.string.search_filter_file_type_spreadsheet);
-        setupFileType(view, BoxSearchFilters.ItemType.Video, R.id.videoFileTypeContainer, R.drawable.ic_box_browsesdk_movie, R.string.search_filter_file_type_video);
+        for (BoxSearchFilters.ItemType itemType: BoxSearchFilters.ItemType.values()) {
+            setupFileType(view, itemType, itemType.getContainerId(), itemType.getDrawableId(), itemType.getStringId());
+        }
 
         final TextView seeMoreTextView = (TextView) view.findViewById(R.id.seeMoreFileType);
         seeMoreTextView.setOnClickListener(new View.OnClickListener() {
