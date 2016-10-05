@@ -317,7 +317,8 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mProgress.setVisibility(View.GONE);
         mSearchFiltersHeader.setVisibility(View.VISIBLE);
 
-        mItems = items;
+        mItems = new ArrayList<BoxItem>();
+        mItems.addAll(items);
         if (mItems.size() > 0 && !(mItems.get(0) instanceof ResultsHeader)) {
             mItems.add(0, new ResultsHeader(mParentFolder));
         }
@@ -422,12 +423,8 @@ public class BoxSearchFragment extends BoxBrowseFragment {
      * @return
      */
     private static int calculateBestOffset(int itemsSize, int limit){
-        if (limit % itemsSize == 0){
-            return itemsSize;
-        }
-        int multiple = itemsSize / limit;
-        return (multiple + 1) * limit;
-
+        double offset = ((double) itemsSize)/limit;
+        return (int)Math.ceil(offset) * limit;
     }
 
     /**
