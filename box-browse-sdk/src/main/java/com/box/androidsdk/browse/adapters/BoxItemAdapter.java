@@ -299,11 +299,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         final Lock lock = mLock.writeLock();
         lock.lock();
         final int startingSize = mItems.size();
-            for (BoxItem item : items) {
-                mItems.add(item);
-            }
-            final int endingSize = mItems.size();
-            mHandler.post(new Runnable() {
+        mItems.addAll(items);
+        final int endingSize = mItems.size();
+
+        mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
