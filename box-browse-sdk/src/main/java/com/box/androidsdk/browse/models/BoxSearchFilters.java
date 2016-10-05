@@ -21,30 +21,30 @@ public class BoxSearchFilters implements Serializable {
         Spreadsheet(R.id.spreadsheetFileTypeContainer, R.drawable.ic_box_browsesdk_spreadsheet, R.string.search_filter_file_type_spreadsheet),
         Video(R.id.videoFileTypeContainer, R.drawable.ic_box_browsesdk_movie, R.string.search_filter_file_type_video);
 
-        int mContainerId;
-        int mStringId;
-        int mDrawableId;
+        int mContainerViewResId;
+        int mDisplayStringResId;
+        int mIconResId;
 
         ItemType(int containerId, int drawableId, int stringId) {
-            mContainerId = containerId;
-            mDrawableId = drawableId;
-            mStringId = stringId;
+            mContainerViewResId = containerId;
+            mIconResId = drawableId;
+            mDisplayStringResId = stringId;
         }
 
         public int getContainerId() {
-            return mContainerId;
+            return mContainerViewResId;
         }
 
         public int getDrawableId() {
-            return mDrawableId;
+            return mIconResId;
         }
 
         public int getStringId() {
-            return mStringId;
+            return mDisplayStringResId;
         }
 
         public String getString(Context context) {
-            return context.getResources().getString(mStringId);
+            return context.getResources().getString(mDisplayStringResId);
         }
     }
 
@@ -55,24 +55,24 @@ public class BoxSearchFilters implements Serializable {
         PastMonth(R.id.dateModifiedContainerPastMonth, R.string.past_month),
         PastYear(R.id.dateModifiedContainerPastYear, R.string.past_year);
 
-        int mContainerId;
-        int mStringId;
+        int mContainerViewResId;
+        int mDisplayStringResId;
 
         ItemModifiedDate(int containerId, int stringId) {
-            mContainerId = containerId;
-            mStringId = stringId;
+            mContainerViewResId = containerId;
+            mDisplayStringResId = stringId;
         }
 
         public int getContainerId() {
-            return mContainerId;
+            return mContainerViewResId;
         }
 
         public int getStringId() {
-            return mStringId;
+            return mDisplayStringResId;
         }
 
         public String getString(Context context) {
-            return context.getResources().getString(mStringId);
+            return context.getResources().getString(mDisplayStringResId);
         }
 
     }
@@ -85,24 +85,24 @@ public class BoxSearchFilters implements Serializable {
         TwentyFiveMbToHundredMb(R.id.itemSizeContainerTwentyFiveToOneHundred, R.string.item_size_25_to_100),
         HundredMbToOneGB(R.id.itemSizeContainerOneHundredToOneThousand, R.string.item_size_100_to_1000);
 
-        int mContainerId;
-        int mStringId;
+        int mContainerViewResId;
+        int mDisplayStringResId;
 
         ItemSize(int containerId, int stringId) {
-            mContainerId = containerId;
-            mStringId = stringId;
+            mContainerViewResId = containerId;
+            mDisplayStringResId = stringId;
         }
 
         public int getContainerId() {
-            return mContainerId;
+            return mContainerViewResId;
         }
 
         public int getStringId() {
-            return mStringId;
+            return mDisplayStringResId;
         }
 
         public String getString(Context context) {
-            return context.getResources().getString(mStringId);
+            return context.getResources().getString(mDisplayStringResId);
         }
     }
 
