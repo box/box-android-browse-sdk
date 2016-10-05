@@ -309,6 +309,22 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return new BoxSearchAdapter(getActivity(), getController(), this);
     }
 
+    protected void updateTo(ArrayList<BoxItem> items) {
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        mProgress.setVisibility(View.GONE);
+        mSearchFiltersHeader.setVisibility(View.VISIBLE);
+
+        mItems = new ArrayList<BoxItem>();
+        mItems.addAll(items);
+        if (mItems.size() > 0 && !(mItems.get(0) instanceof ResultsHeader)) {
+            mItems.add(0, new ResultsHeader(mParentFolder));
+        }
+        mAdapter.updateTo(mItems);
+    }
+
     @Override
     protected void updateItems(ArrayList<BoxItem> items) {
         FragmentActivity activity = getActivity();
@@ -376,7 +392,13 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
         if (response.getResult() instanceof BoxIteratorItems) {
             BoxIteratorItems items = (BoxIteratorItems) response.getResult();
-            updateItems(items.getEntries());
+
+            if (((BoxRequestsSearch.Search) response.getRequest()).getOffset() == 0) {
+                mOffset = 0;
+                updateTo(items.getEntries());
+            } else {
+                updateItems(items.getEntries());
+            }
             mOffset += items.size();
 
             // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
@@ -401,12 +423,8 @@ public class BoxSearchFragment extends BoxBrowseFragment {
      * @return
      */
     private static int calculateBestOffset(int itemsSize, int limit){
-        if (limit % itemsSize == 0){
-            return itemsSize;
-        }
-        int multiple = itemsSize / limit;
-        return (multiple + 1) * limit;
-
+        double offset = ((double) itemsSize)/limit;
+        return (int)Math.ceil(offset) * limit;
     }
 
     /**
