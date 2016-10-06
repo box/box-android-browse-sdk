@@ -58,7 +58,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     protected int mLimit;
 
     protected String mSearchQuery;
-    protected static BoxRequestsSearch.Search mRequest;
+    protected BoxRequestsSearch.Search mRequest;
 
     public static final int REQUEST_FILTER_SEARCH_RESULTS = 228;
     public static final String EXTRA_SEARCH_FILTERS = "SearchFragment.SearchFilters";
