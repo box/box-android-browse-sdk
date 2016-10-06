@@ -20,6 +20,11 @@ public class BoxSearchView extends SearchView {
 
     private OnBoxSearchListener mOnBoxSearchListener;
 
+    // There is another property isIconified that represent the isExpanded state
+    // but it is updated after code is executed in OnCloseListener call
+    // Keeping a local property to ensure we know the state
+    private boolean isExpanded;
+
     public BoxSearchView(final Context context){
         super(context);
         initSearchView(context);
@@ -31,6 +36,8 @@ public class BoxSearchView extends SearchView {
     }
 
     private void initSearchView(final Context context){
+
+        isExpanded = false;
 
         LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
@@ -62,6 +69,7 @@ public class BoxSearchView extends SearchView {
         this.setOnSearchClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                isExpanded = true;
                 mOnBoxSearchListener.onSearchExpanded();
             }
         });
@@ -69,10 +77,15 @@ public class BoxSearchView extends SearchView {
         this.setOnCloseListener(new OnCloseListener() {
             @Override
             public boolean onClose() {
+                isExpanded = false;
                 mOnBoxSearchListener.onSearchCollapsed();
                 return false;
             }
         });
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
     }
 
     public void setSearchTerm(String query) {
