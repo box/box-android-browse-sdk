@@ -68,17 +68,11 @@
                 android:layout_height="1dp"
                 android:background="#FFDADADA"/>
         </LinearLayout>
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/box_browsesdk_swipe_reresh"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/box_browsesdk_items_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/box_browsesdk_list_background"/>
-        </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
     <ImageView
         android:id="@+id/box_browsesdk_folder_empty"
