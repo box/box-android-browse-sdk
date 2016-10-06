@@ -191,10 +191,12 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(getLayout(), container, false);
         mSwipeRefresh = (SwipeRefreshLayout) mRootView.findViewById(R.id.box_browsesdk_swipe_reresh);
-        mSwipeRefresh.setOnRefreshListener(this);
-        mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
-        // This is a work around to show the loading circle because SwipeRefreshLayout.onMeasure must be called before setRefreshing to show the animation
-        mSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
+        if (mSwipeRefresh != null) {
+            mSwipeRefresh.setOnRefreshListener(this);
+            mSwipeRefresh.setColorSchemeColors(R.color.box_accent);
+            // This is a work around to show the loading circle because SwipeRefreshLayout.onMeasure must be called before setRefreshing to show the animation
+            mSwipeRefresh.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
+        }
 
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
         mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
@@ -228,13 +230,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         if (getMultiSelectHandler() != null) {
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
-
-        if (mItems == null) {
-            loadItems();
-        } else {
-            updateItems(mItems);
-        }
-
         return mRootView;
     }
 

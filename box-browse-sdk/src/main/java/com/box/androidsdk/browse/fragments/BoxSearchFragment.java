@@ -14,27 +14,21 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.activities.FilterSearchResults;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
-import com.box.androidsdk.browse.adapters.BoxRecentSearchAdapter;
+
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.adapters.ResultsHeader;
 import com.box.androidsdk.browse.models.BoxSearchFilters;
-import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
-import com.box.androidsdk.content.BoxApiSearch;
-import com.box.androidsdk.content.BoxConstants;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIteratorItems;
-import com.box.androidsdk.content.models.BoxJsonObject;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
-import com.eclipsesource.json.JsonArray;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -214,6 +208,12 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mRequest = mController.getSearchRequest(mSearchQuery);
             mAdapter.removeAll();
             loadItems();
+            mItems = null;
+            mAdapter.notifyDataSetChanged();
+            notifyUpdateListeners();
+        } else {
+            mItems = null;
+            mAdapter.removeAll();
             mAdapter.notifyDataSetChanged();
             notifyUpdateListeners();
         }
