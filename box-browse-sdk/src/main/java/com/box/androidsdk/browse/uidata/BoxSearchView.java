@@ -43,7 +43,7 @@ public class BoxSearchView extends SearchView {
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
 
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
-        searchCloseButton.setImageResource(R.drawable.ic_clear_black_24dp);
+        searchCloseButton.setImageResource(R.drawable.ic_clear_gray_24dp);
 
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setQueryHint(context.getString(R.string.box_browsesdk_search_hint));

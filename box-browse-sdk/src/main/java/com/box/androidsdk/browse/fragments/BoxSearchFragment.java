@@ -414,7 +414,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
                     ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
                 }
             }
-            mSwipeRefresh.setRefreshing(false);
             mSearchFiltersHeader.setVisibility(View.VISIBLE);
         }
     }

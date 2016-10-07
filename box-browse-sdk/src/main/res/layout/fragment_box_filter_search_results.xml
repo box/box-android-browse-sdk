@@ -21,7 +21,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingBottom="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -60,7 +61,7 @@
                         android:textColor="#FF737F8B"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
-                        android:paddingBottom="16dp"
+                        style="@style/Options_ItemContainer"
                         />
 
                     <LinearLayout
@@ -102,7 +103,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:id="@+id/dateModified">
+                    android:id="@+id/dateModified"
+                    android:paddingBottom="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -140,14 +142,15 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#33BDC3C7"/>
+                    android:background="#33BDC3C7" />
 
                 <!-- Size -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:id="@+id/size">
+                    android:id="@+id/size"
+                    android:paddingBottom="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
