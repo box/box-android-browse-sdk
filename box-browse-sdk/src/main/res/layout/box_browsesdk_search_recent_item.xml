@@ -29,6 +29,7 @@
         android:layout_toRightOf="@+id/icon"
         android:layout_toLeftOf="@+id/close"
         android:id="@+id/text"
+        android:textSize="16sp"
         android:gravity="left|center_vertical"
         android:paddingLeft="32dp"
         android:paddingRight="16dp"
