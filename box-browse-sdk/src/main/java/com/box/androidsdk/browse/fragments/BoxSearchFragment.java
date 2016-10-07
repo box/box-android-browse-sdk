@@ -212,6 +212,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mAdapter.notifyDataSetChanged();
             notifyUpdateListeners();
         } else {
+            mRequest = null;
+            mProgress.setVisibility(View.GONE);
+            mSearchFiltersHeader.setVisibility(View.GONE);
             mItems = null;
             mAdapter.removeAll();
             mAdapter.notifyDataSetChanged();
@@ -227,7 +230,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     protected void loadItems() {
         if (mRequest != null) {
             mProgress.setVisibility(View.VISIBLE);
-            mSearchFiltersHeader.setVisibility(View.GONE);
             mOffset = 0;
             mRequest.setLimit(mLimit)
                     .setOffset(mOffset)
@@ -332,7 +334,6 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             return;
         }
         mProgress.setVisibility(View.GONE);
-        mSearchFiltersHeader.setVisibility(View.VISIBLE);
 
         // Search can potentially have a lot of results so incremental loading and de-duping logic is needed
         final int startRange = mAdapter.getItemCount() > 0 ? mAdapter.getItemCount() - 1: 0;
@@ -386,32 +387,35 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             checkConnectivity();
             return;
         }
-        ArrayList<String> removeIds = new ArrayList<String>(1);
-        removeIds.add(BoxSearchAdapter.LOAD_MORE_ID);
-        mAdapter.remove(removeIds);
 
-        if (response.getResult() instanceof BoxIteratorItems) {
-            BoxIteratorItems items = (BoxIteratorItems) response.getResult();
+        if (response.getRequest().equals(mRequest)) {
+            ArrayList<String> removeIds = new ArrayList<String>(1);
+            removeIds.add(BoxSearchAdapter.LOAD_MORE_ID);
+            mAdapter.remove(removeIds);
 
-            if (((BoxRequestsSearch.Search) response.getRequest()).getOffset() == 0) {
-                mOffset = 0;
-                updateTo(items.getEntries());
-            } else {
-                updateItems(items.getEntries());
+            if (response.getResult() instanceof BoxIteratorItems) {
+                BoxIteratorItems items = (BoxIteratorItems) response.getResult();
+
+                if (((BoxRequestsSearch.Search) response.getRequest()).getOffset() == 0) {
+                    mOffset = 0;
+                    updateTo(items.getEntries());
+                } else {
+                    updateItems(items.getEntries());
+                }
+                mOffset += items.size();
+
+                // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
+                if (items.fullSize() != null && mOffset < items.fullSize()) {
+                    // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
+                    mOffset = calculateBestOffset(mOffset, mLimit);
+                    BoxRequestsSearch.Search incrementalSearchTask = mRequest
+                            .setOffset(mOffset)
+                            .setLimit(mLimit);
+                    ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
+                }
             }
-            mOffset += items.size();
-
-            // If not all entries were fetched add a task to fetch more items if user scrolls to last entry.
-            if (items.fullSize() != null && mOffset < items.fullSize()) {
-                // The search endpoint returns a 400 bad request if the offset is not in multiples of the limit
-                mOffset = calculateBestOffset(mOffset, mLimit);
-                BoxRequestsSearch.Search incrementalSearchTask = mRequest
-                        .setOffset(mOffset)
-                        .setLimit(mLimit);
-                ((BoxSearchAdapter) mAdapter).addLoadMoreItem(incrementalSearchTask);
-            }
+            mSearchFiltersHeader.setVisibility(View.VISIBLE);
         }
-        mSwipeRefresh.setRefreshing(false);
     }
 
     /**
