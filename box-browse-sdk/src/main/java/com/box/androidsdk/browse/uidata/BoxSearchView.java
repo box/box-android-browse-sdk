@@ -8,6 +8,7 @@ import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -44,6 +45,10 @@ public class BoxSearchView extends SearchView {
 
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
         searchCloseButton.setImageResource(R.drawable.ic_clear_gray_24dp);
+
+
+        EditText editText = ((EditText)findViewById(R.id.search_src_text));
+        editText.setTextColor(Color.BLACK);
 
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setQueryHint(context.getString(R.string.box_browsesdk_search_hint));
