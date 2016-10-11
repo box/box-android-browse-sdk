@@ -121,7 +121,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             }
         });
         setupSearchFiltersHeader();
-
+        search();
         return view;
     }
 
@@ -205,7 +205,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
 
     protected void search() {
         if (mSearchQuery != null && !mSearchQuery.equals("")) {
-            mRequest = mController.getSearchRequest(mSearchQuery);
+            mRequest = getController().getSearchRequest(mSearchQuery);
             mAdapter.removeAll();
             loadItems();
             mItems = null;

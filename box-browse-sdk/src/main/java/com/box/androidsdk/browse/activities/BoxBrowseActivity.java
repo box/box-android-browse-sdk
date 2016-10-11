@@ -11,8 +11,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
@@ -222,34 +225,70 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     @Override
     public void onSearchExpanded() {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-        if (!(fragment instanceof BoxSearchFragment)) {
-            FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
-            // All fragments will always navigate into folders
-            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, mCurrentBoxFolder).build();
-            trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
-                    .addToBackStack(BoxBrowseFragment.TAG)
-                    .commit();
-        }
     }
 
     @Override
     public void onSearchCollapsed() {
-
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+        if (fragment instanceof BoxSearchFragment) {
+            getSupportFragmentManager().popBackStack();
+        }
     }
 
     @Override
     public void onQueryTextChange(String text) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
-        if (fragment instanceof BoxSearchFragment) {
+        if (!(fragment instanceof BoxSearchFragment)) {
+            FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+
+            // All fragments will always navigate into folders
+            BoxSearchFragment searchFragment = new BoxSearchFragment.Builder(mSession, text, mCurrentBoxFolder).build();
+            trans.replace(R.id.box_browsesdk_fragment_container, searchFragment)
+                    .addToBackStack(BoxBrowseFragment.TAG)
+                    .commit();
+        } else {
             ((BoxSearchFragment)fragment).search(text);
         }
     }
 
     @Override
     public void onQueryTextSubmit(String text) {
+        hideKeyboard();
+    }
 
+    private void hideKeyboard() {
+        if (mSearchView != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * Helper method to initialize the activity with the default toolbar for the Share SDK.
+     * This will show a material themed toolbar with a back button that will finish the Activity.
+     */
+    protected void initToolbar() {
+        Toolbar actionBar = (Toolbar) findViewById(com.box.androidsdk.browse.R.id.box_action_bar);
+        setSupportActionBar(actionBar);
+        actionBar.setNavigationIcon(com.box.androidsdk.browse.R.drawable.ic_box_browsesdk_arrow_back_grey_24dp);
+        actionBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (mSearchView.isExpanded()) {
+                    mSearchView.setIconified(true);
+                    return;
+                }
+
+                FragmentManager fragManager = getSupportFragmentManager();
+                if (fragManager != null && fragManager.getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStack();
+                } else {
+                    finish();
+                }
+            }
+        });
     }
 
     /**
