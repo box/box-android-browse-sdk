@@ -110,6 +110,7 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
         mSelectFolderButton = (Button) findViewById(R.id.box_browsesdk_select_folder_button);
         mSelectFolderButton.setOnClickListener(this);
         initToolbar();
+        initRecentSearches();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1) {
             onItemClick(mItem);
             if (mItem instanceof BoxFolder) {

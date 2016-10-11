@@ -1,13 +1,14 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/box_background">
-    <include layout="@layout/box_browsesdk_toolbar" />
+    <include layout="@layout/box_browsesdk_toolbar"
+        android:id="@+id/mainToolbar"/>
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/mainToolbar">
         <View
             android:layout_width="match_parent"
             android:layout_height="6dp"
@@ -18,4 +19,13 @@
             android:id="@+id/box_browsesdk_fragment_container">
         </FrameLayout>
     </FrameLayout>
-</LinearLayout>
+    <ListView
+        android:id="@+id/recentSearchesListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/mainToolbar"
+        android:background="#55000000"
+        android:visibility="gone"
+        android:dividerHeight="0dp"
+        android:divider="@null"/>
+</RelativeLayout>

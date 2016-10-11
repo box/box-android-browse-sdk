@@ -9,21 +9,27 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.browse.adapters.BoxRecentSearchAdapter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFolderFragment;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.fragments.BoxSearchFragment;
 import com.box.androidsdk.browse.fragments.OnUpdateListener;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
@@ -35,6 +41,7 @@ import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
 
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -58,6 +65,12 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private BoxSearchView mSearchView;
     private BoxFolder mCurrentBoxFolder;
 
+    private ListView mRecentSearchesListView;
+    protected ArrayList<String> mRecentSearches;
+    protected BoxRecentSearchAdapter mRecentSearchesAdapter;
+    private View mRecentSearchesHeader;
+    private View mRecentSearchesFooter;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mController = new BoxBrowseController(mSession, new BoxApiFile(mSession),
@@ -71,6 +84,22 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         } else if (getIntent() != null) {
             mCurrentBoxFolder = (BoxFolder) getIntent().getSerializableExtra(EXTRA_ITEM);
         }
+    }
+
+    public void initRecentSearches() {
+        mRecentSearchesHeader = getLayoutInflater().inflate(com.box.androidsdk.browse.R.layout.box_browsesdk_recent_searches_header, null);
+        mRecentSearchesFooter = getLayoutInflater().inflate(com.box.androidsdk.browse.R.layout.box_browsesdk_recent_searches_footer, null);
+        mRecentSearchesListView = (ListView) findViewById(R.id.recentSearchesListView);
+        mRecentSearchesListView.addHeaderView(mRecentSearchesHeader);
+        mRecentSearchesListView.addFooterView(mRecentSearchesFooter);
+        mRecentSearchesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String query = mRecentSearchesAdapter.getItem(position - mRecentSearchesListView.getHeaderViewsCount());
+                mSearchView.setSearchTerm(query);
+            }
+        });
+        mRecentSearchesListView.setVisibility(View.GONE);
     }
 
 
@@ -225,11 +254,41 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     @Override
     public void onSearchExpanded() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+        if (fragment instanceof BoxSearchFragment) {
+            return;
+        }
+
+        mRecentSearches = mController.getRecentSearches(this, mSession.getUser());
+        mRecentSearchesAdapter = new BoxRecentSearchAdapter(this, mRecentSearches, new BoxRecentSearchAdapter.BoxRecentSearchListener() {
+            @Override
+            public void onCloseClicked(int position) {
+                mRecentSearches.clear();
+                mRecentSearches.addAll(mController.deleteFromRecentSearches(BoxBrowseActivity.this, mSession.getUser(), position));
+                mRecentSearchesAdapter.notifyDataSetChanged();
+                if (mRecentSearches.size() == 0) {
+                    mRecentSearchesHeader.setVisibility(View.GONE);
+                    mRecentSearchesFooter.setVisibility(View.GONE);
+                }
+            }
+        });
+        mRecentSearchesListView.setAdapter(mRecentSearchesAdapter);
+        mRecentSearchesListView.setVisibility(View.VISIBLE);
+
+        if (mRecentSearches.size() == 0) {
+            mRecentSearchesHeader.setVisibility(View.GONE);
+            mRecentSearchesFooter.setVisibility(View.GONE);
+        } else {
+            mRecentSearchesHeader.setVisibility(View.VISIBLE);
+            mRecentSearchesFooter.setVisibility(View.VISIBLE);
+        }
+
 
     }
 
     @Override
     public void onSearchCollapsed() {
+        mRecentSearchesListView.setVisibility(View.GONE);
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         if (fragment instanceof BoxSearchFragment) {
             getSupportFragmentManager().popBackStack();
@@ -239,6 +298,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     @Override
     public void onQueryTextChange(String text) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+        if (TextUtils.isEmpty(text) && !(fragment instanceof BoxSearchFragment)) {
+            return;
+        }
+
+        mRecentSearchesListView.setVisibility(View.GONE);
         if (!(fragment instanceof BoxSearchFragment)) {
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
