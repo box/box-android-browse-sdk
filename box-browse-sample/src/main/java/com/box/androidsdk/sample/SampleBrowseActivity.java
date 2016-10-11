@@ -40,8 +40,8 @@ public class SampleBrowseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_browse);
         BoxConfig.IS_LOG_ENABLED = true;
-        BoxConfig.CLIENT_ID = "186mddjxxv7vlyjxli70ur0tmdpkdgsi";
-        BoxConfig.CLIENT_SECRET = "psi8wEOuP5s9lDtfoKOUDvchjNcjxaFX";
+        BoxConfig.CLIENT_ID = "your-client-id";
+        BoxConfig.CLIENT_SECRET = "your-client-secret";
 
         // Optional: Setting an implementation of a cache will allow the browse sdk to immediately show
         // data to the user while waiting for server data.
