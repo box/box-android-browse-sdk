@@ -325,27 +325,6 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     }
 
     /**
-     * Helper method to initialize the activity with the default toolbar for the Share SDK.
-     * This will show a material themed toolbar with a back button that will finish the Activity.
-     */
-    protected void initToolbar() {
-        Toolbar actionBar = (Toolbar) findViewById(R.id.box_action_bar);
-        setSupportActionBar(actionBar);
-        actionBar.setNavigationIcon(R.drawable.ic_box_browsesdk_arrow_back_grey_24dp);
-        actionBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragManager = getSupportFragmentManager();
-                if (fragManager != null && fragManager.getBackStackEntryCount() > 0) {
-                    getSupportFragmentManager().popBackStack();
-                } else {
-                    finish();
-                }
-            }
-        });
-    }
-
-    /**
      * Helper method that returns formatted text that is meant to be shown in a Button
      *
      * @param title the title text that should be emphasized

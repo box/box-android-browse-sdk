@@ -37,6 +37,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.box_browsesdk_activity_file);
         initToolbar();
+        initRecentSearches();
         if (getSupportFragmentManager().getBackStackEntryCount() < 1){
             onItemClick(mItem);
             getSupportActionBar().setTitle(mItem.getName());
