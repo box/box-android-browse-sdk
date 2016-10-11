@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.uidata;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
@@ -46,9 +47,10 @@ public class BoxSearchView extends SearchView {
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
         searchCloseButton.setImageResource(R.drawable.ic_clear_gray_24dp);
 
-
-        EditText editText = ((EditText)findViewById(R.id.search_src_text));
-        editText.setTextColor(Color.BLACK);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            EditText editText = ((EditText) findViewById(R.id.search_src_text));
+            editText.setTextColor(Color.BLACK);
+        }
 
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
         setQueryHint(context.getString(R.string.box_browsesdk_search_hint));

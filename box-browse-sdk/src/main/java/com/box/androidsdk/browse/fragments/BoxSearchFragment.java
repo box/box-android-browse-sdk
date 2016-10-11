@@ -121,8 +121,13 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             }
         });
         setupSearchFiltersHeader();
-        search();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        search(mSearchQuery);
     }
 
     protected void startFilterActivity() {
