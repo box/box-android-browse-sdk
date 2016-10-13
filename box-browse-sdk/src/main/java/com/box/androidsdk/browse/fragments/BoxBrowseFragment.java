@@ -79,7 +79,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private boolean mIsConnected;
     protected BrowseController mController;
     private Set<OnUpdateListener> mUpdateListeners = new HashSet<OnUpdateListener>();
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    protected BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent instanceof BoxResponseIntent) {
@@ -87,7 +87,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
         }
     };
-    private BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
+    protected BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -154,7 +154,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             // this call must be made after registering the receiver in order to handle very fast responses.
             updateItems(mItems);
         }
-        super.onResume();
     }
 
     protected void cleanupBoxReceivers(){
