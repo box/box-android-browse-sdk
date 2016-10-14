@@ -23,4 +23,37 @@
     <string name="box_browsesdk_performing_search">正在执行搜索…</string>
     <string name="box_browsesdk_see_additional_results">查看更多结果</string>
     <string name="box_browsesdk_search_hint">搜索</string>
+    <string name="box_browsesdk_recent_searches_header">近期搜索</string>
+    <string name="box_browsesdk_search_results_header">&lt;B&gt;%1$s</b> 中的结果</string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">在 %1$s 中搜索</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">筛选结果</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">优化搜索结果</string>
+    <string description="label for apply button in refine search results activity" name="apply">应用</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">清除筛选器</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">文件类型</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">电子表格</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">演示</string>
+    <string description="File type to search for" name="search_filter_file_type_image">图像</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">文件夹</string>
+    <string description="File type to search for" name="search_filter_file_type_document">文档</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">视频</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">音频</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">查看更多...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">日期已修改</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">任何时间</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">过去一天</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">过去一周</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">过去一月</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">过去一年</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">大小</string>
+    <string name="item_size_any">任何大小</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0-1 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1-5 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1-25 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25-100 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB - 1 GB</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">，</string>
 </resources>

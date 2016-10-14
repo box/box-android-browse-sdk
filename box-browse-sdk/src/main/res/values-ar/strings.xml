@@ -23,4 +23,37 @@
     <string name="box_browsesdk_performing_search">جارٍ إجراء البحث...</string>
     <string name="box_browsesdk_see_additional_results">عرض نتائج إضافية</string>
     <string name="box_browsesdk_search_hint">بحث</string>
+    <string name="box_browsesdk_recent_searches_header">عمليات البحث الأخيرة</string>
+    <string name="box_browsesdk_search_results_header">النتائج في <b>%1$s</b></string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">البحث في %1$s</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">تصفية النتائج</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">تحسين نتائج البحث</string>
+    <string description="label for apply button in refine search results activity" name="apply">تطبيق</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">مسح عوامل التصفية</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">نوع الملف</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">جدول بيانات</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">عرض تقديمي</string>
+    <string description="File type to search for" name="search_filter_file_type_image">صورة</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">مجلد</string>
+    <string description="File type to search for" name="search_filter_file_type_document">مستند</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">فيديو</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">صوت</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">عرض المزيد...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">تاريخ التعديل</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">أي وقت</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">اليوم الماضي</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">الأسبوع الماضي</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">الشهر الماضي</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">العام الماضي</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">الحجم</string>
+    <string name="item_size_any">أي حجم</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0-1 ميغابايت</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1-5 ميغابايت</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1-25 ميغابايت</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25-100 ميغابايت</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 ميغابايت - 1 غيغابايت</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">،</string>
 </resources>
