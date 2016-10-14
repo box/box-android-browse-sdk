@@ -57,17 +57,18 @@ public class BoxSearchView extends SearchView {
         this.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
-                mOnBoxSearchListener.onQueryTextSubmit(query);
-
+                if (mOnBoxSearchListener != null) {
+                    mOnBoxSearchListener.onQueryTextSubmit(query);
+                }
                 // Don't perform default action, return true
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mOnBoxSearchListener.onQueryTextChange(newText);
-
+                if (mOnBoxSearchListener != null) {
+                    mOnBoxSearchListener.onQueryTextChange(newText);
+                }
                 // Don't perform default action, return true
                 return true;
             }
@@ -77,7 +78,9 @@ public class BoxSearchView extends SearchView {
             @Override
             public void onClick(View v) {
                 isExpanded = true;
-                mOnBoxSearchListener.onSearchExpanded();
+                if (mOnBoxSearchListener != null) {
+                    mOnBoxSearchListener.onSearchExpanded();
+                }
             }
         });
 
@@ -85,7 +88,9 @@ public class BoxSearchView extends SearchView {
             @Override
             public boolean onClose() {
                 isExpanded = false;
-                mOnBoxSearchListener.onSearchCollapsed();
+                if (mOnBoxSearchListener != null) {
+                    mOnBoxSearchListener.onSearchCollapsed();
+                }
                 return false;
             }
         });
