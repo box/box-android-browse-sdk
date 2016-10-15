@@ -24,7 +24,7 @@
     <string name="box_browsesdk_see_additional_results">查看更多结果</string>
     <string name="box_browsesdk_search_hint">搜索</string>
     <string name="box_browsesdk_recent_searches_header">近期搜索</string>
-    <string name="box_browsesdk_search_results_header">&lt;B&gt;%1$s</b> 中的结果</string>
+    <string name="box_browsesdk_search_results_header">&lt;B&gt;%1$s&lt;/b&gt; 中的结果</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">在 %1$s 中搜索</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">筛选结果</string>
