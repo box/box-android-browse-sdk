@@ -320,7 +320,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         lock.lock();
         try{
             for (int i=0; i < mItems.size(); i++){
-                if(mItems.get(i).equals(item.getId())){
+                if(mItems.get(i).getId().equals(item.getId())){
                     final int index = i;
                     mItems.set(index, item);
                     mHandler.post(new Runnable() {
