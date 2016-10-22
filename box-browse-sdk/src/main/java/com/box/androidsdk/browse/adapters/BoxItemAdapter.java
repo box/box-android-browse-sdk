@@ -23,6 +23,7 @@ import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +47,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected static final int REMOVE_LIMIT = 5;
     protected static final int INSERT_LIMIT = 10;
     protected ReadWriteLock mLock = new ReentrantReadWriteLock();
+    WeakReference<RecyclerView> mRecyclerViewRef;
+    static final int DELAY = 50;
+
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -54,6 +58,25 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        mRecyclerViewRef = new WeakReference<RecyclerView>(recyclerView);
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    protected boolean isRecyclerViewComputing(){
+        if (mRecyclerViewRef == null && mRecyclerViewRef.get() != null){
+            boolean isComputing = mRecyclerViewRef.get().isComputingLayout();
+            return isComputing;
+        }
+        return false;
+    }
+
+    protected boolean isOnUiThread(){
+        return mHandler.getLooper().getThread().equals(Thread.currentThread());
+    }
 
     @Override
     public BoxItemViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -86,21 +109,26 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     public void removeAll() {
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    removeAll();
+                }
+            }, DELAY);
+            return;
+        }
         Lock lock = mLock.writeLock();
         lock.lock();
         try {
             mItems.clear();
+            notifyDataSetChanged();
         } finally {
             lock.unlock();
         }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mLock.readLock().lock();
-                notifyDataSetChanged();
-                mLock.readLock().unlock();
-            }
-        });
+
+
+
     }
 
 
@@ -109,6 +137,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
      * @param ids
      */
     public void remove(final List<String> ids){
+        if (isRecyclerViewComputing()  || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    remove(ids);
+                }
+            }, DELAY);
+            return;
+        }
         mLock.readLock().lock();
         try {
             // check to see if any of the ids are applicable to the data set.
@@ -130,53 +167,48 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
         final Lock writeLock = mLock.writeLock();
         writeLock.lock();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
 
 
-                    HashSet<String> idsRemoved = new HashSet<String>(ids.size());
-                    try {
-                        final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
-                        HashMap<String, Integer> mItemsPositionMap = getPositionMap(mItems);
-                        for (String id : ids) {
-                            Integer index = mItemsPositionMap.get(id);
-                            if (index != null) {
-                                idsRemoved.add(id);
-                                indexesRemoved.add(index);
-                            }
-                        }
-                        // because we are using an array list we don't want to do multiple removes (as this needs to create a new array and does array copies).
-                        final ArrayList<BoxItem> listWithoutRemovedIds = new ArrayList<BoxItem>(mItems.size() - idsRemoved.size());
-                        for (BoxItem item : mItems) {
-                            if (!idsRemoved.contains(item.getId())) {
-                                listWithoutRemovedIds.add(item);
-                            }
-                        }
-
-                        boolean removedItems = false;
-                        if (indexesRemoved.size() <= REMOVE_LIMIT) {
-                            Collections.sort(indexesRemoved);
-                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
-                                notifyItemRemoved(indexesRemoved.get(i));
-                            }
-                            removedItems = true;
-                        }
-                        // we need to alter the list after the remove.
-
-                        mItems.clear();
-                        mItems.addAll(listWithoutRemovedIds);
-
-                        if (removedItems && mItems.size() > 0) {
-                            notifyItemRangeChanged(0, mItems.size());
-                        } else {
-                            notifyDataSetChanged();
-                        }
-                    } finally {
-                        writeLock.unlock();
-                    }
+        HashSet<String> idsRemoved = new HashSet<String>(ids.size());
+        try {
+            final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
+            HashMap<String, Integer> mItemsPositionMap = getPositionMap(mItems);
+            for (String id : ids) {
+                Integer index = mItemsPositionMap.get(id);
+                if (index != null) {
+                    idsRemoved.add(id);
+                    indexesRemoved.add(index);
                 }
-            });
+            }
+            // because we are using an array list we don't want to do multiple removes (as this needs to create a new array and does array copies).
+            final ArrayList<BoxItem> listWithoutRemovedIds = new ArrayList<BoxItem>(mItems.size() - idsRemoved.size());
+            for (BoxItem item : mItems) {
+                if (!idsRemoved.contains(item.getId())) {
+                    listWithoutRemovedIds.add(item);
+                }
+            }
+
+            boolean removedItems = false;
+            if (indexesRemoved.size() <= REMOVE_LIMIT) {
+                Collections.sort(indexesRemoved);
+                for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                    notifyItemRemoved(indexesRemoved.get(i));
+                }
+                removedItems = true;
+            }
+            // we need to alter the list after the remove.
+
+            mItems.clear();
+            mItems.addAll(listWithoutRemovedIds);
+
+            if (removedItems && mItems.size() > 0) {
+                notifyItemRangeChanged(0, mItems.size());
+            } else {
+                notifyDataSetChanged();
+            }
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -184,23 +216,23 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
      * @param items
      */
     public void updateTo(final ArrayList<BoxItem> items){
+        if (isRecyclerViewComputing() ||  ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateTo(items);
+                }
+            }, DELAY);
+            return;
+        }
         final Lock writeLock = mLock.writeLock();
         writeLock.lock();
-        boolean shouldUnlockInFinally = true;
-
-        try {
+       try{
             if (mItems.size() == 0){
                 // if going from completely empty to having something do not bother animating.
                 mItems.clear();
                 mItems.addAll(items);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mLock.readLock().lock();
-                        notifyDataSetChanged();
-                        mLock.readLock().unlock();
-                    }
-                });
+                notifyDataSetChanged();
                 return;
             }
 
@@ -229,70 +261,47 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 return;
             } else {
                 if (oldPositionMap.size() == 0 && newItemPositions.size() > 0 && newItemPositions.size() <= INSERT_LIMIT){
-                    shouldUnlockInFinally = false;
                     mItems.clear();
                     mItems.addAll(items);
-                    // for inserts less than max.
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                // in order to show animations of new items
-                                for (Integer insertIndex : newItemPositions) {
-                                    notifyItemInserted(insertIndex);
-                                }
-                                notifyItemRangeChanged(0, mItems.size());
-                            } finally {
-                                writeLock.unlock();
-                            }
-                        }
-                    });
-
+                    for (Integer insertIndex : newItemPositions) {
+                        notifyItemInserted(insertIndex);
+                    }
                 } else if (oldPositionMap.size() > 0 && oldPositionMap.size() <= REMOVE_LIMIT){
                     final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(oldPositionMap.size());
                     indexesRemoved.addAll(oldPositionMap.values());
                     Collections.sort(indexesRemoved);
-                    shouldUnlockInFinally = false;
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
-                                    notifyItemRemoved(indexesRemoved.get(i));
-                                }
-                                mItems.clear();
-                                mItems.addAll(items);
-                                notifyItemRangeChanged(0, mItems.size());
-                            } finally {
-                                writeLock.unlock();
-                            }
-                        }
-                    });
-
-
-                } else {
+                    for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
+                        notifyItemRemoved(indexesRemoved.get(i));
+                    }
+                    mItems.clear();
+                    mItems.addAll(items);
+                    notifyItemRangeChanged(0, mItems.size());
+              } else {
                     // for everything else, mixed operations or oeprations beyond limits
                     mItems.clear();
                     mItems.addAll(items);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLock.readLock().lock();
-                            notifyDataSetChanged();
-                            mLock.readLock().unlock();
-                        }
-                    });
+                    notifyDataSetChanged();
                 }
             }
-        } finally {
-            if (shouldUnlockInFinally){
-                writeLock.unlock();
-            }
-        }
+       } finally {
+            writeLock.unlock();
+       }
+
+
     }
 
-    public void add(List<BoxItem> items) {
+    public void add(final List<BoxItem> items) {
         if (items.size() == 0){
+            return;
+        }
+
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    add(items);
+                }
+            }, DELAY);
             return;
         }
 
@@ -301,21 +310,24 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         final int startingSize = mItems.size();
         mItems.addAll(items);
         final int endingSize = mItems.size();
-
-        mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        notifyItemRangeInserted(startingSize - 1, endingSize - 1);
-                    }finally{
-                        lock.unlock();
-                    }
-                }
-            });
-
+        try {
+            notifyItemRangeInserted(startingSize - 1, endingSize - 1);
+        }finally{
+            lock.unlock();
+        }
     }
 
-    public int update(BoxItem item) {
+    public int update(final BoxItem item) {
+
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    update(item);
+                }
+            }, DELAY);
+            return -1;
+        }
         final Lock lock = mLock.writeLock();
         lock.lock();
         try{
@@ -323,14 +335,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 if(mItems.get(i).getId().equals(item.getId())){
                     final int index = i;
                     mItems.set(index, item);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLock.readLock().lock();
-                            notifyItemChanged(index);
-                            mLock.readLock().unlock();
-                        }
-                    });
+                    notifyItemChanged(index);
                     return index;
                 }
             }
