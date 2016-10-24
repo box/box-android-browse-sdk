@@ -24,7 +24,7 @@
     <string name="box_browsesdk_see_additional_results">Ek sonuçları görün</string>
     <string name="box_browsesdk_search_hint">Ara</string>
     <string name="box_browsesdk_recent_searches_header">Son Aramalar</string>
-    <string name="box_browsesdk_search_results_header"><b>%1$s</b> konumundaki sonuçlar</string>
+    <string name="box_browsesdk_search_results_header"><![CDATA[<b>%1$s</b>]]> konumundaki sonuçlar</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s klasöründe ara</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Sonuçları Filtrele</string>

@@ -24,7 +24,7 @@
     <string name="box_browsesdk_see_additional_results">Weitere Ergebnisse anzeigen</string>
     <string name="box_browsesdk_search_hint">Suchen</string>
     <string name="box_browsesdk_recent_searches_header">Zuletzt ausgeführte Suchvorgänge</string>
-    <string name="box_browsesdk_search_results_header">Ergebnisse in <b>%1$s</b></string>
+    <string name="box_browsesdk_search_results_header">Ergebnisse in <![CDATA[<b>%1$s</b>]]></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Suchen in %1$s</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Ergebnisse filtern</string>
