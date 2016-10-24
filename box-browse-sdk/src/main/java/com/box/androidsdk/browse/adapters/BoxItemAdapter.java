@@ -66,6 +66,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    /**
+     * A check to see if the recyclerview is busy and operations altering it should not be made.
+     * @return true if the recyclerview is currently computing its layout, false otherwise.
+     */
     protected boolean isRecyclerViewComputing(){
         if (mRecyclerViewRef == null && mRecyclerViewRef.get() != null){
             boolean isComputing = mRecyclerViewRef.get().isComputingLayout();
@@ -74,6 +78,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return false;
     }
 
+    /**
+     *
+     * @return true if this method is being run on the ui thread, false otherwise.
+     */
     protected boolean isOnUiThread(){
         return mHandler.getLooper().getThread().equals(Thread.currentThread());
     }
@@ -108,6 +116,10 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return BOX_ITEM_VIEW_TYPE;
     }
 
+    /**
+     * Clear all items from the adapter. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     */
     public void removeAll() {
         if (isRecyclerViewComputing() || ! isOnUiThread()){
             mHandler.postDelayed(new Runnable() {
@@ -133,8 +145,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
 
     /**
-     * Removes the ids from this folder if applicable.
-     * @param ids
+     * Removes the ids from this folder if applicable. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param ids list of ids to remove
      */
     public void remove(final List<String> ids){
         if (isRecyclerViewComputing()  || ! isOnUiThread()){
@@ -212,8 +225,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     /**
-     * Does the appropriate add and removes to display only provided items.
-     * @param items
+     * Does the appropriate add and removes to display only provided items. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param items new list of items adapter should reflect.
      */
     public void updateTo(final ArrayList<BoxItem> items){
         if (isRecyclerViewComputing() ||  ! isOnUiThread()){
@@ -266,6 +280,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     for (Integer insertIndex : newItemPositions) {
                         notifyItemInserted(insertIndex);
                     }
+                    notifyItemRangeChanged(0, mItems.size());
                 } else if (oldPositionMap.size() > 0 && oldPositionMap.size() <= REMOVE_LIMIT){
                     final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(oldPositionMap.size());
                     indexesRemoved.addAll(oldPositionMap.values());
@@ -290,6 +305,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     }
 
+    /**
+     * Add items to the end of the adapter. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param items to append to this adapter.
+     */
     public void add(final List<BoxItem> items) {
         if (items.size() == 0){
             return;
@@ -317,7 +337,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
     }
 
-    public int update(final BoxItem item) {
+    /**
+     * Update an item inside of the adapter if applicable. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param item item to update.
+     */
+    public void update(final BoxItem item) {
 
         if (isRecyclerViewComputing() || ! isOnUiThread()){
             mHandler.postDelayed(new Runnable() {
@@ -326,7 +351,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     update(item);
                 }
             }, DELAY);
-            return -1;
+            return;
         }
         final Lock lock = mLock.writeLock();
         lock.lock();
@@ -336,16 +361,22 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                     final int index = i;
                     mItems.set(index, item);
                     notifyItemChanged(index);
-                    return index;
+                    return;
                 }
             }
 
-            return -1;
+            return;
         } finally {
             lock.unlock();
         }
     }
 
+    /**
+     * Return the index of an item in the adapter. It may return stale data in case an
+     * update method is pending.
+     * @param id the box item id to check for.
+     * @return the index of the box item id.
+     */
     public int indexOf(String id) {
         mLock.readLock().lock();
         try {
@@ -360,6 +391,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return -1;
     }
 
+    /**
+     * It may return stale data in case an
+     * update method is pending.
+     * @return A new list containing the items shown by this adapter.
+     */
     public ArrayList<BoxItem> getItems() {
         mLock.readLock().lock();
         try {
@@ -369,6 +405,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
     }
 
+    /**
+     * It may return stale data in case an
+     * update method is pending.
+     * @param position an index position
+     * @return a box item id for the item at that position.
+     */
     @Override
     public long getItemId(int position) {
         mLock.readLock().lock();
