@@ -24,7 +24,7 @@
     <string name="box_browsesdk_see_additional_results">Посмотреть другие результаты</string>
     <string name="box_browsesdk_search_hint">Поиск</string>
     <string name="box_browsesdk_recent_searches_header">Предыдущие поисковые запросы</string>
-    <string name="box_browsesdk_search_results_header">Результаты из <b>%1$s</b></string>
+    <string name="box_browsesdk_search_results_header">Результаты из <![CDATA[<b>%1$s</b>]]></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Поиск в %1$s</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Фильтрация результатов</string>

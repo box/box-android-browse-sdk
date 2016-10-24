@@ -24,7 +24,7 @@
     <string name="box_browsesdk_see_additional_results">Se yderligere resultater</string>
     <string name="box_browsesdk_search_hint">Søg</string>
     <string name="box_browsesdk_recent_searches_header">Nylige søgninger</string>
-    <string name="box_browsesdk_search_results_header">Resultater i <b>%1$s</b></string>
+    <string name="box_browsesdk_search_results_header">Resultater i <![CDATA[<b>%1$s</b>]]></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Søg i %1$s</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Filtrér resultater</string>
