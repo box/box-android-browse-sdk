@@ -23,6 +23,7 @@ import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +47,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected static final int REMOVE_LIMIT = 5;
     protected static final int INSERT_LIMIT = 10;
     protected ReadWriteLock mLock = new ReentrantReadWriteLock();
+    WeakReference<RecyclerView> mRecyclerViewRef;
+    static final int DELAY = 50;
+
 
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
@@ -54,6 +58,33 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        mRecyclerViewRef = new WeakReference<RecyclerView>(recyclerView);
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    /**
+     * A check to see if the recyclerview is busy and operations altering it should not be made.
+     * @return true if the recyclerview is currently computing its layout, false otherwise.
+     */
+    protected boolean isRecyclerViewComputing(){
+        if (mRecyclerViewRef == null && mRecyclerViewRef.get() != null){
+            boolean isComputing = mRecyclerViewRef.get().isComputingLayout();
+            return isComputing;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return true if this method is being run on the ui thread, false otherwise.
+     */
+    protected boolean isOnUiThread(){
+        return mHandler.getLooper().getThread().equals(Thread.currentThread());
+    }
 
     @Override
     public BoxItemViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -85,30 +116,49 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return BOX_ITEM_VIEW_TYPE;
     }
 
+    /**
+     * Clear all items from the adapter. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     */
     public void removeAll() {
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    removeAll();
+                }
+            }, DELAY);
+            return;
+        }
         Lock lock = mLock.writeLock();
         lock.lock();
         try {
             mItems.clear();
+            notifyDataSetChanged();
         } finally {
             lock.unlock();
         }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mLock.readLock().lock();
-                notifyDataSetChanged();
-                mLock.readLock().unlock();
-            }
-        });
+
+
+
     }
 
 
     /**
-     * Removes the ids from this folder if applicable.
-     * @param ids
+     * Removes the ids from this folder if applicable. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param ids list of ids to remove
      */
     public void remove(final List<String> ids){
+        if (isRecyclerViewComputing()  || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    remove(ids);
+                }
+            }, DELAY);
+            return;
+        }
         mLock.readLock().lock();
         try {
             // check to see if any of the ids are applicable to the data set.
@@ -130,77 +180,73 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
         final Lock writeLock = mLock.writeLock();
         writeLock.lock();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
 
 
-                    HashSet<String> idsRemoved = new HashSet<String>(ids.size());
-                    try {
-                        final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
-                        HashMap<String, Integer> mItemsPositionMap = getPositionMap(mItems);
-                        for (String id : ids) {
-                            Integer index = mItemsPositionMap.get(id);
-                            if (index != null) {
-                                idsRemoved.add(id);
-                                indexesRemoved.add(index);
-                            }
-                        }
-                        // because we are using an array list we don't want to do multiple removes (as this needs to create a new array and does array copies).
-                        final ArrayList<BoxItem> listWithoutRemovedIds = new ArrayList<BoxItem>(mItems.size() - idsRemoved.size());
-                        for (BoxItem item : mItems) {
-                            if (!idsRemoved.contains(item.getId())) {
-                                listWithoutRemovedIds.add(item);
-                            }
-                        }
-
-                        boolean removedItems = false;
-                        if (indexesRemoved.size() <= REMOVE_LIMIT) {
-                            Collections.sort(indexesRemoved);
-                            for (int i=indexesRemoved.size() -1; i >= 0; i--){
-                                notifyItemRemoved(indexesRemoved.get(i));
-                            }
-                            removedItems = true;
-                        }
-                        // we need to alter the list after the remove.
-
-                        mItems.clear();
-                        mItems.addAll(listWithoutRemovedIds);
-
-                        if (removedItems && mItems.size() > 0) {
-                            notifyItemRangeChanged(0, mItems.size());
-                        } else {
-                            notifyDataSetChanged();
-                        }
-                    } finally {
-                        writeLock.unlock();
-                    }
+        HashSet<String> idsRemoved = new HashSet<String>(ids.size());
+        try {
+            final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(ids.size());
+            HashMap<String, Integer> mItemsPositionMap = getPositionMap(mItems);
+            for (String id : ids) {
+                Integer index = mItemsPositionMap.get(id);
+                if (index != null) {
+                    idsRemoved.add(id);
+                    indexesRemoved.add(index);
                 }
-            });
+            }
+            // because we are using an array list we don't want to do multiple removes (as this needs to create a new array and does array copies).
+            final ArrayList<BoxItem> listWithoutRemovedIds = new ArrayList<BoxItem>(mItems.size() - idsRemoved.size());
+            for (BoxItem item : mItems) {
+                if (!idsRemoved.contains(item.getId())) {
+                    listWithoutRemovedIds.add(item);
+                }
+            }
+
+            boolean removedItems = false;
+            if (indexesRemoved.size() <= REMOVE_LIMIT) {
+                Collections.sort(indexesRemoved);
+                for (int i=indexesRemoved.size() -1; i >= 0; i--){
+                    notifyItemRemoved(indexesRemoved.get(i));
+                }
+                removedItems = true;
+            }
+            // we need to alter the list after the remove.
+
+            mItems.clear();
+            mItems.addAll(listWithoutRemovedIds);
+
+            if (removedItems && mItems.size() > 0) {
+                notifyItemRangeChanged(0, mItems.size());
+            } else {
+                notifyDataSetChanged();
+            }
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
-     * Does the appropriate add and removes to display only provided items.
-     * @param items
+     * Does the appropriate add and removes to display only provided items. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param items new list of items adapter should reflect.
      */
     public void updateTo(final ArrayList<BoxItem> items){
+        if (isRecyclerViewComputing() ||  ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateTo(items);
+                }
+            }, DELAY);
+            return;
+        }
         final Lock writeLock = mLock.writeLock();
         writeLock.lock();
-        boolean shouldUnlockInFinally = true;
-
-        try {
+       try{
             if (mItems.size() == 0){
                 // if going from completely empty to having something do not bother animating.
                 mItems.clear();
                 mItems.addAll(items);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mLock.readLock().lock();
-                        notifyDataSetChanged();
-                        mLock.readLock().unlock();
-                    }
-                });
+                notifyDataSetChanged();
                 return;
             }
 
@@ -229,70 +275,53 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 return;
             } else {
                 if (oldPositionMap.size() == 0 && newItemPositions.size() > 0 && newItemPositions.size() <= INSERT_LIMIT){
-                    shouldUnlockInFinally = false;
                     mItems.clear();
                     mItems.addAll(items);
-                    // for inserts less than max.
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                // in order to show animations of new items
-                                for (Integer insertIndex : newItemPositions) {
-                                    notifyItemInserted(insertIndex);
-                                }
-                                notifyItemRangeChanged(0, mItems.size());
-                            } finally {
-                                writeLock.unlock();
-                            }
-                        }
-                    });
-
+                    for (Integer insertIndex : newItemPositions) {
+                        notifyItemInserted(insertIndex);
+                    }
+                    notifyItemRangeChanged(0, mItems.size());
                 } else if (oldPositionMap.size() > 0 && oldPositionMap.size() <= REMOVE_LIMIT){
                     final ArrayList<Integer> indexesRemoved = new ArrayList<Integer>(oldPositionMap.size());
                     indexesRemoved.addAll(oldPositionMap.values());
                     Collections.sort(indexesRemoved);
-                    shouldUnlockInFinally = false;
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
-                                    notifyItemRemoved(indexesRemoved.get(i));
-                                }
-                                mItems.clear();
-                                mItems.addAll(items);
-                                notifyItemRangeChanged(0, mItems.size());
-                            } finally {
-                                writeLock.unlock();
-                            }
-                        }
-                    });
-
-
-                } else {
+                    for (int i = indexesRemoved.size() - 1; i >= 0; i--) {
+                        notifyItemRemoved(indexesRemoved.get(i));
+                    }
+                    mItems.clear();
+                    mItems.addAll(items);
+                    notifyItemRangeChanged(0, mItems.size());
+              } else {
                     // for everything else, mixed operations or oeprations beyond limits
                     mItems.clear();
                     mItems.addAll(items);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLock.readLock().lock();
-                            notifyDataSetChanged();
-                            mLock.readLock().unlock();
-                        }
-                    });
+                    notifyDataSetChanged();
                 }
             }
-        } finally {
-            if (shouldUnlockInFinally){
-                writeLock.unlock();
-            }
-        }
+       } finally {
+            writeLock.unlock();
+       }
+
+
     }
 
-    public void add(List<BoxItem> items) {
+    /**
+     * Add items to the end of the adapter. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param items to append to this adapter.
+     */
+    public void add(final List<BoxItem> items) {
         if (items.size() == 0){
+            return;
+        }
+
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    add(items);
+                }
+            }, DELAY);
             return;
         }
 
@@ -301,21 +330,29 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         final int startingSize = mItems.size();
         mItems.addAll(items);
         final int endingSize = mItems.size();
-
-        mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        notifyItemRangeInserted(startingSize - 1, endingSize - 1);
-                    }finally{
-                        lock.unlock();
-                    }
-                }
-            });
-
+        try {
+            notifyItemRangeInserted(startingSize - 1, endingSize - 1);
+        }finally{
+            lock.unlock();
+        }
     }
 
-    public int update(BoxItem item) {
+    /**
+     * Update an item inside of the adapter if applicable. This method is always run on ui
+     * thread so adapter may not reflect changes immediately.
+     * @param item item to update.
+     */
+    public void update(final BoxItem item) {
+
+        if (isRecyclerViewComputing() || ! isOnUiThread()){
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    update(item);
+                }
+            }, DELAY);
+            return;
+        }
         final Lock lock = mLock.writeLock();
         lock.lock();
         try{
@@ -323,24 +360,23 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 if(mItems.get(i).getId().equals(item.getId())){
                     final int index = i;
                     mItems.set(index, item);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLock.readLock().lock();
-                            notifyItemChanged(index);
-                            mLock.readLock().unlock();
-                        }
-                    });
-                    return index;
+                    notifyItemChanged(index);
+                    return;
                 }
             }
 
-            return -1;
+            return;
         } finally {
             lock.unlock();
         }
     }
 
+    /**
+     * Return the index of an item in the adapter. It may return stale data in case an
+     * update method is pending.
+     * @param id the box item id to check for.
+     * @return the index of the box item id.
+     */
     public int indexOf(String id) {
         mLock.readLock().lock();
         try {
@@ -355,6 +391,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         return -1;
     }
 
+    /**
+     * It may return stale data in case an
+     * update method is pending.
+     * @return A new list containing the items shown by this adapter.
+     */
     public ArrayList<BoxItem> getItems() {
         mLock.readLock().lock();
         try {
@@ -364,6 +405,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
     }
 
+    /**
+     * It may return stale data in case an
+     * update method is pending.
+     * @param position an index position
+     * @return a box item id for the item at that position.
+     */
     @Override
     public long getItemId(int position) {
         mLock.readLock().lock();
