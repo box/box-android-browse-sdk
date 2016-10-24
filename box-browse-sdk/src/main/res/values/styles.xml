@@ -29,7 +29,60 @@
     </style>
 
     <style name="BoxListItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
         <item name="android:background">@drawable/boxsdk_list_item_selector</item>
     </style>
 
+    <style name="BoxListItem_Description">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
+        <item name="android:layout_marginLeft">@dimen/box_browsesdk_list_item_description_margin</item>
+        <item name="android:layout_marginRight">@dimen/box_browsesdk_horizontal_margin</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="BoxListItem_SecondaryAction" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">@drawable/circular_touch_selector</item>
+        <item name="android:layout_width">@dimen/box_browsesdk_secondary_action_width</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_secondary_action_width</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="BoxListItem_Checkbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_marginRight">4dp</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Options_ItemContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@drawable/button_settings_states2</item>
+    </style>
+
+    <style name="Options_ItemContainerButton">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">@drawable/button_settings_states2</item>
+    </style>
 </resources>

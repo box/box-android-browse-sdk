@@ -1,24 +1,59 @@
+<?xml version="1.0" encoding="null"?>
 <resources>
-    <string name="box_browsesdk_title" description="Default title for the Browse SDK">Browse</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">Bladeren</string>
     <string name="box_browsesdk_problem_fetching_folder">Probleem met ophalen van map.</string>
     <string name="box_browsesdk_problem_performing_search">Probleem met zoeken.</string>
-    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">U kunt de items in deze map niet bekijken.</string>
-    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">Netwerkfout. Probeer het opnieuw.</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">Sessie is niet geverifieerd</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">Er is geen item geselecteerd</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">U kunt de items in deze map niet bekijken.</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Netwerkfout. Probeer het opnieuw.</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">Sessie is niet geverifieerd</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">Er is geen item geselecteerd</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">Alle bestanden</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">Alle bestanden</string>
 
-    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Instellingen</string>
-    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">Zoeken</string>
-    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">Map maken</string>
-    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">Deze map selecteren</string>
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">Instellingen</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">Zoeken</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Map maken</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Deze map selecteren</string>
     <string name="box_browsesdk_dialog_ok">OK</string>
-    <string name="box_browsesdk_dialog_cancel">Annuleren</string>
+    <string name="box_browsesdk_dialog_cancel">ANNULEREN</string>
 
     <string name="box_browsesdk_create_folder_conflict">Er is al een map met die naam gemaakt.</string>
     <string name="box_browsesdk_error_retrieving_items">Fout bij het ophalen van items</string>
     <string name="box_browsesdk_tap_to_retry">Tik om het opnieuw te proberen</string>
     <string name="box_browsesdk_performing_search">Zoeken...</string>
     <string name="box_browsesdk_see_additional_results">Extra zoekresultaten weergeven</string>
+    <string name="box_browsesdk_search_hint">Zoeken</string>
+    <string name="box_browsesdk_recent_searches_header">Recente zoekopdrachten</string>
+    <string name="box_browsesdk_search_results_header">Resultaten in <b>%1$s</b></string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Zoeken in %1$s</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">Resultaten filteren</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">Zoekresultaten verfijnen</string>
+    <string description="label for apply button in refine search results activity" name="apply">Toepassen</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">Filters wissen</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">Bestandstype</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">Spreadsheet</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">Presentatie</string>
+    <string description="File type to search for" name="search_filter_file_type_image">Afbeelding</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">Map</string>
+    <string description="File type to search for" name="search_filter_file_type_document">Document</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">Video</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">Audio</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Meer bekijken...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Datum laatste wijziging</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">Elke tijd</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Afgelopen dag</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">Afgelopen week</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">Afgelopen maand</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">Afgelopen jaar</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">Grootte</string>
+    <string name="item_size_any">Elke grootte</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0 - 1 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1 - 5 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1 - 25 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25 - 100 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB - 1 GB</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,</string>
 </resources>

@@ -108,7 +108,12 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
             @Override
             public void onAuthFailure(BoxAuthentication.BoxAuthenticationInfo info, Exception ex) {
                 finish();
-                Toast.makeText(BoxThreadPoolExecutorActivity.this, R.string.box_browsesdk_session_is_not_authenticated, Toast.LENGTH_LONG).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(BoxThreadPoolExecutorActivity.this, R.string.box_browsesdk_session_is_not_authenticated, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
@@ -317,27 +322,6 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
      */
     protected void showView(View view){
         view.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * Helper method to initialize the activity with the default toolbar for the Share SDK.
-     * This will show a material themed toolbar with a back button that will finish the Activity.
-     */
-    protected void initToolbar() {
-        Toolbar actionBar = (Toolbar) findViewById(R.id.box_action_bar);
-        setSupportActionBar(actionBar);
-        actionBar.setNavigationIcon(R.drawable.ic_box_browsesdk_arrow_back_grey_24dp);
-        actionBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragManager = getSupportFragmentManager();
-                if (fragManager != null && fragManager.getBackStackEntryCount() > 0) {
-                    getSupportFragmentManager().popBackStack();
-                } else {
-                    finish();
-                }
-            }
-        });
     }
 
     /**

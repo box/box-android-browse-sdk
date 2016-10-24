@@ -15,11 +15,11 @@ import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
-public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearchView.OnBoxSearchListener{
+public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
      * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFile} to the intent
      */
@@ -36,35 +36,26 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.box_browsesdk_activity_file);
-        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
-            onBoxItemSelected(mItem);
-        }
         initToolbar();
+        initRecentSearches();
+        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
+            onItemClick(mItem);
+            getSupportActionBar().setTitle(mItem.getName());
+        }
+
     }
 
     @Override
-    public boolean handleOnItemClick(BoxItem item) {
+    public void onItemClick(BoxItem item) {
+        super.onItemClick(item);
         if (item instanceof BoxFile || item instanceof BoxBookmark) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_BOX_FILE, item);
             setResult(Activity.RESULT_OK, intent);
             finish();
-            return false;
-        }
-        else {
-            onBoxItemSelected(item);
-            return false;
         }
     }
 
-
-    @Override
-    public void onBoxItemSelected(BoxItem boxItem) {
-        super.onBoxItemSelected(boxItem);
-        if (!(boxItem instanceof BoxFolder)) {
-            handleOnItemClick(boxItem);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,17 +63,6 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
         getMenuInflater().inflate(R.menu.box_browsesdk_menu_file, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Override
-    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-        if(getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER) != null){
-            ArrayList<String> list = getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER);
-            String[] extensions =  list.toArray(new String[list.size()]);
-            searchRequest.limitFileExtensions(extensions);
-        }
-        return super.onSearchRequested(searchRequest);
-    }
-
 
     /**
      * Create an intent to launch an instance of this activity to browse folders.
@@ -174,11 +154,10 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
      */
     @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-        LinkedHashMap<String, Object> folderMap = new LinkedHashMap<String, Object>();
-        folderMap.put(BoxItem.FIELD_ID, folderId);
-        folderMap.put(BoxItem.FIELD_TYPE, BoxFolder.TYPE);
-        folderMap.put(BoxItem.FIELD_NAME, folderName);
-        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(folderMap)).createIntent();
+        BoxFolder folder = BoxFolder.createFromId(folderId);
+        JsonObject jsonObject = folder.toJsonObject().add(BoxItem.FIELD_NAME, folderName);
+
+        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(jsonObject)).createIntent();
     }
 
     /**

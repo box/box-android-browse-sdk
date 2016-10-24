@@ -1,24 +1,59 @@
+<?xml version="1.0" encoding="null"?>
 <resources>
-    <string name="box_browsesdk_title" description="Default title for the Browse SDK">Gennemse</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">Gennemse</string>
     <string name="box_browsesdk_problem_fetching_folder">Problem med at hente mappe.</string>
     <string name="box_browsesdk_problem_performing_search">Problem med at søge.</string>
-    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">Du kan ikke se elementerne i denne mappe.</string>
-    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">Netværksfejl. Prøv igen.</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">Session er ikke godkendt.</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">Intet element valgt</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">Du kan ikke se elementerne i denne mappe.</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Netværksfejl. Prøv igen.</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">Session er ikke godkendt</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">Intet element valgt</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">Alle filer</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">Alle filer</string>
 
-    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Indstillinger</string>
-    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">Søg</string>
-    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">Opret mappe</string>
-    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">Vælg denne mappe</string>
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">Indstillinger</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">Søg</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Opret mappe</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Vælg denne mappe</string>
     <string name="box_browsesdk_dialog_ok">OK</string>
-    <string name="box_browsesdk_dialog_cancel">Annuller</string>
+    <string name="box_browsesdk_dialog_cancel">ANNULLER</string>
 
     <string name="box_browsesdk_create_folder_conflict">En mappe med det navn er allerede oprettet.</string>
-    <string name="box_browsesdk_error_retrieving_items">Fejl  ved hentning af elementer</string>
+    <string name="box_browsesdk_error_retrieving_items">Fejl ved hentning af elementer</string>
     <string name="box_browsesdk_tap_to_retry">Tryk for at prøve igen</string>
     <string name="box_browsesdk_performing_search">Søger...</string>
     <string name="box_browsesdk_see_additional_results">Se yderligere resultater</string>
+    <string name="box_browsesdk_search_hint">Søg</string>
+    <string name="box_browsesdk_recent_searches_header">Nylige søgninger</string>
+    <string name="box_browsesdk_search_results_header">Resultater i <b>%1$s</b></string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Søg i %1$s</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">Filtrér resultater</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">Præcisér søgeresultaterne</string>
+    <string description="label for apply button in refine search results activity" name="apply">Anvend</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">Ryd filtre</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">Filtype</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">Regneark</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">Præsentation</string>
+    <string description="File type to search for" name="search_filter_file_type_image">Billede</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">Mappe</string>
+    <string description="File type to search for" name="search_filter_file_type_document">Dokument</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">Video</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">Lyd</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Se mere...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Modificeringsdato</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">Ethvert tidspunkt</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Sidste dag</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">Sidste uge</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">Sidste måned</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">Sidste år</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">Størrelse</string>
+    <string name="item_size_any">Enhver størrelse</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0-1 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1-5 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1-25 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25-100 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB-1 GB</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,</string>
 </resources>
