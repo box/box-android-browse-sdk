@@ -376,10 +376,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
             filteredItems.add(item);
         }
+
+        mItems = filteredItems;
         if (mAdapter != null) {
             mAdapter.updateTo(filteredItems);
         }
-        mItems = filteredItems;
     }
 
     /**
