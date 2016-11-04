@@ -46,7 +46,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.OnBoxSearchListener {
+public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.OnBoxSearchListener, FragmentManager.OnBackStackChangedListener {
 
     protected static final String EXTRA_SHOULD_SEARCH_ALL = "extraShouldSearchAll";
 
@@ -58,7 +58,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private static final String SEARCH_QUERY = "searchQuery";
     private static ThreadPoolExecutor mApiExecutor;
     private MenuItem mSearchViewMenuItem;
-    private boolean mRestoreSearch;
     private String mSearchQuery;
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
@@ -78,12 +77,19 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
                 new BoxApiSearch(mSession));
 
         if (savedInstanceState != null) {
-            mRestoreSearch = savedInstanceState.getBoolean(RESTORE_SEARCH, false);
             mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
             mCurrentBoxFolder = (BoxFolder) savedInstanceState.getSerializable(EXTRA_ITEM);
         } else if (getIntent() != null) {
             mCurrentBoxFolder = (BoxFolder) getIntent().getSerializableExtra(EXTRA_ITEM);
         }
+
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        getSupportFragmentManager().removeOnBackStackChangedListener(this);
+        super.onDestroy();
     }
 
     public void initRecentSearches() {
@@ -201,23 +207,19 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         mSearchViewMenuItem = menu.findItem(R.id.box_browsesdk_action_search);
         mSearchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
-        mSearchView.setOnBoxSearchListener(this);
-        if (mRestoreSearch) {
-            mSearchViewMenuItem.expandActionView();
+
+        if (fragment instanceof BoxSearchFragment) {
             mSearchView.setIconified(false);
-            mSearchView.setQuery(mSearchQuery, false);
-            mRestoreSearch = false;
+            mSearchView.setSearchTerm(((BoxSearchFragment)fragment).getSearchQuery());
         }
+
+        mSearchView.setOnBoxSearchListener(this);
 
         return true;
-    }
-
-    public void setSearchQuery(String query) {
-        if (mSearchView != null) {
-            mSearchView.setSearchTerm(query);
-        }
     }
 
 
@@ -236,8 +238,12 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         if (mSearchViewMenuItem == null) {
             return;
         }
+
         BoxSearchView searchView = (BoxSearchView) MenuItemCompat.getActionView(mSearchViewMenuItem);
-        searchView.onActionViewCollapsed();
+        if (!searchView.isIconified()) {
+            searchView.onActionViewCollapsed();
+            searchView.setIconified(true);
+        }
     }
 
     @Override
@@ -339,9 +345,14 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         actionBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+                if (fragment instanceof BoxSearchFragment) {
+                    onBackPressed();
+                    return;
+                }
 
                 if (mSearchView.isExpanded()) {
-                    mSearchView.setIconified(true);
+                    clearSearch();
                     return;
                 }
 
@@ -353,6 +364,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        invalidateOptionsMenu();
     }
 
     /**
