@@ -61,14 +61,15 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private String mSearchQuery;
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
-    private BoxSearchView mSearchView;
-    private BoxFolder mCurrentBoxFolder;
 
+    private BoxSearchView mSearchView;
     private ListView mRecentSearchesListView;
     protected ArrayList<String> mRecentSearches;
     protected BoxRecentSearchAdapter mRecentSearchesAdapter;
     private View mRecentSearchesHeader;
     private View mRecentSearchesFooter;
+
+    private BoxFolder mCurrentBoxFolder;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -217,11 +218,25 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             mSearchView.setSearchTerm(((BoxSearchFragment)fragment).getSearchQuery());
         }
 
+        enableDisableRecentView();
         mSearchView.setOnBoxSearchListener(this);
 
         return true;
     }
 
+
+    private void enableDisableRecentView() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+        boolean recentSearchesHidden = fragment instanceof BoxSearchFragment || !mSearchView.isExpanded();
+        mRecentSearchesListView.setVisibility(recentSearchesHidden? View.GONE : View.VISIBLE);
+        if (mRecentSearches == null || mRecentSearches.size() == 0) {
+            mRecentSearchesHeader.setVisibility(View.GONE);
+            mRecentSearchesFooter.setVisibility(View.GONE);
+        } else {
+            mRecentSearchesHeader.setVisibility(View.VISIBLE);
+            mRecentSearchesFooter.setVisibility(View.VISIBLE);
+        }
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -248,8 +263,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     @Override
     public void onItemClick(BoxItem item) {
-
-        // TODO: If current fragment is search fragment, add search term to recent searches
+        // If current fragment is search fragment, add search term to recent searches
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
+        if (fragment instanceof BoxSearchFragment) {
+            mController.addToRecentSearches(this, mSession.getUser(), item.getName());
+        }
 
         // If click is on a folder, navigate to that folder
         if (item instanceof BoxFolder) {
@@ -279,26 +297,17 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
             }
         });
         mRecentSearchesListView.setAdapter(mRecentSearchesAdapter);
-        mRecentSearchesListView.setVisibility(View.VISIBLE);
-
-        if (mRecentSearches.size() == 0) {
-            mRecentSearchesHeader.setVisibility(View.GONE);
-            mRecentSearchesFooter.setVisibility(View.GONE);
-        } else {
-            mRecentSearchesHeader.setVisibility(View.VISIBLE);
-            mRecentSearchesFooter.setVisibility(View.VISIBLE);
-        }
-
+        enableDisableRecentView();
 
     }
 
     @Override
     public void onSearchCollapsed() {
-        mRecentSearchesListView.setVisibility(View.GONE);
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         if (fragment instanceof BoxSearchFragment) {
             getSupportFragmentManager().popBackStack();
         }
+        enableDisableRecentView();
     }
 
     @Override
