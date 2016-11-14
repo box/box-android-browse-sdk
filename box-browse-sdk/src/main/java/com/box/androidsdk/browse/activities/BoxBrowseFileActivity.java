@@ -7,18 +7,19 @@ import android.os.Bundle;
 import android.view.Menu;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.models.BoxBookmark;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.utils.SdkUtils;
 import com.eclipsesource.json.JsonObject;
 
 import java.util.ArrayList;
 
+/**
+ * The type Box browse file activity.
+ */
 public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
      * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFile} to the intent
@@ -87,6 +88,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
 
     /**
      * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     *
      * @param context current context.
      * @param session a session, should be already authenticated.
      * @return a builder object to use to construct an instance of this class.
@@ -96,14 +98,32 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
     }
 
 
+    /**
+     * The type Intent builder.
+     */
     public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder>{
 
+        /**
+         * The M allowed extensions.
+         */
         ArrayList<String> mAllowedExtensions;
 
+        /**
+         * Instantiates a new Intent builder.
+         *
+         * @param context the context
+         * @param session the session
+         */
         protected IntentBuilder(final Context context, final BoxSession session){
             super(context, session);
         }
 
+        /**
+         * Set allowed extensions intent builder.
+         *
+         * @param allowedExtensions extension of files which should be shown while browsing.
+         * @return the intent builder
+         */
         public IntentBuilder setAllowedExtensions(final ArrayList<String> allowedExtensions){
             mAllowedExtensions = allowedExtensions;
             return this;
@@ -146,6 +166,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
      * Create an intent to launch an instance of this activity to navigate folders. This version will immediately show the given name in the navigation spinner
      * to before information about it has been fetched from the server.
      * This method is deprecated use the createIntentBuilder instead.
+     *
      * @param context    current context.
      * @param folderName Name to show in the navigation spinner. Should be name of the folder.
      * @param folderId   folder id to navigate.
@@ -163,6 +184,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
      * Create an intent to launch an instance of this activity to navigate folders. This version will disable all files with extension types not included in the extensions list.
      * This method is deprecated use the createIntentBuilder instead.
+     *
      * @param context           current context.
      * @param folderId          folder id to navigate.
      * @param allowedExtensions extension types to enable.

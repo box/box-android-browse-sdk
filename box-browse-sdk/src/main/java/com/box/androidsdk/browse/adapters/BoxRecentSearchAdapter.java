@@ -13,15 +13,33 @@ import com.box.androidsdk.browse.R;
 
 import java.util.List;
 
+/**
+ * The type Box recent search adapter.
+ */
 public class BoxRecentSearchAdapter extends ArrayAdapter<String> {
 
+    /**
+     * The interface Box recent search listener.
+     */
     public interface BoxRecentSearchListener {
+        /**
+         * On close clicked.
+         *
+         * @param position the position
+         */
         void onCloseClicked(int position);
     }
 
     List<String> mHistory;
     BoxRecentSearchListener mListener;
 
+    /**
+     * Instantiates a new Box recent search adapter.
+     *
+     * @param context  the context
+     * @param objects  list of recent search terms
+     * @param listener listener to get callbacks if user tries to delete the search term from history
+     */
     public BoxRecentSearchAdapter(Context context, List<String> objects, BoxRecentSearchListener listener) {
         super(context, R.layout.box_browsesdk_search_recent_item, objects);
         mHistory = objects;

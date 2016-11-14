@@ -30,6 +30,9 @@ import java.util.concurrent.Callable;
  */
 public class LoaderDrawable extends BitmapDrawable {
 
+    /**
+     * The M task ref.
+     */
     WeakReference<ThumbnailTask> mTaskRef;
 
     private LoaderDrawable(ThumbnailTask task, Resources resources, Bitmap placeHolder) {
@@ -37,6 +40,11 @@ public class LoaderDrawable extends BitmapDrawable {
         mTaskRef = new WeakReference<ThumbnailTask>(task);
     }
 
+    /**
+     * Gets task.
+     *
+     * @return the task
+     */
     public ThumbnailTask getTask() {
         return mTaskRef.get();
     }
@@ -44,10 +52,12 @@ public class LoaderDrawable extends BitmapDrawable {
     /**
      * Creates a LoaderDrawable that is responsible for loading a thumbnail into the provided image view
      *
-     * @param request
-     * @param imageView
-     * @param placeHolder
-     * @return
+     * @param request            the request
+     * @param boxItem            the box item
+     * @param imageView          the image view
+     * @param placeHolder        the place holder
+     * @param imageReadyListener the image ready listener
+     * @return loader drawable
      */
     public static LoaderDrawable create(BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView imageView, Bitmap placeHolder, final ImageReadyListener imageReadyListener) {
         return new LoaderDrawable(ThumbnailTask.create(request, boxItem, imageView, imageReadyListener),imageView.getResources(), placeHolder);
@@ -55,8 +65,9 @@ public class LoaderDrawable extends BitmapDrawable {
 
     /**
      * Checks to see if this loader drawable matches the given request.
+     *
      * @param request a request for downloading a thumbnail.
-     * @return
+     * @return boolean
      */
     public boolean matchesRequest(final BoxRequest request){
         if(getTask() != null){
@@ -65,18 +76,34 @@ public class LoaderDrawable extends BitmapDrawable {
         return false;
     }
 
+    /**
+     * The type Thumbnail task.
+     */
     static class ThumbnailTask extends BoxFutureTask<BoxDownload> {
 
         private final String mKey;
         private final BoxItem mBoxItem;
 
 
+        /**
+         * Instantiates a new Thumbnail task.
+         *
+         * @param callable the callable
+         * @param request  the request
+         * @param boxItem  the box item
+         */
         protected ThumbnailTask(final Callable<BoxResponse<BoxDownload>> callable, final BoxRequest request, final BoxItem boxItem) {
             super(callable, request);
             mKey = createRequestKey(request);
             mBoxItem = boxItem;
         }
 
+        /**
+         * Create request key string.
+         *
+         * @param req the req
+         * @return the string
+         */
         protected static String createRequestKey(BoxRequest req) {
             if (req instanceof BoxRequestsFile.DownloadThumbnail) {
                 return ((BoxRequestsFile.DownloadThumbnail) req).getId();
@@ -85,15 +112,33 @@ public class LoaderDrawable extends BitmapDrawable {
         }
 
 
-
+        /**
+         * Gets key.
+         *
+         * @return the key
+         */
         public String getKey() {
             return mKey;
         }
 
+        /**
+         * Get box item box item.
+         *
+         * @return the box item
+         */
         public BoxItem getBoxItem(){
             return mBoxItem;
         }
 
+        /**
+         * Create thumbnail task.
+         *
+         * @param request            the request
+         * @param boxItem            the box item
+         * @param target             the target
+         * @param imageReadyListener the image ready listener
+         * @return the thumbnail task
+         */
         public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView target, final ImageReadyListener imageReadyListener) {
             final WeakReference<ImageView> targetRef = new WeakReference<ImageView>(target);
             Callable<BoxResponse<BoxDownload>> callable = new Callable<BoxResponse<BoxDownload>>() {
@@ -128,8 +173,19 @@ public class LoaderDrawable extends BitmapDrawable {
     }
 
 
+    /**
+     * The interface Image ready listener.
+     */
     public interface ImageReadyListener {
 
+        /**
+         * On image ready.
+         *
+         * @param bitmapSourceFile the bitmap source file
+         * @param request          the request
+         * @param bitmap           the bitmap
+         * @param view             the view
+         */
         void onImageReady(File bitmapSourceFile, BoxRequest request, Bitmap bitmap, ImageView view);
 
     }

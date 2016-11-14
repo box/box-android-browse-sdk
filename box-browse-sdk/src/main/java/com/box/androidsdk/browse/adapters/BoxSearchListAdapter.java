@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Adapter for navigation items.
- * 
  */
 public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFutureTask.OnCompletedListener<BoxIteratorItems>{
 
@@ -47,6 +46,13 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     private OnBoxSearchListener mOnBoxSearchListener;
     public static int DEFAULT_MAX_SUGGESTIONS = 9;
 
+    /**
+     * Instantiates a new Box search list adapter.
+     *
+     * @param context the context
+     * @param layout  the layout
+     * @param flags   the flags
+     */
     public BoxSearchListAdapter(Context context, int layout, int flags){
         super(context, layout, new BoxSearchCursor(null, ""), flags);
         mHandler = new Handler(Looper.getMainLooper());
@@ -71,6 +77,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     }
 
 
+    /**
+     * Set on box search listener.
+     *
+     * @param searchListener the search listener
+     */
     public void setOnBoxSearchListener(final OnBoxSearchListener searchListener){
         mOnBoxSearchListener = searchListener;
     }
@@ -98,6 +109,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
     }
 
+    /**
+     * Gets controller.
+     *
+     * @return the controller
+     */
     protected BrowseController getController() {
         if (getFilterQueryProvider() instanceof SearchFilterQueryProvider) {
             return ((SearchFilterQueryProvider) getFilterQueryProvider()).getController();
@@ -141,6 +157,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             }
     }
 
+    /**
+     * Set controller.
+     *
+     * @param controller the controller
+     */
     public void setController(final BrowseController controller){
         if (controller == null){
             setFilterQueryProvider(null);
@@ -167,6 +188,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     }
 
     private static class ViewHolder {
+
         ImageView thumbnail;
         TextView name;
         TextView description;
@@ -186,6 +208,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     private class SearchFilterQueryProvider implements FilterQueryProvider {
         private final BrowseController mController;
 
+        /**
+         * Instantiates a new Search filter query provider.
+         *
+         * @param controller the controller
+         */
         public SearchFilterQueryProvider(final BrowseController controller){
             mController = controller;
         }
@@ -208,11 +235,22 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             return new BoxSearchCursor(null, "failed: " + constraint);
         }
 
+        /**
+         * Gets controller.
+         *
+         * @return the controller
+         */
         public BrowseController getController() {
             return mController;
         }
     }
 
+    /**
+     * On search requested
+     *
+     * @param searchRequest the search request
+     * @return updated box search request
+     */
     public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest){
         if (mOnBoxSearchListener != null){
             return mOnBoxSearchListener.onSearchRequested(searchRequest);
@@ -228,6 +266,7 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
         /**
          * This is called before any search calls are sent. Allows modification of search request
          * adding limitations, etc...
+         *
          * @param searchRequest The most basic search request that searches entire account.
          * @return the search request desired to be performed, or null to not perform a search.
          */
@@ -237,6 +276,13 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
     }
 
 
+    /**
+     * Create path string.
+     *
+     * @param boxItem   the box item
+     * @param separator the separator
+     * @return the string that represents a path to the boxItem
+     */
     public static String createPath(final BoxItem boxItem, final String separator){
         StringBuilder builder = new StringBuilder(separator);
         if (boxItem.getPathCollection() != null) {
@@ -249,7 +295,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
 
     }
 
+    /**
+     * The type Box search cursor.
+     */
     public static class BoxSearchCursor extends MatrixCursor {
+
         public static int TYPE_NORMAL = 0;
         public static int TYPE_QUERY  = 1;
         public static int TYPE_ADDITIONAL_RESULT = 2;
@@ -257,6 +307,11 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
         private static final String[] SEARCH_COLUMN_NAMES = new String[]{"_id", "name", "path", "type"};
         private final BoxIteratorItems mBoxIterator;
 
+        /**
+         * Instantiates a new Box search cursor.
+         *
+         * @param BoxIterator the box iterator
+         */
         BoxSearchCursor(final BoxIteratorItems BoxIterator){
             super(SEARCH_COLUMN_NAMES, BoxIterator.size());
             mBoxIterator = BoxIterator;
@@ -266,6 +321,12 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             }
         }
 
+        /**
+         * Instantiates a new Box search cursor.
+         *
+         * @param BoxIterator the box iterator
+         * @param query       the search query
+         */
         BoxSearchCursor(final BoxIteratorItems BoxIterator, final String query){
             super(SEARCH_COLUMN_NAMES);
             mBoxIterator = BoxIterator;
@@ -273,10 +334,20 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             initializeFromList(BoxIterator);
         }
 
+        /**
+         * Get box item box item.
+         *
+         * @return the box item
+         */
         public BoxItem getBoxItem(){
             return (BoxItem)mBoxIterator.get(getPosition());
         }
 
+        /**
+         * Initialize from list.
+         *
+         * @param BoxIterator the box iterator
+         */
         protected void initializeFromList(final BoxIteratorItems BoxIterator){
             if (BoxIterator == null){
                 return;
@@ -293,18 +364,38 @@ public class BoxSearchListAdapter extends ResourceCursorAdapter implements BoxFu
             }
         }
 
+        /**
+         * Get type int.
+         *
+         * @return the int
+         */
         public int getType(){
             return this.getInt(getColumnIndex("type"));
         }
 
+        /**
+         * Get box iterator box iterator items.
+         *
+         * @return the box iterator items
+         */
         public BoxIteratorItems getBoxIterator(){
             return mBoxIterator;
         }
 
+        /**
+         * Get name string.
+         *
+         * @return the string
+         */
         public String getName(){
             return this.getString(getColumnIndex("name"));
         }
 
+        /**
+         * Get path string.
+         *
+         * @return the string
+         */
         public String getPath(){
             return this.getString(getColumnIndex("path"));
         }

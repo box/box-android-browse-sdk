@@ -62,6 +62,14 @@ public class BoxBrowseController implements BrowseController {
     protected LruCache<Integer, Bitmap> mIconResCache = new LruCache<Integer, Bitmap>(10);
 
 
+    /**
+     * Instantiates a new Box browse controller.
+     *
+     * @param session   the session
+     * @param apiFile   the api file
+     * @param apiFolder the api folder
+     * @param apiSearch the api search
+     */
     public BoxBrowseController(BoxSession session, BoxApiFile apiFile, BoxApiFolder apiFolder, BoxApiSearch apiSearch) {
         mSession = session;
         mFileApi = apiFile;
@@ -77,6 +85,11 @@ public class BoxBrowseController implements BrowseController {
         }
     }
 
+    /**
+     * Instantiates a new Box browse controller.
+     *
+     * @param session the session
+     */
     public BoxBrowseController(BoxSession session) {
         mSession = session;
         mFileApi = new BoxApiFile(mSession);
@@ -186,6 +199,11 @@ public class BoxBrowseController implements BrowseController {
         return mThumbnailManager;
     }
 
+    /**
+     * Gets api executor.
+     *
+     * @return the api executor
+     */
     protected ThreadPoolExecutor getApiExecutor() {
         if (mApiExecutor == null || mApiExecutor.isShutdown()) {
             mApiExecutor = new ThreadPoolExecutor(1, 1, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -272,8 +290,16 @@ public class BoxBrowseController implements BrowseController {
         BoxLogUtils.e(tag, msg, t);
     }
 
+    /**
+     * The type Bitmap lru cache.
+     */
     protected class BitmapLruCache extends LruCache<File, Bitmap> {
 
+        /**
+         * Instantiates a new Bitmap lru cache.
+         *
+         * @param sizeInKb the size in kb
+         */
         public BitmapLruCache(int sizeInKb){
             super(sizeInKb);
         }

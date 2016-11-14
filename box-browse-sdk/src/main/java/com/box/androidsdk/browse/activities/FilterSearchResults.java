@@ -10,6 +10,9 @@ import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.fragments.BoxFilterSearchResultsFragment;
 import com.box.androidsdk.browse.models.BoxSearchFilters;
 
+/**
+ * The type Filter search results.
+ */
 public class FilterSearchResults extends AppCompatActivity {
 
     private static String EXTRA_FILTERS = "extraFilters";
@@ -50,6 +53,13 @@ public class FilterSearchResults extends AppCompatActivity {
     }
 
 
+    /**
+     * New filter search results intent intent.
+     *
+     * @param context the context
+     * @param filters current selected filters
+     * @return the intent
+     */
     public static Intent newFilterSearchResultsIntent(final Context context, BoxSearchFilters filters) {
         Intent intent = new Intent(context, FilterSearchResults.class);
         intent.putExtra(EXTRA_FILTERS, filters == null? new BoxSearchFilters(): filters);

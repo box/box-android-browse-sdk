@@ -29,6 +29,9 @@ import com.eclipsesource.json.JsonValue;
 import java.net.HttpURLConnection;
 
 
+/**
+ * The type Box browse folder activity.
+ */
 public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener {
 
     /**
@@ -196,6 +199,12 @@ public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.O
     public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder> {
 
 
+        /**
+         * Instantiates a new Intent builder.
+         *
+         * @param context the context
+         * @param session an authenticated session
+         */
         protected IntentBuilder(final Context context, final BoxSession session) {
             super(context, session);
         }

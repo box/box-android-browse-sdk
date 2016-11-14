@@ -51,8 +51,8 @@ import java.util.Set;
  */
 public abstract class BoxBrowseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
         BoxItemAdapter.OnInteractionListener {
-    public static final String TAG = BoxBrowseFragment.class.getName();
 
+    public static final String TAG = BoxBrowseFragment.class.getName();
     protected static final String ARG_ID = "argId";
     protected static final String ARG_USER_ID = "argUserId";
     protected static final String ARG_NAME = "argName";
@@ -105,6 +105,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private BoxItemFilter mBoxItemFilter;
     private LocalBroadcastManager mLocalBroadcastmanager;
 
+    /**
+     * Instantiates a new Box browse fragment.
+     */
     public BoxBrowseFragment() {
         // Required empty public constructor
     }
@@ -144,6 +147,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         super.onStop();
     }
 
+    /**
+     * Init box receivers.
+     */
     protected void initBoxReceivers(){
         getActivity().registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         getLocalBroadcastManager().registerReceiver(mBroadcastReceiver, getIntentFilter());
@@ -156,6 +162,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    /**
+     * Cleanup box receivers.
+     */
     protected void cleanupBoxReceivers(){
         getLocalBroadcastManager().unregisterReceiver(mBroadcastReceiver);
         getActivity().unregisterReceiver(mConnectivityReceiver);
@@ -173,6 +182,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * Handle response.
+     *
+     * @param intent the intent
+     */
     protected void handleResponse(BoxResponseIntent intent) {
         if (!intent.isSuccess()) {
             mController.onError(getActivity(), intent.getResponse());
@@ -182,6 +196,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    /**
+     * Gets layout.
+     *
+     * @return the layout
+     */
     protected int getLayout() {
         return R.layout.box_browsesdk_fragment_browse;
     }
@@ -232,6 +251,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         return mRootView;
     }
 
+    /**
+     * Load items.
+     */
     protected abstract void loadItems();
 
     private void updateUI() {
@@ -244,11 +266,21 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
+    /**
+     * Sets empty state.
+     *
+     * @param isEmpty the is empty
+     */
     protected void setEmptyState(boolean isEmpty) {
         ((ImageView) mRootView.findViewById(R.id.box_browsesdk_folder_empty)).setVisibility(
                 isEmpty ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Create adapter box item adapter.
+     *
+     * @return the box item adapter
+     */
     protected BoxItemAdapter createAdapter() {
         return new BoxItemAdapter(getActivity(), getController(), this);
     }
@@ -275,6 +307,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         mListener = null;
     }
 
+    /**
+     * Gets controller.
+     *
+     * @return the controller
+     */
     public BrowseController getController() {
         if (mController == null) {
             String userId = getArguments().getString(ARG_USER_ID);
@@ -284,6 +321,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         return mController;
     }
 
+    /**
+     * Sets controller.
+     *
+     * @param controller the controller
+     */
     public void setController(BrowseController controller) {
         mController = controller;
     }
@@ -300,8 +342,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     /**
      * Optionally set a secondary action to use on this fragment.
      *
-     * @param listener listener to be called when a secondary action is clicked on an item. Must be serializable.
      * @param <T>      Serializable OnSecondaryActionListener.
+     * @param listener listener to be called when a secondary action is clicked on an item. Must be serializable.
      */
     public <T extends OnSecondaryActionListener & Serializable> void setSecondaryActionListener(T listener) {
         mSecondaryActionListener = listener;
@@ -321,8 +363,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     /**
      * Optionally set a multi select handler.
      *
-     * @param handler handler to be called when multiple items are selected.
      * @param <T>     Serializable OnSecondaryActionListener.
+     * @param handler handler to be called when multiple items are selected.
      */
     public <T extends MultiSelectHandler & Serializable> void setMultiSelectHandler(T handler) {
         mMultiSelectHandler = handler;
@@ -331,6 +373,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    /**
+     * Gets local broadcast manager.
+     *
+     * @return the local broadcast manager
+     */
     protected LocalBroadcastManager getLocalBroadcastManager() {
         if (mLocalBroadcastmanager == null) {
             mLocalBroadcastmanager = LocalBroadcastManager.getInstance(getActivity());
@@ -354,6 +401,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     /**
      * Updates the list of items that the adapter is bound to
+     *
+     * @param items the items
      */
     protected void updateItems(final ArrayList<BoxItem> items) {
         FragmentActivity activity = getActivity();
@@ -386,7 +435,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     /**
      * Handles showing new thumbnails after they have been downloaded.
      *
-     * @param intent
+     * @param intent the intent
      */
     protected void onDownloadedThumbnail(final BoxResponseIntent intent) {
         if (mAdapter != null) {
@@ -395,20 +444,45 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    /**
+     * Gets intent filter.
+     *
+     * @return the intent filter
+     */
     protected IntentFilter getIntentFilter() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BoxRequestsFile.DownloadThumbnail.class.getName());
         return filter;
     }
 
+    /**
+     * The interface On secondary action listener.
+     */
     public interface OnSecondaryActionListener {
+        /**
+         * On secondary action boolean.
+         *
+         * @param item the item
+         * @return true if the action has been handled
+         */
         boolean onSecondaryAction(BoxItem item);
     }
 
+    /**
+     * The interface On item click listener.
+     */
     public interface OnItemClickListener {
+        /**
+         * On item click.
+         *
+         * @param item which has been clicked
+         */
         void onItemClick(BoxItem item);
     }
 
+    /**
+     * The type Multi select handler.
+     */
     public static abstract class MultiSelectHandler {
 
 
@@ -417,6 +491,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         transient WeakReference<BoxItemAdapter> mItemAdapter;
 
         /**
+         * Gets selected box items.
          *
          * @return a list of selected items.
          */
@@ -427,6 +502,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         /**
+         * Gets size.
          *
          * @return the number of items selected.
          */
@@ -435,6 +511,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         /**
+         * Is item selected boolean.
          *
          * @param item a box item being displayed in this fragment.
          * @return true if the item is selected.
@@ -444,6 +521,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         /**
+         * Is selectable boolean.
+         *
          * @param boxItem box item the user may potentially select.
          * @return true if this item can be selected by the user, false if it should be disabled.
          */
@@ -458,6 +537,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
          */
         public abstract void handleItemSelected(BoxItem boxItem, boolean wasSelected, MultiSelectHandler handler);
 
+        /**
+         * Toggle.
+         *
+         * @param boxItem which needs to be toggled
+         */
         public void toggle(BoxItem boxItem) {
             if (boxItem == null || !isSelectable(boxItem)) {
                 return;
@@ -472,6 +556,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             handleItemSelected(boxItem, wasSelected, this);
         }
 
+        /**
+         * Sets item adapter.
+         *
+         * @param adapter the adapter
+         */
         void setItemAdapter(BoxItemAdapter adapter) {
             mItemAdapter = new WeakReference<BoxItemAdapter>(adapter);
         }
@@ -505,8 +594,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             }
          }
 
-         /**
+        /**
          * Return true if multi selecting, false otherwise.
+         *
+         * @return the boolean
          */
         public boolean isEnabled() {
             return mIsMultiSelecting;
@@ -514,6 +605,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
         /**
          * Enable or disable multiselect mode.
+         *
+         * @param enabled true if multiselect mode needs to be enabled
          */
         public void setEnabled(boolean enabled) {
             if (mIsMultiSelecting == enabled) {
@@ -530,6 +623,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
+    /**
+     * Add on update listener.
+     *
+     * @param updateListener the update listener
+     */
     public void addOnUpdateListener(OnUpdateListener updateListener) {
         synchronized (mUpdateListeners) {
             mUpdateListeners.add(updateListener);
@@ -537,6 +635,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     }
 
+    /**
+     * Remove on update listener.
+     *
+     * @param updateListener the update listener
+     */
     public void removeOnUpdateListener(OnUpdateListener updateListener) {
         synchronized (mUpdateListeners) {
             mUpdateListeners.remove(updateListener);
@@ -553,6 +656,9 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         super.onDestroy();
     }
 
+    /**
+     * Notify update listeners.
+     */
     protected void notifyUpdateListeners() {
         synchronized (mUpdateListeners) {
             for (OnUpdateListener listener : mUpdateListeners) {
@@ -562,8 +668,14 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     private class BoxItemDividerDecoration extends RecyclerView.ItemDecoration {
+
         Drawable mDivider;
 
+        /**
+         * Instantiates a new Box item divider decoration.
+         *
+         * @param resources the resources
+         */
         public BoxItemDividerDecoration(Resources resources) {
             mDivider = resources.getDrawable(R.drawable.box_browsesdk_item_divider);
         }
@@ -591,6 +703,11 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private static class FooterDecoration extends RecyclerView.ItemDecoration {
         private final int mFooterPadding;
 
+        /**
+         * Instantiates a new Footer decoration.
+         *
+         * @param resources the resources
+         */
         public FooterDecoration(Resources resources) {
             mFooterPadding = (int) resources.getDimension(R.dimen.box_browsesdk_list_footer_padding);
         }
@@ -606,19 +723,37 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     /**
      * Builder for constructing an instance of BoxBrowseFolderFragment
+     *
+     * @param <T> the type parameter
      */
     public static abstract class Builder<T extends BoxBrowseFragment> {
+
         protected Bundle mArgs = new Bundle();
 
 
+        /**
+         * Sets folder id.
+         *
+         * @param folderId the folder id
+         */
         protected void setFolderId(String folderId) {
             mArgs.putString(ARG_ID, folderId);
         }
 
+        /**
+         * Sets folder name.
+         *
+         * @param folderName the folder name
+         */
         protected void setFolderName(String folderName) {
             mArgs.putString(ARG_NAME, folderName);
         }
 
+        /**
+         * Sets user id.
+         *
+         * @param userId the user id
+         */
         protected void setUserId(String userId) {
             mArgs.putString(ARG_USER_ID, userId);
         }
@@ -626,8 +761,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         /**
          * Set the BoxItemFilter for filtering the items being displayed
          *
-         * @param filter
-         * @param <E>
+         * @param <E>    the type parameter
+         * @param filter the filter
          */
         public <E extends Serializable & BoxItemFilter> void setBoxItemFilter(E filter) {
             mArgs.putSerializable(ARG_BOX_ITEM_FILTER, filter);
@@ -636,10 +771,15 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         /**
          * Returns an empty instance of the fragment to build
          *
-         * @return
+         * @return instance
          */
         protected abstract T getInstance();
 
+        /**
+         * Build BoxBrowseFragment fragment
+         *
+         * @return fragment
+         */
         public T build() {
             T newFragment = getInstance();
             newFragment.setArguments(mArgs);

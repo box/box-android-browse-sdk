@@ -46,7 +46,6 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * 
  * This class manages thumbnails to display to users. This class does not do network calls.
  */
 public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
@@ -57,7 +56,9 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     /** Controller used for all requests */
     private final BrowseController mController;
 
-    /** Maps the target image view to the thumbnail task. Provides ability to cancel tasks */
+    /**
+     * Maps the target image view to the thumbnail task. Provides ability to cancel tasks
+     */
     WeakHashMap<Object, BoxFutureTask> mTargetToTask = new WeakHashMap<Object, BoxFutureTask>();
 
     protected final static HashMap<String, Integer> DEFAULT_ICON_RESORCE_MAP = new HashMap<String, Integer>();
@@ -67,14 +68,12 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     public static final String[] PRESENTATION_EXTENSIONS_ARRAY = {"ppt", "pptx"};
     public static final String[] SPREADSHEET_EXTENSIONS_ARRAY = {"csv", "gsheet", "xls", "xlsm", "xlsx", "xsd", "xsl"};
     public static final String[] WORD_EXTENSIONS_ARRAY = {"doc", "docx"};
-
     public static final String[] AUDIO_EXTENSIONS_ARRAY = {"aac", "aif", "aifc", "aiff", "amr", "au", "flac", "m4a", "mp3", "ra", "wav", "wma"};
     public static final String[] CODE_EXTENSIONS_ARRAY = {"h", "c", "cp", "cpp", "c++", "cc", "cxx", "m", "strings", "hpp", "h++", "hxx", "mm", "java", "jav", "scala",
             "clj", "coffee", "cl", "css", "diff", "erl", "go", "groovy", "hs", "lhs", "hx", "asp", "aspx", "ejs", "jsp", "html", "htm", "js", "jscript", "javascript", "json",
             "ts", "less", "lua", "markdown", "mdown", "md", "mysql", "sql", "nt", "ocaml", "pas", "pp", "lpr", "dpr", "pascal", "pl", "php", "pig", "plsql", "properties", "ini",
             "py", "r", "rpm", "rst", "rb", "rs", "scheme", "sh", "siv", "sieve", "st", "smarty", "rq", "stex", "tiddlywiki", "vb", "frm", "cs", "vbs", "vm", "v", "vh", "xml",
             "xhtml", "xquery", "xq", "xqy", "yml", "yaml", "z80"};
-
     public static final String[] VIDEO_EXTENSIONS_ARRAY = {"3g2", "3gp", "avi", "m2v", "m2ts", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "ogg", "mts",
             "qt", "wmv"};
     public static final String[] COMPRESSED_EXTENSIONS_ARRAY = {"zip", "rar", "gz", "tar", "7z", "arc", "ace", "tbz"};
@@ -144,11 +143,9 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     /**
      * Constructor.
-     * 
      *
-     * @param controller
-     * @throws java.io.FileNotFoundException
-     *             thrown if the directory given does not exist and cannot be created.
+     * @param controller the controller
+     * @throws FileNotFoundException the file not found exception
      */
     public ThumbnailManager(BrowseController controller) throws FileNotFoundException {
         mController = controller;
@@ -162,9 +159,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     /**
      * Gets the default icon resource depending on what kind of boxItem is being viewed.
-     * 
-     * @param boxItem
-     *            The box item to show to user.
+     *
+     * @param boxItem The box item to show to user.
      * @return an integer resource.
      */
     public int getDefaultIconResource(final BoxItem boxItem) {
@@ -195,7 +191,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     /**
      * Returns a file in a determinate location for the given boxItem.
      *
-     * @param boxItem
+     * @param boxItem the box item
      * @return a File object where the thumbnail is saved to or should be saved to.
      */
     public File getThumbnailForBoxItem(final BoxItem boxItem) {
@@ -208,9 +204,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     /**
      * Returns a file in a determinate location for the given boxItem.
-     * 
-     * @param boxFile
-     *            box file.
+     *
+     * @param boxFile box file.
      * @return a File object where the thumbnail is saved to or should be saved to.
      */
     public File getThumbnailForBoxFile(final BoxFile boxFile) {
@@ -231,6 +226,12 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         return file;
     }
 
+    /**
+     * Gets cache name.
+     *
+     * @param boxFile the box file
+     * @return the cache name
+     */
     protected String getCacheName(BoxFile boxFile) {
         if (boxFile == null || SdkUtils.isBlank(boxFile.getId()) || SdkUtils.isBlank(boxFile.getSha1())) {
             throw new IllegalArgumentException("BoxFile argument must not be null and must also contain an id and sha1");
@@ -239,6 +240,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     }
 
     /**
+     * Gets thumbnail directory.
+     *
      * @return the cacheDirectory of this thumbnail manager.
      */
     public File getThumbnailDirectory() {
@@ -259,6 +262,12 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         }
     }
 
+    /**
+     * Is thumbnail available boolean.
+     *
+     * @param item the item
+     * @return the boolean
+     */
     public static boolean isThumbnailAvailable(BoxItem item) {
         if (item == null || SdkUtils.isBlank(item.getName())) {
             return false;
@@ -274,8 +283,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     /**
      * Loads the thumbnail for the provided BoxItem (if available) into the target image view
      *
-     * @param item
-     * @param targetImage
+     * @param item        the item
+     * @param targetImage the target image
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
         targetImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -345,7 +354,15 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         }
     }
 
-    // this is a work around to get view to post this only view is attached. Must be done on ui thread.
+    /**
+     * Post later to view.
+     *
+     * @param bitmapSourceFile the bitmap source file
+     * @param request          the request
+     * @param bitmap           the bitmap
+     * @param view             the view
+     */
+// this is a work around to get view to post this only view is attached. Must be done on ui thread.
     protected void postLaterToView(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -367,6 +384,12 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         });
     }
 
+    /**
+     * Load thumbnail.
+     *
+     * @param bitmap    the bitmap
+     * @param imageView the image view
+     */
     public void loadThumbnail(final Bitmap bitmap, final ImageView imageView){
         ViewParent parent = imageView.getParent();
         boolean isScrolling = false;
