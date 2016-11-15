@@ -308,7 +308,8 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     /**
-     * Gets controller.
+     * Gets browse controller. Browse controller is used to make network calls.
+     * Developers can either use the default controller or supply a custom one using setController
      *
      * @return the controller
      */
@@ -322,7 +323,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     }
 
     /**
-     * Sets controller.
+     * Set a custom browse controller
      *
      * @param controller the controller
      */

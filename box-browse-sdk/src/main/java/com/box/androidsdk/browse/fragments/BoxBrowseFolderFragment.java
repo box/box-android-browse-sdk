@@ -15,6 +15,8 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 
 /**
+ * Fragment to browse a box folder
+ *
  * Use the {@link Builder#build()} to
  * create an instance of this fragment.
  */
@@ -66,7 +68,7 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     /**
-     * Gets folder.
+     * Gets the BoxFolder being displayed by this fragment
      *
      * @return the current folder this fragment is meant to display.
      */

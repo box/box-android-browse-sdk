@@ -9,7 +9,7 @@ import com.box.androidsdk.content.models.BoxItem;
 public interface BoxItemFilter {
 
     /**
-     * Accept boolean.
+     * Method which decides whether a file should be shown or not.
      *
      * @param item a file, folder, or bookmark
      * @return return true if the item should be shown, false otherwise.
@@ -17,7 +17,7 @@ public interface BoxItemFilter {
     boolean accept(final BoxItem item);
 
     /**
-     * Is enabled boolean.
+     * Method which decides whether file should be enabled or disabled.
      *
      * @param item a file, folder, or bookmark
      * @return return true if the item if shown should be enabled, false otherwise.
