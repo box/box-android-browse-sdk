@@ -9,7 +9,6 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +28,6 @@ import com.box.androidsdk.browse.fragments.BoxSearchFragment;
 import com.box.androidsdk.browse.fragments.OnUpdateListener;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
@@ -60,7 +58,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     private static final String SEARCH_QUERY = "searchQuery";
     private static ThreadPoolExecutor mApiExecutor;
     private MenuItem mSearchViewMenuItem;
-    private String mSearchQuery;
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
 
@@ -80,7 +77,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
                 new BoxApiSearch(mSession));
 
         if (savedInstanceState != null) {
-            mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
             mCurrentBoxFolder = (BoxFolder) savedInstanceState.getSerializable(EXTRA_ITEM);
         } else if (getIntent() != null) {
             mCurrentBoxFolder = (BoxFolder) getIntent().getSerializableExtra(EXTRA_ITEM);
@@ -97,6 +93,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     /**
      * Init recent searches.
+     *
+     * It initiates the views related to recent searches, like recent searches listview, header and footer of the list etc.
      */
     public void initRecentSearches() {
         mRecentSearchesHeader = getLayoutInflater().inflate(com.box.androidsdk.browse.R.layout.box_browsesdk_recent_searches_header, null);
@@ -161,7 +159,9 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     }
 
     /**
-     * Gets top browse fragment.
+     * Get top browse fragment
+     * As user is navigating folders, BoxBrowseActivity will have a stack of browse fragment, each representing a folder.
+     * This method returns the top browse fragment from the stack.
      *
      * @return the top browse fragment
      */
@@ -173,6 +173,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     /**
      * Handle box folder clicked.
+     * This method is called when user clicks on a folder. It will create a new browse fragment,
+     * with the folder that user has clicked and will push it on to the stack of browse fragments
      *
      * @param boxFolder folder on which the user has clicked
      */
@@ -219,7 +221,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
 
     /**
-     * Sets title.
+     * Sets the title in the toolbar.
+     * This method reads the folder name and sets it as the title in the toolbar.
      *
      * @param folder current folder, whose name should be used as a title
      */
@@ -407,6 +410,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     /**
      * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     * This will be used to create an instance of BoxFolderActivity or a BoxFileActivity
      *
      * @param <R> the type parameter
      */
