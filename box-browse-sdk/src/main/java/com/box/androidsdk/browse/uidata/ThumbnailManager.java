@@ -356,13 +356,13 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     /**
      * Post later to view.
+     * this is a work around to get view to post this only view is attached. Must be done on ui thread.
      *
      * @param bitmapSourceFile the bitmap source file
      * @param request          the request
      * @param bitmap           the bitmap
      * @param view             the view
      */
-// this is a work around to get view to post this only view is attached. Must be done on ui thread.
     protected void postLaterToView(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view){
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
