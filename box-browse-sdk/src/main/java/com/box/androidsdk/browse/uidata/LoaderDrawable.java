@@ -30,9 +30,6 @@ import java.util.concurrent.Callable;
  */
 public class LoaderDrawable extends BitmapDrawable {
 
-    /**
-     * The M task ref.
-     */
     WeakReference<ThumbnailTask> mTaskRef;
 
     private LoaderDrawable(ThumbnailTask task, Resources resources, Bitmap placeHolder) {
@@ -41,7 +38,7 @@ public class LoaderDrawable extends BitmapDrawable {
     }
 
     /**
-     * Gets task.
+     * Gets the thumbnail task that is held by this object
      *
      * @return the task
      */
@@ -113,7 +110,7 @@ public class LoaderDrawable extends BitmapDrawable {
 
 
         /**
-         * Gets key.
+         * Gets the key that identifies this request
          *
          * @return the key
          */
@@ -122,7 +119,7 @@ public class LoaderDrawable extends BitmapDrawable {
         }
 
         /**
-         * Get box item box item.
+         * Get box item for which thumbnail is being loaded
          *
          * @return the box item
          */
@@ -131,7 +128,7 @@ public class LoaderDrawable extends BitmapDrawable {
         }
 
         /**
-         * Create thumbnail task.
+         * Create a thumbnail task.
          *
          * @param request            the request
          * @param boxItem            the box item

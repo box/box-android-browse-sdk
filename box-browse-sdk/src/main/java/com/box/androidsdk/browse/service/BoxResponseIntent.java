@@ -30,7 +30,7 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     }
 
     /**
-     * Is success boolean.
+     * Is success boolean. returns truw if the request was successful
      *
      * @return the boolean
      */
@@ -39,7 +39,7 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     }
 
     /**
-     * Gets request.
+     * Gets the request associated with this response.
      *
      * @return the request
      */
@@ -48,7 +48,7 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     }
 
     /**
-     * Gets result.
+     * Gets the result from this response.
      *
      * @return the result
      */
@@ -57,7 +57,7 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     }
 
     /**
-     * Gets exception.
+     * Gets the exception from this response
      *
      * @return the exception
      */
@@ -66,7 +66,7 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
     }
 
     /**
-     * Gets response.
+     * Gets the response that we received from box server
      *
      * @return the response
      */
@@ -85,9 +85,6 @@ public class BoxResponseIntent<E extends BoxObject> extends Intent {
         out.writeSerializable(mResponse);
     }
 
-    /**
-     * The constant CREATOR.
-     */
     public static final Parcelable.Creator<BoxResponseIntent> CREATOR = new Creator<BoxResponseIntent>() {
         @Override
         public BoxResponseIntent createFromParcel(Parcel source) {

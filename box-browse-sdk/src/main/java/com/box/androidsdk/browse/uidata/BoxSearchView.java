@@ -108,7 +108,7 @@ public class BoxSearchView extends SearchView {
     }
 
     /**
-     * Is expanded boolean.
+     * Is expanded boolean. returns true if the search view is expanded
      *
      * @return true if the view is expanded
      */
@@ -117,7 +117,7 @@ public class BoxSearchView extends SearchView {
     }
 
     /**
-     * Sets search term.
+     * Sets search term in the search view
      *
      * @param query the query
      */

@@ -203,7 +203,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     }
 
     /**
-     * Returns a file in a determinate location for the given boxItem.
+     * Returns a file in a determinate location for the given boxFile.
      *
      * @param boxFile box file.
      * @return a File object where the thumbnail is saved to or should be saved to.

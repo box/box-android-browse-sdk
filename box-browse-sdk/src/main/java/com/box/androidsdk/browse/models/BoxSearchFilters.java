@@ -8,13 +8,13 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 /**
- * The type Box search filters.
+ * BoxSearchFilters. This class stores the current set filters for a search
  */
 public class BoxSearchFilters implements Serializable {
     private static final long serialVersionUID = 1626794929492522854L;
 
     /**
-     * The enum Item type.
+     * File types allowed for search request
      */
     public enum ItemType {
         /**
@@ -55,15 +55,15 @@ public class BoxSearchFilters implements Serializable {
         Video(R.id.videoFileTypeContainer, R.drawable.ic_box_browsesdk_movie, R.string.search_filter_file_type_video);
 
         /**
-         * The container view res id.
+         * This is a resource id for the view that shows file type to the user.
          */
         int mContainerViewResId;
         /**
-         * The display string res id.
+         * This is a resource id for the string that should be displayed for a file type
          */
         int mDisplayStringResId;
         /**
-         * The icon res id.
+         * This is a resource id for the icon that should be displayed for the file type
          */
         int mIconResId;
 
@@ -137,11 +137,11 @@ public class BoxSearchFilters implements Serializable {
         PastYear(R.id.dateModifiedContainerPastYear, R.string.past_year);
 
         /**
-         * The container view res id.
+         * This is a resource id for the view that shows the date modified to the user
          */
         int mContainerViewResId;
         /**
-         * The display string res id.
+         * This is a resource id for the string that should be displayed for the date modified
          */
         int mDisplayStringResId;
 
@@ -210,11 +210,11 @@ public class BoxSearchFilters implements Serializable {
         HundredMbToOneGB(R.id.itemSizeContainerOneHundredToOneThousand, R.string.item_size_100_to_1000);
 
         /**
-         * The container view res id.
+         * This is a resource id for the view that shows item size to the user
          */
         int mContainerViewResId;
         /**
-         * The display string res id.
+         * This is a resource id for the string that should be displayed for an item size
          */
         int mDisplayStringResId;
 
@@ -253,15 +253,15 @@ public class BoxSearchFilters implements Serializable {
     }
 
     /**
-     * The item types.
+     * The item types that has been selected by the user
      */
     public HashSet<ItemType> mItemTypes;
     /**
-     * The item modified date.
+     * The item modified date that has been selected by the user
      */
     public ItemModifiedDate mItemModifiedDate;
     /**
-     * The item size.
+     * The item size that has been selected by the user
      */
     public ItemSize mItemSize;
 
@@ -275,7 +275,7 @@ public class BoxSearchFilters implements Serializable {
     }
 
     /**
-     * Add item type.
+     * Add item type to the mItemTypes
      *
      * @param type the type
      */
@@ -286,7 +286,7 @@ public class BoxSearchFilters implements Serializable {
     }
 
     /**
-     * Remove item type.
+     * Remove item type from mItemTypes
      *
      * @param type the type
      */
@@ -297,7 +297,7 @@ public class BoxSearchFilters implements Serializable {
     }
 
     /**
-     * Contains type boolean.
+     * Contains type boolean. Check if an item type is selected by the user
      *
      * @param type the type
      * @return the boolean
