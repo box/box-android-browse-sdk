@@ -14,7 +14,7 @@ import com.box.androidsdk.browse.R;
 import java.util.List;
 
 /**
- * The type Box recent search adapter.
+ * Adapter that will be used to display recent search terms
  */
 public class BoxRecentSearchAdapter extends ArrayAdapter<String> {
 
@@ -23,9 +23,9 @@ public class BoxRecentSearchAdapter extends ArrayAdapter<String> {
      */
     public interface BoxRecentSearchListener {
         /**
-         * On close clicked.
+         * This method is called when user tries to delete a recent search term.
          *
-         * @param position the position
+         * @param position the position of the item in the list
          */
         void onCloseClicked(int position);
     }
@@ -34,7 +34,7 @@ public class BoxRecentSearchAdapter extends ArrayAdapter<String> {
     BoxRecentSearchListener mListener;
 
     /**
-     * Instantiates a new Box recent search adapter.
+     * Instantiates a new recent search adapter.
      *
      * @param context  the context
      * @param objects  list of recent search terms

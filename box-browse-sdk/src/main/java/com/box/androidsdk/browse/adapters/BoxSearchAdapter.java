@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type Box search adapter.
+ * Adapter that is used to display search results
  */
 public class BoxSearchAdapter extends BoxItemAdapter {
 
@@ -71,6 +71,8 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
     /**
      * Add load more item.
+     * Search results may be showing partial results at a time. In that case, it adds a LoadMore item
+     * Once LoadMore item becomes visible in the list, it makes the network request to fetch more results
      *
      * @param searchReq the search req which will be executed once the load more item is visible
      */
@@ -81,7 +83,7 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     }
 
     /**
-     * The type Search view holder.
+     * ViewHolder for a search item
      */
     class SearchViewHolder extends BoxItemViewHolder {
         /**
@@ -101,16 +103,30 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
             super.onBindBoxItemViewHolder(holder, itemToBind);
             holder.getNameView().setText(itemToBind.getName());
-            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(itemToBind, File.separator));
+            holder.getMetaDescription().setText(createPath(itemToBind, File.separator));
             mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
         }
+
+        private String createPath(final BoxItem boxItem, final String separator){
+            StringBuilder builder = new StringBuilder(separator);
+            if (boxItem.getPathCollection() != null) {
+                for (BoxFolder folder : boxItem.getPathCollection()) {
+                    builder.append(folder.getName());
+                    builder.append(separator);
+                }
+            }
+            return builder.toString();
+
+        }
     }
 
     /**
-     * The type Load more view holder.
+     * View holder for load more item in search results
+     * Search results may be showing partial results at a time. In that case, it adds a LoadMore item
+     * Once LoadMore item becomes visible in the list, it makes the network request to fetch more results
      */
     class LoadMoreViewHolder extends BoxItemViewHolder {
         /**
@@ -143,7 +159,8 @@ public class BoxSearchAdapter extends BoxItemAdapter {
     }
 
     /**
-     * The type Results header view holder.
+     * View holder for search results header view.
+     * To ensure that header scrolls with the list, it is added as an item on the top of the list
      */
     class ResultsHeaderViewHolder extends BoxItemViewHolder {
         /**
@@ -190,7 +207,7 @@ class LoadMoreItem extends BoxItem {
     }
 
     /**
-     * Gets request.
+     * Gets the request which should be executed to fetch more search results from the server
      *
      * @return the request
      */

@@ -50,7 +50,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.OnBoxSearchListener, FragmentManager.OnBackStackChangedListener {
 
-    protected static final String EXTRA_SHOULD_SEARCH_ALL = "extraShouldSearchAll";
     protected static final String TAG = BoxBrowseActivity.class.getName();
 
     private static final ConcurrentLinkedQueue<BoxResponse> RESPONSE_QUEUE = new ConcurrentLinkedQueue<BoxResponse>();
@@ -412,15 +411,14 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * Create a builder object that can be used to construct an intent to launch an instance of this activity.
      * This will be used to create an instance of BoxFolderActivity or a BoxFileActivity
      *
-     * @param <R> the type parameter
+     * @param <R> the type parameter. It should be the derived class from IntentBuilder.
+     *           This ensures return value is derived class object and there is no need to typecast the returned value.
      */
     protected static abstract class IntentBuilder<R> {
 
         final BoxSession mSession;
         final Context mContext;
         BoxFolder mFolder;
-        boolean mShouldSearchAll = false;
-
 
         /**
          * Create an new Intent Builder designed to create an intent to launch a child of BoxBrowseActivity.
@@ -440,7 +438,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
 
         /**
-         * Sets starting folder.
+         * Sets the folder to be browsed
          *
          * @param folder folder to start browsing in.
          * @return an IntentBuilder which can create an instance of this class.
@@ -453,23 +451,12 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
 
         /**
-         * Sets should search all.
-         *
-         * @param searchAll true if searching should search entire account, false if searching should only search current folder. False by default.
-         * @return an IntentBuilder which can create an instance of this class.
-         */
-        public R setShouldSearchAll(final boolean searchAll) {
-            mShouldSearchAll = searchAll;
-            return (R) this;
-        }
-
-        /**
          * Add extras.
          *
          * @param intent intent to add extras from this builder to.
          */
         protected void addExtras(final Intent intent) {
-            intent.putExtra(EXTRA_SHOULD_SEARCH_ALL, mShouldSearchAll);
+
         }
 
         /**

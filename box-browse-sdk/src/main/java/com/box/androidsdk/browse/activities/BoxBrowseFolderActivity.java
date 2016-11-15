@@ -30,7 +30,7 @@ import java.net.HttpURLConnection;
 
 
 /**
- * The type Box browse folder activity.
+ * This activity is launched to browse a BoxFolder
  */
 public class BoxBrowseFolderActivity extends BoxBrowseActivity implements View.OnClickListener, BoxCreateFolderFragment.OnCreateFolderListener {
 

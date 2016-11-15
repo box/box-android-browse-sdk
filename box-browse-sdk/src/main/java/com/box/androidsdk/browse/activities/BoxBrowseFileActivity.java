@@ -18,7 +18,7 @@ import com.eclipsesource.json.JsonObject;
 import java.util.ArrayList;
 
 /**
- * The type Box browse file activity.
+ * This activity is launched to navigate to a boxfile
  */
 public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
@@ -103,9 +103,6 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
      */
     public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder>{
 
-        /**
-         * The M allowed extensions.
-         */
         ArrayList<String> mAllowedExtensions;
 
         /**
@@ -119,7 +116,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity {
         }
 
         /**
-         * Set allowed extensions intent builder.
+         * Sets a list of allowed extensions to filter files by.
          *
          * @param allowedExtensions extension of files which should be shown while browsing.
          * @return the intent builder

@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * The type Box item adapter.
+ * Adapter for BoxItems used in the RecyclerView of a BrowseFragment
  */
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
 
@@ -92,7 +92,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     /**
-     * Is on ui thread boolean.
+     * Is code running on ui thread
      *
      * @return true if this method is being run on the ui thread, false otherwise.
      */
@@ -113,7 +113,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     /**
-     * Get position map hash map.
+     * Gets a hash map with item ids as keys and their position as values
      *
      * @param items the items
      * @return the hash map with item ids as keys and their position as values
@@ -158,11 +158,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         } finally {
             lock.unlock();
         }
-
-
-
     }
-
 
     /**
      * Removes the ids from this folder if applicable. This method is always run on ui
@@ -451,45 +447,18 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
 
     /**
-     * The type Box item view holder.
+     * View Holder for the BoxItemAdapater
      */
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        /**
-         * The M item.
-         */
-        BoxItem mItem;
 
-        /**
-         * The M view.
-         */
+        BoxItem mItem;
         View mView;
-        /**
-         * The M thumb view.
-         */
         ImageView mThumbView;
-        /**
-         * The M name view.
-         */
         TextView mNameView;
-        /**
-         * The M meta description.
-         */
         TextView mMetaDescription;
-        /**
-         * The M progress bar.
-         */
         ProgressBar mProgressBar;
-        /**
-         * The M secondary action.
-         */
         ImageButton mSecondaryAction;
-        /**
-         * The M secondary click listener.
-         */
         BoxItemClickListener mSecondaryClickListener;
-        /**
-         * The M item check box.
-         */
         AppCompatCheckBox mItemCheckBox;
 
         /**
@@ -651,7 +620,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         /**
-         * Gets check box.
+         * Gets check box from the view represented by this view holder
          *
          * @return the check box
          */
@@ -660,7 +629,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         /**
-         * Gets secondary action.
+         * Gets secondary action view from the view represented by this view holder
          *
          * @return the secondary action
          */
@@ -670,7 +639,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
 
         /**
-         * Gets item.
+         * Gets the box item which is displayed by this viewholder
          *
          * @return the item
          */
@@ -688,7 +657,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         /**
-         * Gets meta description.
+         * Gets meta description view
          *
          * @return the meta description
          */
@@ -706,7 +675,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         /**
-         * Gets thumb view.
+         * Gets thumbnail view.
          *
          * @return the thumb view
          */
@@ -715,7 +684,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
 
         /**
-         * Gets view.
+         * Gets the root view represented by this view holder
          *
          * @return the view
          */
@@ -759,9 +728,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     private class BoxItemClickListener implements View.OnClickListener {
 
-        /**
-         * The M item.
-         */
         protected BoxItem mItem;
 
         /**
@@ -784,28 +750,28 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
      */
     public interface OnInteractionListener {
         /**
-         * Gets multi select handler.
+         * returns the MultiSelectHandler set on BrowseFragment.
          *
          * @return the multi select handler
          */
         BoxBrowseFragment.MultiSelectHandler getMultiSelectHandler();
 
         /**
-         * Gets on secondary action listener.
+         * Gets on secondary action listener set on BrowseFragment.
          *
          * @return the on secondary action listener
          */
         BoxBrowseFragment.OnSecondaryActionListener getOnSecondaryActionListener();
 
         /**
-         * Gets on item click listener.
+         * Gets on item click listener set on BrowseFragment.
          *
          * @return the on item click listener
          */
         BoxBrowseFragment.OnItemClickListener getOnItemClickListener();
 
         /**
-         * Gets item filter.
+         * Gets item filter
          *
          * @return the item filter
          */
