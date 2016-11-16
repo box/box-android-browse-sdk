@@ -9,7 +9,6 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +28,6 @@ import com.box.androidsdk.browse.fragments.BoxSearchFragment;
 import com.box.androidsdk.browse.fragments.OnUpdateListener;
 import com.box.androidsdk.browse.service.BoxBrowseController;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.browse.service.CompletionListener;
 import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxApiFolder;
@@ -46,19 +44,19 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * Box browse activity
+ * This is the base activity BoxFolderActivity and BoxFileActivity. It implements the common functionality like initiating search feature, handling navigation etc.
+ */
 public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity implements BoxBrowseFragment.OnItemClickListener, BoxSearchView.OnBoxSearchListener, FragmentManager.OnBackStackChangedListener {
 
-    protected static final String EXTRA_SHOULD_SEARCH_ALL = "extraShouldSearchAll";
-
     protected static final String TAG = BoxBrowseActivity.class.getName();
-    private static final String OUT_BROWSE_FRAGMENT = "outBrowseFragment";
 
     private static final ConcurrentLinkedQueue<BoxResponse> RESPONSE_QUEUE = new ConcurrentLinkedQueue<BoxResponse>();
     private static final String RESTORE_SEARCH = "restoreSearch";
     private static final String SEARCH_QUERY = "searchQuery";
     private static ThreadPoolExecutor mApiExecutor;
     private MenuItem mSearchViewMenuItem;
-    private String mSearchQuery;
     private BrowseController mController;
     private OnUpdateListener mUpdateListener;
 
@@ -78,7 +76,6 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
                 new BoxApiSearch(mSession));
 
         if (savedInstanceState != null) {
-            mSearchQuery = savedInstanceState.getString(SEARCH_QUERY);
             mCurrentBoxFolder = (BoxFolder) savedInstanceState.getSerializable(EXTRA_ITEM);
         } else if (getIntent() != null) {
             mCurrentBoxFolder = (BoxFolder) getIntent().getSerializableExtra(EXTRA_ITEM);
@@ -93,6 +90,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         super.onDestroy();
     }
 
+    /**
+     * Init recent searches.
+     *
+     * It initiates the views related to recent searches, like recent searches listview, header and footer of the list etc.
+     */
     public void initRecentSearches() {
         mRecentSearchesHeader = getLayoutInflater().inflate(com.box.androidsdk.browse.R.layout.box_browsesdk_recent_searches_header, null);
         mRecentSearchesFooter = getLayoutInflater().inflate(com.box.androidsdk.browse.R.layout.box_browsesdk_recent_searches_footer, null);
@@ -128,6 +130,11 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     }
 
+    /**
+     * Gets current folder.
+     *
+     * @return the current folder
+     */
     protected BoxFolder getCurrentFolder() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.box_browsesdk_fragment_container);
         BoxFolder curFolder = fragment instanceof BoxBrowseFolderFragment ?
@@ -150,12 +157,26 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
     }
 
+    /**
+     * Get top browse fragment
+     * As user is navigating folders, BoxBrowseActivity will have a stack of browse fragment, each representing a folder.
+     * This method returns the top browse fragment from the stack.
+     *
+     * @return the top browse fragment
+     */
     protected BoxBrowseFragment getTopBrowseFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment frag = fragmentManager.findFragmentById(R.id.box_browsesdk_fragment_container);
         return frag instanceof BoxBrowseFragment ? (BoxBrowseFragment) frag : null;
     }
 
+    /**
+     * Handle box folder clicked.
+     * This method is called when user clicks on a folder. It will create a new browse fragment,
+     * with the folder that user has clicked and will push it on to the stack of browse fragments
+     *
+     * @param boxFolder folder on which the user has clicked
+     */
     protected void handleBoxFolderClicked(final BoxFolder boxFolder) {
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
@@ -173,7 +194,7 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
      * BoxItems. For a more customized experience, a custom implementation of the fragment can
      * be provided here.
      *
-     * @param folder the folder that will be browsed
+     * @param folder  the folder that will be browsed
      * @param session the session that will be used for browsing
      * @return Browsing fragment that will be used to show the BoxItems
      */
@@ -198,6 +219,12 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     }
 
 
+    /**
+     * Sets the title in the toolbar.
+     * This method reads the folder name and sets it as the title in the toolbar.
+     *
+     * @param folder current folder, whose name should be used as a title
+     */
     protected void setTitle(final BoxFolder folder) {
         ActionBar actionbar = getSupportActionBar();
         if (actionbar != null && folder != null) {
@@ -382,13 +409,16 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
 
     /**
      * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     * This will be used to create an instance of BoxFolderActivity or a BoxFileActivity
+     *
+     * @param <R> the type parameter. It should be the derived class from IntentBuilder.
+     *           This ensures return value is derived class object and there is no need to typecast the returned value.
      */
     protected static abstract class IntentBuilder<R> {
+
         final BoxSession mSession;
         final Context mContext;
         BoxFolder mFolder;
-        boolean mShouldSearchAll = false;
-
 
         /**
          * Create an new Intent Builder designed to create an intent to launch a child of BoxBrowseActivity.
@@ -408,6 +438,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
 
         /**
+         * Sets the folder to be browsed
+         *
          * @param folder folder to start browsing in.
          * @return an IntentBuilder which can create an instance of this class.
          */
@@ -419,21 +451,19 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
         }
 
         /**
-         * @param searchAll true if searching should search entire account, false if searching should only search current folder. False by default.
-         * @return an IntentBuilder which can create an instance of this class.
-         */
-        public R setShouldSearchAll(final boolean searchAll) {
-            mShouldSearchAll = searchAll;
-            return (R) this;
-        }
-
-        /**
+         * Add extras.
+         *
          * @param intent intent to add extras from this builder to.
          */
         protected void addExtras(final Intent intent) {
-            intent.putExtra(EXTRA_SHOULD_SEARCH_ALL, mShouldSearchAll);
+
         }
 
+        /**
+         * Create launch intent intent.
+         *
+         * @return the intent
+         */
         protected abstract Intent createLaunchIntent();
 
         /**

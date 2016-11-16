@@ -130,6 +130,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         search(mSearchQuery);
     }
 
+    /**
+     * Start filter activity.
+     */
     protected void startFilterActivity() {
         startActivityForResult(FilterSearchResults.newFilterSearchResultsIntent(getActivity(), mSearchFilters), REQUEST_FILTER_SEARCH_RESULTS);
     }
@@ -190,6 +193,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return filter;
     }
 
+    /**
+     * Gets search query.
+     *
+     * @return the search query
+     */
     public String getSearchQuery() {
         if (mSearchQuery != null) {
             return mSearchQuery;
@@ -198,6 +206,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return "";
     }
 
+    /**
+     * Search.
+     *
+     * @param query the query
+     */
     public void search(String query) {
         if (query != null) {
             String trimmedQuery = query.trim();
@@ -208,6 +221,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
     }
 
+    /**
+     * Search.
+     */
     protected void search() {
         if (mSearchQuery != null && !mSearchQuery.equals("")) {
             mRequest = getController().getSearchRequest(mSearchQuery);
@@ -227,6 +243,9 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
     }
 
+    /**
+     * Execute request.
+     */
     protected void executeRequest() {
         getController().execute(mRequest);
     }
@@ -316,6 +335,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         return new BoxSearchAdapter(getActivity(), getController(), this);
     }
 
+    /**
+     * Update to.
+     *
+     * @param items the items
+     */
     protected void updateTo(ArrayList<BoxItem> items) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -387,6 +411,11 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
     }
 
+    /**
+     * On items fetched.
+     *
+     * @param response the response received from Box server
+     */
     protected void onItemsFetched(BoxResponse response) {
         if (!response.isSuccess()) {
             checkConnectivity();
@@ -429,7 +458,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
      * will not be a multiple of limit.
      * @param itemsSize
      * @param limit
-     * @return
+     * @return offset that should be used with next request
      */
     private static int calculateBestOffset(int itemsSize, int limit){
         double offset = ((double) itemsSize)/limit;
@@ -442,6 +471,13 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     public static class Builder extends BoxBrowseFragment.Builder<BoxSearchFragment> {
 
 
+        /**
+         * Instantiates a new Builder.
+         *
+         * @param session      the session
+         * @param searchQuery  the search query
+         * @param parentFolder the parent folder in which the search should be performed
+         */
         public Builder(BoxSession session, String searchQuery, BoxFolder parentFolder) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
@@ -450,9 +486,12 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         }
 
 
-            /**
-             * @param session
-             */
+        /**
+         * Instantiates a new Builder.
+         *
+         * @param session      the session
+         * @param parentFolder the parent folder
+         */
         public Builder(BoxSession session, BoxFolder parentFolder) {
             mArgs.putString(ARG_USER_ID, session.getUserId());
             mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
@@ -462,7 +501,8 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         /**
          * Set the number of items that the results will be limited to when retrieving search results
          *
-         * @param limit
+         * @param limit the limit
+         * @return the limit
          */
         public BoxSearchFragment.Builder setLimit(int limit) {
             mArgs.putInt(ARG_LIMIT, limit);

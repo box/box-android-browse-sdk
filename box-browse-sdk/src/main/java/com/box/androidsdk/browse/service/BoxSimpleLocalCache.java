@@ -16,10 +16,16 @@ import com.box.androidsdk.content.requests.BoxResponse;
  */
 public class BoxSimpleLocalCache implements BoxCache {
 
+    /**
+     * Instantiates a new Box simple local cache.
+     */
     public BoxSimpleLocalCache(){
     }
 
 
+    /**
+     * The full folder cache.
+     */
     LruCache<String, BoxFolder> mFullFolderCache = new LruCache<String, BoxFolder>(10);
 
     @Override

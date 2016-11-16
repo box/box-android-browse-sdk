@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Base class for all activities that make API requests through the Box Content SDK. This class is responsible for
  * showing a loading spinner while a request is executing and then hiding it when the request is complete.
- *
+ * <p/>
  * All BoxRequest tasks should be submitted to getApiExecutor and then handled by overriding handleBoxResponse
  */
 public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
@@ -48,6 +48,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
 
     protected static final int DEFAULT_TIMEOUT = 30 * 1000;
     private static final int  DEFAULT_SPINNER_DELAY = 500;
+
     protected static final String ACTION_STARTING_TASK = "com.box.androidsdk.share.starting_task";
     protected static final String ACTION_ENDING_TASK = "com.box.androidsdk.share.ending_task";
 
@@ -55,7 +56,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     private LastRunnableHandler mDialogHandler;
 
     /**
-     * Broadcast receiver for handilng when the spinner should be shown or hidden
+     * Broadcast receiver for handling when the spinner should be shown or hidden
      */
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -146,8 +147,8 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     /**
      * Returns the api executor for the activity
      *
-     * @param application
-     * @return
+     * @param application the application
+     * @return api executor
      */
     public abstract ThreadPoolExecutor getApiExecutor(final Application application);
 
@@ -170,7 +171,8 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
 
     /**
      * Checks if the API executor currently ahs a task in progress
-     * @return
+     *
+     * @return true is the task is in progress, false otherwise.
      */
     protected boolean isTaskInProgress(){
         return getApiExecutor(getApplication()) != null && (getApiExecutor(getApplication()).getActiveCount() > 0 || getApiExecutor(getApplication()).getQueue().size() > 0);
@@ -210,7 +212,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     /**
      * Sets the main BoxItem that will be interacted with
      *
-     * @param boxItem
+     * @param boxItem the box item
      */
     protected void setMainItem(final BoxItem boxItem){
         mItem = boxItem;
@@ -247,7 +249,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
      * Shows the spinner with a custom title and description
      *
      * @param stringTitleRes string resource for the spinner title
-     * @param stringRes string resource for the spinner description
+     * @param stringRes      string resource for the spinner description
      */
     protected void showSpinner(final int stringTitleRes, final int stringRes) {
         mDialogHandler.queue(new Runnable() {
@@ -274,7 +276,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
      * Creates a static ThreadPoolExecutor that is meant to be used in {@link #getApiExecutor(android.app.Application) getApiExecutor}.
      * The ThreadPoolExecutor returned should be set to a static variable so that it is not recreated each time
      *
-     * @param application application context needed for the LocalBroadcastManager
+     * @param application   application context needed for the LocalBroadcastManager
      * @param responseQueue the queue that will hold all responses after the requests are completed. This should be provided through {@link #getResponseQueue()}
      * @return the ThreadPoolExecutor used to execute API requests
      */
@@ -327,7 +329,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     /**
      * Helper method that returns formatted text that is meant to be shown in a Button
      *
-     * @param title the title text that should be emphasized
+     * @param title       the title text that should be emphasized
      * @param description the description text that should be de-emphasized
      * @return Spannable that is the formatted text
      */
@@ -345,6 +347,7 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
      */
     private class LastRunnableHandler extends Handler {
         private Runnable mLastRunable;
+
 
         public void queue(final Runnable runnable, final int delay){
             cancelLastRunnable();

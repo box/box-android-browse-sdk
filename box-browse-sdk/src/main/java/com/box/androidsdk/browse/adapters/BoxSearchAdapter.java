@@ -18,12 +18,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter that is used to display search results
+ */
 public class BoxSearchAdapter extends BoxItemAdapter {
 
     public static final String LOAD_MORE_ID = "com.box.androidsdk.browse.LOAD_MORE";
     protected static final int LOAD_MORE_VIEW_TYPE = 1;
     protected static final int RESULTS_HEADER_VIEW_TYPE = 2;
 
+    /**
+     * Instantiates a new Box search adapter.
+     *
+     * @param context    the context
+     * @param controller BrowseController instance
+     * @param listener   OnInteractionListener to net notified for any interactions with the items
+     */
     public BoxSearchAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         super(context, controller, listener);
     }
@@ -59,13 +69,28 @@ public class BoxSearchAdapter extends BoxItemAdapter {
         return super.getItemViewType(position);
     }
 
+    /**
+     * Add load more item.
+     * Search results may be showing partial results at a time. In that case, it adds a LoadMore item
+     * Once LoadMore item becomes visible in the list, it makes the network request to fetch more results
+     *
+     * @param searchReq the search req which will be executed once the load more item is visible
+     */
     public void addLoadMoreItem(BoxRequestsSearch.Search searchReq) {
         ArrayList<BoxItem> list = new ArrayList<BoxItem>(1);
         list.add(LoadMoreItem.create(searchReq));
         this.add(list);
     }
 
+    /**
+     * ViewHolder for a search item
+     */
     class SearchViewHolder extends BoxItemViewHolder {
+        /**
+         * Instantiates a new Search view holder.
+         *
+         * @param itemView view to bind with this holder
+         */
         public SearchViewHolder(View itemView) {
             super(itemView);
         }
@@ -78,15 +103,37 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
             super.onBindBoxItemViewHolder(holder, itemToBind);
             holder.getNameView().setText(itemToBind.getName());
-            holder.getMetaDescription().setText(BoxSearchListAdapter.createPath(itemToBind, File.separator));
+            holder.getMetaDescription().setText(createPath(itemToBind, File.separator));
             mController.getThumbnailManager().loadThumbnail(itemToBind, holder.getThumbView());
             holder.getProgressBar().setVisibility(View.GONE);
             holder.getMetaDescription().setVisibility(View.VISIBLE);
             holder.getThumbView().setVisibility(View.VISIBLE);
         }
+
+        private String createPath(final BoxItem boxItem, final String separator){
+            StringBuilder builder = new StringBuilder(separator);
+            if (boxItem.getPathCollection() != null) {
+                for (BoxFolder folder : boxItem.getPathCollection()) {
+                    builder.append(folder.getName());
+                    builder.append(separator);
+                }
+            }
+            return builder.toString();
+
+        }
     }
 
+    /**
+     * View holder for load more item in search results
+     * Search results may be showing partial results at a time. In that case, it adds a LoadMore item
+     * Once LoadMore item becomes visible in the list, it makes the network request to fetch more results
+     */
     class LoadMoreViewHolder extends BoxItemViewHolder {
+        /**
+         * Instantiates a new Load more view holder.
+         *
+         * @param view the view to bind with this holder
+         */
         public LoadMoreViewHolder(View view) {
             super(view);
         }
@@ -96,6 +143,9 @@ public class BoxSearchAdapter extends BoxItemAdapter {
             mController.execute(((LoadMoreItem) itemToBind).getRequest());
         }
 
+        /**
+         * Sets error.
+         */
         public void setError() {
             // TODO: Should set error state
             mThumbView.setImageResource(R.drawable.ic_box_browsesdk_refresh_grey_36dp);
@@ -108,7 +158,16 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
     }
 
+    /**
+     * View holder for search results header view.
+     * To ensure that header scrolls with the list, it is added as an item on the top of the list
+     */
     class ResultsHeaderViewHolder extends BoxItemViewHolder {
+        /**
+         * Instantiates a new Results header view holder.
+         *
+         * @param view the view
+         */
         public ResultsHeaderViewHolder(View view) {
             super(view);
         }
@@ -133,6 +192,12 @@ class LoadMoreItem extends BoxItem {
         super(obj);
     }
 
+    /**
+     * Create load more item.
+     *
+     * @param request the request
+     * @return the load more item
+     */
     static LoadMoreItem create(BoxRequestsSearch.Search request) {
         JsonObject object = new JsonObject();
         object.add(BoxItem.FIELD_ID, BoxSearchAdapter.LOAD_MORE_ID);
@@ -141,6 +206,11 @@ class LoadMoreItem extends BoxItem {
         return ret;
     }
 
+    /**
+     * Gets the request which should be executed to fetch more search results from the server
+     *
+     * @return the request
+     */
     public BoxRequestsSearch.Search getRequest() {
         return mRequest;
     }

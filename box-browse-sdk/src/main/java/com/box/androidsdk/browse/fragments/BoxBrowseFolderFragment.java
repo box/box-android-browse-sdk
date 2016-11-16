@@ -15,6 +15,8 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 
 /**
+ * Fragment to browse a box folder
+ *
  * Use the {@link Builder#build()} to
  * create an instance of this fragment.
  */
@@ -66,6 +68,8 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     }
 
     /**
+     * Gets the BoxFolder being displayed by this fragment
+     *
      * @return the current folder this fragment is meant to display.
      */
     public BoxFolder getFolder() {
@@ -78,6 +82,11 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * On folder fetched.
+     *
+     * @param folder that has been fetched
+     */
     protected void onFolderFetched(BoxFolder folder) {
         if (folder != null && mFolder.getId().equals(folder.getId())) {
             BoxIteratorItems items = folder.getItemCollection();
@@ -94,8 +103,8 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
      * Convenience method that returns a folder object without its item collection. This is done to ensure
      * a single source of truth for the item collection
      *
-     * @param folder
-     * @return
+     * @param folder the folder which may contain items
+     * @return box folder without any items
      */
     protected BoxFolder createFolderWithoutItems(BoxFolder folder) {
         JsonObject jsonObject = new JsonObject();
@@ -124,6 +133,8 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
     public static class Builder extends BoxBrowseFragment.Builder<BoxBrowseFolderFragment> {
 
         /**
+         * Instantiates a new Builder.
+         *
          * @param folderId id of the folder to browse
          * @param userId   id of the user that the contents will be loaded for
          */
@@ -134,6 +145,8 @@ public class BoxBrowseFolderFragment extends BoxBrowseFragment {
         }
 
         /**
+         * Instantiates a new Builder.
+         *
          * @param folder  the BoxFolder to Browse
          * @param session the session that the contents will be loaded for
          */

@@ -12,6 +12,11 @@ public class CompletionListener implements BoxFutureTask.OnCompletedListener {
 
     private final LocalBroadcastManager mBroadcastManager;
 
+    /**
+     * Instantiates a new Completion listener.
+     *
+     * @param broadcastManager the broadcast manager
+     */
     public CompletionListener(LocalBroadcastManager broadcastManager) {
         mBroadcastManager = broadcastManager;
     }

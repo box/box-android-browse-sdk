@@ -21,6 +21,9 @@ import com.box.androidsdk.browse.models.BoxSearchFilters;
 
 import java.util.HashMap;
 
+/**
+ * This Fragment allows users to set filters on search parameters.
+ */
 public class BoxFilterSearchResultsFragment extends Fragment {
     private static String EXTRA_FILTERS = "extraFilters";
     private BoxSearchFilters mFilters;
@@ -32,11 +35,20 @@ public class BoxFilterSearchResultsFragment extends Fragment {
     private LinearLayout mSizeView;
 
 
+    /**
+     * Instantiates a new Box filter search results fragment.
+     */
     public BoxFilterSearchResultsFragment() {
         // Required empty public constructor
     }
 
 
+    /**
+     * New instance box filter search results fragment.
+     *
+     * @param filters current search filters
+     * @return the box filter search results fragment
+     */
     public static BoxFilterSearchResultsFragment newInstance(BoxSearchFilters filters) {
         BoxFilterSearchResultsFragment fragment = new BoxFilterSearchResultsFragment();
         Bundle args = new Bundle();
@@ -69,6 +81,11 @@ public class BoxFilterSearchResultsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Gets current filters.
+     *
+     * @return the current filters
+     */
     public BoxSearchFilters getCurrentFilters() {
         return mFilters;
     }
@@ -277,7 +294,11 @@ public class BoxFilterSearchResultsFragment extends Fragment {
         clearButton.setEnabled(mFilters.anyFiltersSet());
     }
 
+    /**
+     * The type File type data.
+     */
     class FileTypeData {
+
         public BoxSearchFilters.ItemType mItemType;
         public RelativeLayout mContainer;
         public AppCompatCheckBox mCheckBox;

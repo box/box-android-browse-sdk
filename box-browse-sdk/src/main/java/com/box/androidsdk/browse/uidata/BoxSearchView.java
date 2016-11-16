@@ -27,11 +27,22 @@ public class BoxSearchView extends SearchView {
     // Keeping a local property to ensure we know the state
     private boolean isExpanded;
 
+    /**
+     * Instantiates a new Box search view.
+     *
+     * @param context the context
+     */
     public BoxSearchView(final Context context){
         super(context);
         initSearchView(context);
     }
 
+    /**
+     * Instantiates a new Box search view.
+     *
+     * @param context the context
+     * @param attrs   the attrs
+     */
     public BoxSearchView(final Context context, final AttributeSet attrs){
         super(context, attrs);
         initSearchView(context);
@@ -96,10 +107,20 @@ public class BoxSearchView extends SearchView {
         });
     }
 
+    /**
+     * Is expanded boolean. returns true if the search view is expanded
+     *
+     * @return true if the view is expanded
+     */
     public boolean isExpanded() {
         return isExpanded;
     }
 
+    /**
+     * Sets search term in the search view
+     *
+     * @param query the query
+     */
     public void setSearchTerm(String query) {
         setQuery(query, false);
     }
@@ -123,10 +144,18 @@ public class BoxSearchView extends SearchView {
         }
     }
 
+    /**
+     * Set on box search listener.
+     *
+     * @param onBoxSearchListener the on box search listener
+     */
     public void setOnBoxSearchListener(final OnBoxSearchListener onBoxSearchListener){
         mOnBoxSearchListener = onBoxSearchListener;
     }
 
+    /**
+     * The interface On box search listener.
+     */
     public interface OnBoxSearchListener {
 
         /**
@@ -141,13 +170,15 @@ public class BoxSearchView extends SearchView {
 
         /**
          * The text in search field has changed
-         * @param text
+         *
+         * @param text the text
          */
         void onQueryTextChange(String text);
 
         /**
          * User pressed enter (or search button on keyboard) and submitted the search query
-         * @param text
+         *
+         * @param text the text
          */
         void onQueryTextSubmit(String text);
     }

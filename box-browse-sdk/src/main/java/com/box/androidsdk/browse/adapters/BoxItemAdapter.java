@@ -36,7 +36,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Adapter for BoxItems used in the RecyclerView of a BrowseFragment
+ */
 public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemViewHolder> {
+
     protected final Context mContext;
     protected final BrowseController mController;
     protected final OnInteractionListener mListener;
@@ -48,9 +52,17 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     protected static final int INSERT_LIMIT = 10;
     protected ReadWriteLock mLock = new ReentrantReadWriteLock();
     WeakReference<RecyclerView> mRecyclerViewRef;
+
     static final int DELAY = 50;
 
 
+    /**
+     * Instantiates a new Box item adapter.
+     *
+     * @param context    the context
+     * @param controller BrowseController instance
+     * @param listener   OnInteractionListener to net notified for any interactions with the items
+     */
     public BoxItemAdapter(Context context, BrowseController controller, OnInteractionListener listener) {
         mContext = context;
         mController = controller;
@@ -68,6 +80,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
     /**
      * A check to see if the recyclerview is busy and operations altering it should not be made.
+     *
      * @return true if the recyclerview is currently computing its layout, false otherwise.
      */
     protected boolean isRecyclerViewComputing(){
@@ -79,6 +92,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
     /**
+     * Is code running on ui thread
      *
      * @return true if this method is being run on the ui thread, false otherwise.
      */
@@ -98,6 +112,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         boxItemHolder.bindItem(item);
     }
 
+    /**
+     * Gets a hash map with item ids as keys and their position as values
+     *
+     * @param items the items
+     * @return the hash map with item ids as keys and their position as values
+     */
     protected HashMap<String, Integer> getPositionMap(final List<BoxItem> items){
         HashMap<String, Integer> map = new HashMap<String, Integer>(items.size());
         for (int i= 0;i < items.size(); i++){
@@ -138,15 +158,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         } finally {
             lock.unlock();
         }
-
-
-
     }
-
 
     /**
      * Removes the ids from this folder if applicable. This method is always run on ui
      * thread so adapter may not reflect changes immediately.
+     *
      * @param ids list of ids to remove
      */
     public void remove(final List<String> ids){
@@ -227,6 +244,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     /**
      * Does the appropriate add and removes to display only provided items. This method is always run on ui
      * thread so adapter may not reflect changes immediately.
+     *
      * @param items new list of items adapter should reflect.
      */
     public void updateTo(final ArrayList<BoxItem> items){
@@ -308,6 +326,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     /**
      * Add items to the end of the adapter. This method is always run on ui
      * thread so adapter may not reflect changes immediately.
+     *
      * @param items to append to this adapter.
      */
     public void add(final List<BoxItem> items) {
@@ -340,6 +359,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     /**
      * Update an item inside of the adapter if applicable. This method is always run on ui
      * thread so adapter may not reflect changes immediately.
+     *
      * @param item item to update.
      */
     public void update(final BoxItem item) {
@@ -374,6 +394,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     /**
      * Return the index of an item in the adapter. It may return stale data in case an
      * update method is pending.
+     *
      * @param id the box item id to check for.
      * @return the index of the box item id.
      */
@@ -394,6 +415,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     /**
      * It may return stale data in case an
      * update method is pending.
+     *
      * @return A new list containing the items shown by this adapter.
      */
     public ArrayList<BoxItem> getItems() {
@@ -424,9 +446,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     }
 
 
+    /**
+     * View Holder for the BoxItemAdapater
+     */
     public class BoxItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        BoxItem mItem;
 
+        BoxItem mItem;
         View mView;
         ImageView mThumbView;
         TextView mNameView;
@@ -436,6 +461,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         BoxItemClickListener mSecondaryClickListener;
         AppCompatCheckBox mItemCheckBox;
 
+        /**
+         * Instantiates a new Box item view holder.
+         *
+         * @param itemView the item view
+         */
         public BoxItemViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
@@ -455,6 +485,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             }
         }
 
+        /**
+         * Bind item.
+         *
+         * @param item the item
+         */
         public void bindItem(BoxItem item) {
             onBindBoxItemViewHolder(this, item);
             mItem = item;
@@ -470,8 +505,8 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
          * a custom BoxBrowseFolder fragment can be returned in
          * {@link BoxBrowseActivity#createBrowseFolderFragment(BoxItem, BoxSession)}
          *
-         * @param holder the BoxItemHolder
-         * @param itemToBind
+         * @param holder     the BoxItemHolder
+         * @param itemToBind the item to bind
          */
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
             if (itemToBind == null) {
@@ -584,35 +619,75 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
             return textSize;
         }
 
+        /**
+         * Gets check box from the view represented by this view holder
+         *
+         * @return the check box
+         */
         public AppCompatCheckBox getCheckBox() {
             return mItemCheckBox;
         }
 
+        /**
+         * Gets secondary action view from the view represented by this view holder
+         *
+         * @return the secondary action
+         */
         public ImageButton getSecondaryAction() {
             return mSecondaryAction;
         }
 
 
+        /**
+         * Gets the box item which is displayed by this viewholder
+         *
+         * @return the item
+         */
         public BoxItem getItem() {
             return mItem;
         }
 
+        /**
+         * Gets progress bar.
+         *
+         * @return the progress bar
+         */
         public ProgressBar getProgressBar() {
             return mProgressBar;
         }
 
+        /**
+         * Gets meta description view
+         *
+         * @return the meta description
+         */
         public TextView getMetaDescription() {
             return mMetaDescription;
         }
 
+        /**
+         * Gets name view.
+         *
+         * @return the name view
+         */
         public TextView getNameView() {
             return mNameView;
         }
 
+        /**
+         * Gets thumbnail view.
+         *
+         * @return the thumb view
+         */
         public ImageView getThumbView() {
             return mThumbView;
         }
 
+        /**
+         * Gets the root view represented by this view holder
+         *
+         * @return the view
+         */
         public View getView() {
             return mView;
         }
@@ -655,6 +730,11 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         protected BoxItem mItem;
 
+        /**
+         * Sets list item.
+         *
+         * @param item the item
+         */
         void setListItem(BoxItem item) {
             mItem = item;
         }
@@ -665,10 +745,36 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         }
     }
 
+    /**
+     * The interface On interaction listener.
+     */
     public interface OnInteractionListener {
+        /**
+         * returns the MultiSelectHandler set on BrowseFragment.
+         *
+         * @return the multi select handler
+         */
         BoxBrowseFragment.MultiSelectHandler getMultiSelectHandler();
+
+        /**
+         * Gets on secondary action listener set on BrowseFragment.
+         *
+         * @return the on secondary action listener
+         */
         BoxBrowseFragment.OnSecondaryActionListener getOnSecondaryActionListener();
+
+        /**
+         * Gets on item click listener set on BrowseFragment.
+         *
+         * @return the on item click listener
+         */
         BoxBrowseFragment.OnItemClickListener getOnItemClickListener();
+
+        /**
+         * Gets item filter
+         *
+         * @return the item filter
+         */
         BoxItemFilter getItemFilter();
 
     }
