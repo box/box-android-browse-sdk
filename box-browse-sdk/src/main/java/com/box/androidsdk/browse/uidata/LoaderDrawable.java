@@ -74,7 +74,7 @@ public class LoaderDrawable extends BitmapDrawable {
     }
 
     /**
-     * The type Thumbnail task.
+     * This class is a BoxFutureTask used for downloading thumbnails.
      */
     static class ThumbnailTask extends BoxFutureTask<BoxDownload> {
 
@@ -171,7 +171,7 @@ public class LoaderDrawable extends BitmapDrawable {
 
 
     /**
-     * The interface Image ready listener.
+     * Callback interface for signifying that the thumbnail has been loaded into the imageview.
      */
     public interface ImageReadyListener {
 

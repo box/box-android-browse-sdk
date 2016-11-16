@@ -22,7 +22,7 @@ import com.box.androidsdk.browse.models.BoxSearchFilters;
 import java.util.HashMap;
 
 /**
- * The type Box filter search results fragment.
+ * This Fragment allows users to set filters on search parameters.
  */
 public class BoxFilterSearchResultsFragment extends Fragment {
     private static String EXTRA_FILTERS = "extraFilters";

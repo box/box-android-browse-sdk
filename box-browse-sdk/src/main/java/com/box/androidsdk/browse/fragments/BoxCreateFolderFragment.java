@@ -18,7 +18,7 @@ import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.utils.SdkUtils;
 
 /**
- * The type Box create folder fragment.
+ * A dialog fragment shown when user creates a new box folder
  */
 public class BoxCreateFolderFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
