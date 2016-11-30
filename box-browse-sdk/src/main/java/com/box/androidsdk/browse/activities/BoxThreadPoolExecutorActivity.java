@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Base class for all activities that make API requests through the Box Content SDK. This class is responsible for
  * showing a loading spinner while a request is executing and then hiding it when the request is complete.
- * <p/>
  * All BoxRequest tasks should be submitted to getApiExecutor and then handled by overriding handleBoxResponse
  */
 public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
