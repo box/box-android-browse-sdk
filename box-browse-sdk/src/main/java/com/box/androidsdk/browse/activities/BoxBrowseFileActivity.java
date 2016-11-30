@@ -7,19 +7,20 @@ import android.os.Bundle;
 import android.view.Menu;
 
 import com.box.androidsdk.browse.R;
-import com.box.androidsdk.browse.uidata.BoxSearchView;
 import com.box.androidsdk.content.models.BoxBookmark;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
-import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.utils.SdkUtils;
+import com.eclipsesource.json.JsonObject;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
-public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearchView.OnBoxSearchListener{
+/**
+ * This activity is launched to navigate to a boxfile
+ */
+public class BoxBrowseFileActivity extends BoxBrowseActivity {
     /**
      * Extra serializable intent parameter that adds a {@link com.box.androidsdk.content.models.BoxFile} to the intent
      */
@@ -36,35 +37,26 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.box_browsesdk_activity_file);
-        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
-            onBoxItemSelected(mItem);
-        }
         initToolbar();
+        initRecentSearches();
+        if (getSupportFragmentManager().getBackStackEntryCount() < 1){
+            onItemClick(mItem);
+            getSupportActionBar().setTitle(mItem.getName());
+        }
+
     }
 
     @Override
-    public boolean handleOnItemClick(BoxItem item) {
+    public void onItemClick(BoxItem item) {
+        super.onItemClick(item);
         if (item instanceof BoxFile || item instanceof BoxBookmark) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_BOX_FILE, item);
             setResult(Activity.RESULT_OK, intent);
             finish();
-            return false;
-        }
-        else {
-            onBoxItemSelected(item);
-            return false;
         }
     }
 
-
-    @Override
-    public void onBoxItemSelected(BoxItem boxItem) {
-        super.onBoxItemSelected(boxItem);
-        if (!(boxItem instanceof BoxFolder)) {
-            handleOnItemClick(boxItem);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,17 +64,6 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
         getMenuInflater().inflate(R.menu.box_browsesdk_menu_file, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Override
-    public BoxRequestsSearch.Search onSearchRequested(BoxRequestsSearch.Search searchRequest) {
-        if(getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER) != null){
-            ArrayList<String> list = getIntent().getStringArrayListExtra(EXTRA_BOX_EXTENSION_FILTER);
-            String[] extensions =  list.toArray(new String[list.size()]);
-            searchRequest.limitFileExtensions(extensions);
-        }
-        return super.onSearchRequested(searchRequest);
-    }
-
 
     /**
      * Create an intent to launch an instance of this activity to browse folders.
@@ -107,6 +88,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
 
     /**
      * Create a builder object that can be used to construct an intent to launch an instance of this activity.
+     *
      * @param context current context.
      * @param session a session, should be already authenticated.
      * @return a builder object to use to construct an instance of this class.
@@ -116,14 +98,29 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
     }
 
 
+    /**
+     * The type Intent builder.
+     */
     public static class IntentBuilder extends BoxBrowseActivity.IntentBuilder<IntentBuilder>{
 
         ArrayList<String> mAllowedExtensions;
 
+        /**
+         * Instantiates a new Intent builder.
+         *
+         * @param context the context
+         * @param session the session
+         */
         protected IntentBuilder(final Context context, final BoxSession session){
             super(context, session);
         }
 
+        /**
+         * Sets a list of allowed extensions to filter files by.
+         *
+         * @param allowedExtensions extension of files which should be shown while browsing.
+         * @return the intent builder
+         */
         public IntentBuilder setAllowedExtensions(final ArrayList<String> allowedExtensions){
             mAllowedExtensions = allowedExtensions;
             return this;
@@ -166,6 +163,7 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
      * Create an intent to launch an instance of this activity to navigate folders. This version will immediately show the given name in the navigation spinner
      * to before information about it has been fetched from the server.
      * This method is deprecated use the createIntentBuilder instead.
+     *
      * @param context    current context.
      * @param folderName Name to show in the navigation spinner. Should be name of the folder.
      * @param folderId   folder id to navigate.
@@ -174,16 +172,16 @@ public class BoxBrowseFileActivity extends BoxBrowseActivity implements BoxSearc
      */
     @Deprecated
     public static Intent getLaunchIntent(Context context, final String folderName, final String folderId, final BoxSession session) {
-        LinkedHashMap<String, Object> folderMap = new LinkedHashMap<String, Object>();
-        folderMap.put(BoxItem.FIELD_ID, folderId);
-        folderMap.put(BoxItem.FIELD_TYPE, BoxFolder.TYPE);
-        folderMap.put(BoxItem.FIELD_NAME, folderName);
-        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(folderMap)).createIntent();
+        BoxFolder folder = BoxFolder.createFromId(folderId);
+        JsonObject jsonObject = folder.toJsonObject().add(BoxItem.FIELD_NAME, folderName);
+
+        return createIntentBuilder(context,session).setStartingFolder(new BoxFolder(jsonObject)).createIntent();
     }
 
     /**
      * Create an intent to launch an instance of this activity to navigate folders. This version will disable all files with extension types not included in the extensions list.
      * This method is deprecated use the createIntentBuilder instead.
+     *
      * @param context           current context.
      * @param folderId          folder id to navigate.
      * @param allowedExtensions extension types to enable.

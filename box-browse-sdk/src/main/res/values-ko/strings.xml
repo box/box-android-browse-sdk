@@ -1,24 +1,59 @@
+<?xml version="1.0" encoding="null"?>
 <resources>
-    <string name="box_browsesdk_title" description="Default title for the Browse SDK">찾아보기</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">찾아보기</string>
     <string name="box_browsesdk_problem_fetching_folder">폴더를 가져오는 데 문제가 발생했습니다.</string>
     <string name="box_browsesdk_problem_performing_search">검색을 수행하는 데 문제가 발생했습니다.</string>
-    <string name="box_browsesdk_cannot_view_folder" description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available">이 폴더의 항목을 볼 수 없습니다.</string>
-    <string name="box_browsesdk_network_error" description="Toast message that indicates that an error occurred while performing an action">네트워크 오류입니다. 다시 시도하십시오.</string>
-    <string name="box_browsesdk_session_is_not_authenticated" description="Toast message that indicates that the provided authentication session is not valid">세션이 인증되지 않음</string>
-    <string name="box_browsesdk_no_item_selected" description="Toast message that indicates that an invalid item was provided to browse on">선택한 항목 없음</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">이 폴더의 항목을 볼 수 없습니다.</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">네트워크 오류입니다. 다시 시도하십시오.</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">세션이 인증되지 않았습니다.</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">선택한 항목 없음</string>
 
-    <string name="box_browsesdk_all_files" description="Title shown for the parent folder when it is at the root level">모든 파일</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">모든 파일</string>
 
-    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">설정</string>
-    <string name="box_browsesdk_action_search" description="Accessibility title for the search menu action in the toolbar">검색</string>
-    <string name="box_browsesdk_create_folder" description="Accessibility title for the create folder menu action in the toolbar">폴더 생성</string>
-    <string name="box_browsesdk_select_folder" description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned">이 폴더 선택</string>
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">설정</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">검색</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">폴더 만들기</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">이 폴더 선택</string>
     <string name="box_browsesdk_dialog_ok">확인</string>
     <string name="box_browsesdk_dialog_cancel">취소</string>
 
     <string name="box_browsesdk_create_folder_conflict">이 이름의 폴더가 이미 생성되었습니다.</string>
     <string name="box_browsesdk_error_retrieving_items">항목 검색 중 오류 발생</string>
-    <string name="box_browsesdk_tap_to_retry">다시 시도하려면 누르십시오</string>
+    <string name="box_browsesdk_tap_to_retry">다시 시도하려면 누르십시오.</string>
     <string name="box_browsesdk_performing_search">검색 수행 중…</string>
     <string name="box_browsesdk_see_additional_results">추가 결과 보기</string>
+    <string name="box_browsesdk_search_hint">검색</string>
+    <string name="box_browsesdk_recent_searches_header">최근 검색</string>
+    <string name="box_browsesdk_search_results_header"><![CDATA[<b>%1$s</b>]]>의 결과</string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s에서 검색</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">결과 필터링</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">검색 결과 구체화</string>
+    <string description="label for apply button in refine search results activity" name="apply">적용</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">필터 지우기</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">파일 유형</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">스프레드시트</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">프레젠테이션</string>
+    <string description="File type to search for" name="search_filter_file_type_image">이미지</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">폴더</string>
+    <string description="File type to search for" name="search_filter_file_type_document">문서</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">비디오</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">오디오</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">더 보기...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">수정한 날짜</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">항상</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">어제</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">지난 주</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">지난 달</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">지난 해</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">크기</string>
+    <string name="item_size_any">모든 크기</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0 - 1MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1 - 5MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1 - 25MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25 - 100MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100MB - 1GB</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,</string>
 </resources>

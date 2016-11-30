@@ -17,6 +17,9 @@ import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.utils.SdkUtils;
 
+/**
+ * A dialog fragment shown when user creates a new box folder
+ */
 public class BoxCreateFolderFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
     public static final String ARGS_USER_ID = "argsUserId";
@@ -88,6 +91,13 @@ public class BoxCreateFolderFragment extends DialogFragment implements DialogInt
         }
     }
 
+    /**
+     * New instance box create folder fragment.
+     *
+     * @param folder  the folder
+     * @param session an authenticated session
+     * @return the box create folder fragment
+     */
     public static BoxCreateFolderFragment newInstance(BoxFolder folder, BoxSession session) {
         if (folder == null || SdkUtils.isBlank(folder.getId()))
             throw new IllegalArgumentException("A valid folder must be provided to browse");
@@ -102,7 +112,15 @@ public class BoxCreateFolderFragment extends DialogFragment implements DialogInt
         return createFolderDialog;
     }
 
+    /**
+     * The interface On create folder listener.
+     */
     public interface OnCreateFolderListener {
+        /**
+         * On create folder.
+         *
+         * @param name the name
+         */
         void onCreateFolder(String name);
     }
 }

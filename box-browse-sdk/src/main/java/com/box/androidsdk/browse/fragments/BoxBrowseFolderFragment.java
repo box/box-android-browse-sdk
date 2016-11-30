@@ -1,261 +1,174 @@
 package com.box.androidsdk.browse.fragments;
 
-import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
+import android.view.View;
 
-import com.box.androidsdk.browse.R;
-import com.box.androidsdk.content.BoxApiFolder;
-import com.box.androidsdk.content.BoxException;
-import com.box.androidsdk.content.models.BoxFile;
+import com.box.androidsdk.browse.service.BoxResponseIntent;
 import com.box.androidsdk.content.models.BoxFolder;
-import com.box.androidsdk.content.models.BoxItem;
-import com.box.androidsdk.content.models.BoxListItems;
+import com.box.androidsdk.content.models.BoxIterator;
+import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
-
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
 
 /**
- * Use the {@link BoxBrowseFolderFragment#newInstance} factory method to
+ * Fragment to browse a box folder
+ *
+ * Use the {@link Builder#build()} to
  * create an instance of this fragment.
  */
 public class BoxBrowseFolderFragment extends BoxBrowseFragment {
 
+    public static final String ARG_FOLDER = "BoxBrowseFolderFragment.Folder";
     protected BoxFolder mFolder = null;
-    private static final String OUT_ITEM = "outItem";
 
-    protected String mFolderId;
-    protected String mFolderName;
-
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folder  the folder to browse
-     * @param session the session that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(BoxFolder folder, BoxSession session) {
-        return newInstance(folder.getId(), session.getUserId(), folder.getName(), DEFAULT_LIMIT);
-    }
-
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folderId the id of the folder to browse
-     * @param userId   the id of the user that the contents will be loaded for
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(String folderId, String userId) {
-        return newInstance(folderId, userId, null, DEFAULT_LIMIT);
+    @Override
+    protected IntentFilter getIntentFilter() {
+        IntentFilter filter = super.getIntentFilter();
+        filter.addAction(BoxRequestsFolder.GetFolderWithAllItems.class.getName());
+        return filter;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null){
-            mFolder = (BoxFolder)savedInstanceState.getSerializable(OUT_ITEM);
-        }
-        if (getArguments() != null) {
-            mFolderId = getArguments().getString(ARG_ID);
-            mFolderName = getArguments().getString(ARG_NAME);
-            if (mFolder == null){
-                mFolder = BoxFolder.createFromId(mFolderId);
-            }
-
-            if (SdkUtils.isBlank(mFolderId) || SdkUtils.isBlank(mUserId)) {
-                Toast.makeText(getActivity(), R.string.box_browsesdk_cannot_view_folder, Toast.LENGTH_LONG).show();
-                // TODO: Call error handler
+        if (savedInstanceState != null) {
+            mFolder = (BoxFolder) savedInstanceState.getSerializable(ARG_FOLDER);
+        } else if (getArguments() != null) {
+            String folderId = getArguments().getString(ARG_ID);
+            String folderName = getArguments().getString(ARG_NAME);
+            if (mFolder == null && !SdkUtils.isBlank(folderId)) {
+                mFolder = BoxFolder.createFromIdAndName(folderId, folderName);
             }
         }
     }
 
     @Override
-    public void onResume() {
-        if (getArguments() != null){
-            String folderName = getArguments().getString(ARG_NAME);
-            setToolbar(folderName);
+    protected void handleResponse(BoxResponseIntent intent) {
+        super.handleResponse(intent);
+        if (!intent.isSuccess()) {
+            checkConnectivity();
+            return;
         }
-        super.onResume();
+        if (intent.getAction().equals(BoxRequestsFolder.GetFolderWithAllItems.class.getName())) {
+            onFolderFetched((BoxFolder) intent.getResult());
+            if (mSwipeRefresh != null) {
+                mSwipeRefresh.setRefreshing(false);
+            }
+        }
+    }
+
+    @Override
+    protected void loadItems() {
+        mProgress.setVisibility(View.VISIBLE);
+        getController().execute(getController().getFolderWithAllItems(mFolder.getId()));
     }
 
     /**
+     * Gets the BoxFolder being displayed by this fragment
      *
      * @return the current folder this fragment is meant to display.
      */
-    public BoxFolder getFolder(){
+    public BoxFolder getFolder() {
         return mFolder;
-    }
-
-
-    /**
-     * Use this factory method to create a new instance of the Browse fragment
-     * with default configurations
-     *
-     * @param folderId   the id of the folder to browse
-     * @param userId     the id of the user that the contents will be loaded for
-     * @param folderName the name of the folder that will be shown in the action bar
-     * @param limit the number of items that the results will be limited to when retrieving folder items
-     * @return A new instance of fragment BoxBrowseFragment.
-     */
-    public static BoxBrowseFolderFragment newInstance(String folderId, String userId, String folderName, int limit) {
-        BoxBrowseFolderFragment fragment = new BoxBrowseFolderFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_ID, folderId);
-        args.putString(ARG_USER_ID, userId);
-        args.putString(ARG_NAME, folderName);
-        args.putInt(ARG_LIMIT, limit);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public FutureTask<Intent> fetchInfo() {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_FETCHED_INFO);
-                intent.putExtra(EXTRA_ID, mFolderId);
-                intent.putExtra(EXTRA_LIMIT, mLimit);
-                try {
-                    BoxRequestsFolder.GetFolderInfo req = new BoxApiFolder(mSession).getInfoRequest(mFolderId)
-                            // TODO: Should clean-up to only include required fields
-                            .setFields(BoxFolder.ALL_FIELDS)
-                            .setLimit(mLimit);
-                    BoxFolder bf = req.send();
-                    if (bf != null) {
-                        intent.putExtra(EXTRA_SUCCESS, true);
-                        intent.putExtra(EXTRA_FOLDER, bf);
-                        intent.putExtra(EXTRA_COLLECTION, bf.getItemCollection());
-                    }
-
-                } catch (BoxException e) {
-                    e.printStackTrace();
-                    intent.putExtra(EXTRA_SUCCESS, false);
-                } finally {
-                    mLocalBroadcastManager.sendBroadcast(intent);
-                }
-
-                return intent;
-            }
-        });
-    }
-
-
-
-    public FutureTask<Intent> fetchItems(final int offset, final int limit) {
-        return new FutureTask<Intent>(new Callable<Intent>() {
-
-            @Override
-            public Intent call() throws Exception {
-                Intent intent = new Intent();
-                intent.setAction(ACTION_FETCHED_ITEMS);
-                intent.putExtra(EXTRA_OFFSET, offset);
-                intent.putExtra(EXTRA_LIMIT, limit);
-                intent.putExtra(EXTRA_ID, mFolderId);
-                try {
-
-                    // this call the collection is just BoxObjectItems and each does not appear to be an instance of BoxItem.
-                    ArrayList<String> itemFields = new ArrayList<String>();
-                    String[] fields = new String[]{BoxFile.FIELD_NAME, BoxFile.FIELD_SIZE, BoxFile.FIELD_OWNED_BY, BoxFolder.FIELD_HAS_COLLABORATIONS, BoxFolder.FIELD_IS_EXTERNALLY_OWNED, BoxFolder.FIELD_PARENT};
-                    BoxApiFolder api = new BoxApiFolder(mSession);
-                    BoxListItems items = api.getItemsRequest(mFolderId).setLimit(limit).setOffset(offset).setFields(fields).send();
-                    intent.putExtra(EXTRA_SUCCESS, true);
-                    intent.putExtra(EXTRA_COLLECTION, items);
-                } catch (BoxException e) {
-                    e.printStackTrace();
-                    intent.putExtra(EXTRA_SUCCESS, false);
-                } finally {
-                    mLocalBroadcastManager.sendBroadcast(intent);
-                }
-
-                return intent;
-            }
-        });
-    }
-
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            mFolder = (BoxFolder) savedInstanceState.getSerializable(OUT_ITEM);
-            if (mFolder != null && mFolder.getItemCollection() != null) {
-                mAdapter.addAll(mFolder.getItemCollection());
-                mAdapter.notifyDataSetChanged();
-            }
-        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(OUT_ITEM, mFolder);
+        outState.putSerializable(ARG_FOLDER, mFolder);
         super.onSaveInstanceState(outState);
     }
 
-
-    protected void onItemsFetched(Intent intent) {
-        FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
-            checkConnectivity();
-            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        mAdapter.remove(intent.getAction());
-        if (mFolderId.equals(intent.getStringExtra(EXTRA_ID))) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
-            super.onItemsFetched(intent);
+    /**
+     * On folder fetched.
+     *
+     * @param folder that has been fetched
+     */
+    protected void onFolderFetched(BoxFolder folder) {
+        if (folder != null && mFolder.getId().equals(folder.getId())) {
+            BoxIteratorItems items = folder.getItemCollection();
+            if (items != null && items.getEntries() != null && items.fullSize() != null && (items.size() > 0 || items.fullSize() == 0)) {
+                updateItems(folder.getItemCollection().getEntries());
+            }
+            mFolder = createFolderWithoutItems(folder);
+            notifyUpdateListeners();
         }
     }
 
 
-    protected void onInfoFetched(Intent intent) {
-        FragmentActivity activity = getActivity();
-        if (activity == null || mAdapter == null) {
-            return;
-        }
-
-        if (!intent.getBooleanExtra(EXTRA_SUCCESS, false)) {
-            checkConnectivity();
-            Toast.makeText(getActivity(), getResources().getString(R.string.box_browsesdk_problem_fetching_folder), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (mFolderId.equals(intent.getStringExtra(EXTRA_ID))) {
-            mFolder = (BoxFolder)intent.getSerializableExtra(EXTRA_FOLDER);
-            if (mFolder != null && mFolder.getName() != null) {
-                getArguments().putString(ARG_NAME, mFolder.getName());
-                this.setToolbar(mFolder.getName());
+    /**
+     * Convenience method that returns a folder object without its item collection. This is done to ensure
+     * a single source of truth for the item collection
+     *
+     * @param folder the folder which may contain items
+     * @return box folder without any items
+     */
+    protected BoxFolder createFolderWithoutItems(BoxFolder folder) {
+        JsonObject jsonObject = new JsonObject();
+        for (String key: folder.getPropertiesKeySet()){
+            if (!key.equals(BoxFolder.FIELD_ITEM_COLLECTION)){
+                jsonObject.add(key, folder.getPropertyValue(key));
+            } else {
+                JsonObject itemCollection = new JsonObject();
+                BoxIteratorItems iteratorItems = folder.getItemCollection();
+                for (String collectionKey : iteratorItems.getPropertiesKeySet()){
+                    if (!collectionKey.equals(BoxIterator.FIELD_ENTRIES)) {
+                        itemCollection.add(collectionKey, iteratorItems.getPropertyValue(collectionKey));
+                    } else {
+                        itemCollection.add(collectionKey, new JsonArray());
+                    }
+                }
+                jsonObject.add(key, itemCollection);
             }
-            super.onInfoFetched(intent);
         }
+        return new BoxFolder(jsonObject);
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an item being tapped to be communicated to the activity
+     * Builder for constructing an instance of BoxBrowseFolderFragment
      */
-    public interface OnFragmentInteractionListener extends BoxBrowseFragment.OnFragmentInteractionListener{
+    public static class Builder extends BoxBrowseFragment.Builder<BoxBrowseFolderFragment> {
 
         /**
-         * Called whenever an item in the RecyclerView is tapped
+         * Instantiates a new Builder.
          *
-         * @param item the item that was tapped
-         * @return whether the tap event should continue to be handled by the fragment
+         * @param folderId id of the folder to browse
+         * @param userId   id of the user that the contents will be loaded for
          */
-        boolean handleOnItemClick(BoxItem item);
+        public Builder(String folderId, String userId) {
+            mArgs.putString(ARG_ID, folderId);
+            mArgs.putString(ARG_USER_ID, userId);
+
+        }
+
+        /**
+         * Instantiates a new Builder.
+         *
+         * @param folder  the BoxFolder to Browse
+         * @param session the session that the contents will be loaded for
+         */
+        public Builder(BoxFolder folder, BoxSession session) {
+            mArgs.putString(ARG_ID, folder.getId());
+            mArgs.putString(ARG_NAME, folder.getName());
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+        }
+
+        /**
+         * Set the name of the folder that will be shown as title in the toolbar
+         *
+         * @param folderName
+         */
+        public void setFolderName(String folderName) {
+            mArgs.putString(ARG_NAME, folderName);
+        }
+
+        @Override
+        protected BoxBrowseFolderFragment getInstance() {
+            return new BoxBrowseFolderFragment();
+        }
     }
 
 }
