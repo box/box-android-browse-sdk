@@ -346,11 +346,9 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
 
         final Lock lock = mLock.writeLock();
         lock.lock();
-        final int startingSize = mItems.size();
         mItems.addAll(items);
-        final int endingSize = mItems.size();
         try {
-            notifyItemRangeInserted(startingSize - 1, endingSize - 1);
+            notifyDataSetChanged();
         }finally{
             lock.unlock();
         }
