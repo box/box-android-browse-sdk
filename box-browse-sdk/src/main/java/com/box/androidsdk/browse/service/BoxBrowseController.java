@@ -128,7 +128,7 @@ public class BoxBrowseController implements BrowseController {
             thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
         }
         try {
-            return mFileApi.getDownloadThumbnailRequest(downloadFile, fileId)
+            return mFileApi.getDownloadThumbnailRequest(downloadFile, fileId, false)
                     .setMinWidth(thumbSize)
                     .setMinHeight(thumbSize);
         } catch (IOException e) {
