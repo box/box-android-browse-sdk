@@ -341,8 +341,11 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
             return;
         }
         if (view.getMeasuredWidth() > 0 && view.getMeasuredHeight() > 0){
-            mController.getThumbnailCache().put(bitmapSourceFile, ThumbnailUtils.extractThumbnail(bitmap, view.getMeasuredWidth(), view.getMeasuredHeight()));
-            bitmap.recycle();
+            Bitmap resizedBitmap =  ThumbnailUtils.extractThumbnail(bitmap, view.getMeasuredWidth(), view.getMeasuredHeight());
+            mController.getThumbnailCache().put(bitmapSourceFile, resizedBitmap);
+            if (resizedBitmap != bitmap){
+                bitmap.recycle();
+            }
         } else {
             postLaterToView(bitmapSourceFile, request, bitmap, view);
             return;
