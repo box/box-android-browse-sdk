@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="null"?>
 <resources>
     <string description="Default title for the Browse SDK" name="box_browsesdk_title">استعراض</string>
     <string name="box_browsesdk_problem_fetching_folder">حدثت مشكلة في إحضار المجلد.</string>
@@ -24,7 +23,7 @@
     <string name="box_browsesdk_see_additional_results">عرض نتائج إضافية</string>
     <string name="box_browsesdk_search_hint">بحث</string>
     <string name="box_browsesdk_recent_searches_header">عمليات البحث الأخيرة</string>
-    <string name="box_browsesdk_search_results_header">النتائج في <![CDATA[<b>%1$s</b>]]></string>
+    <string name="box_browsesdk_search_results_header">النتائج في &lt;b>%1$s&lt;/b></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">البحث في %1$s</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">تصفية النتائج</string>
