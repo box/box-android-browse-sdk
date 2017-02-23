@@ -405,6 +405,8 @@ public abstract class BoxBrowseActivity extends BoxThreadPoolExecutorActivity im
     @Override
     public void onBackStackChanged() {
         invalidateOptionsMenu();
+        // Update title while navigating folders.
+        setTitle(getCurrentFolder());
     }
 
     /**

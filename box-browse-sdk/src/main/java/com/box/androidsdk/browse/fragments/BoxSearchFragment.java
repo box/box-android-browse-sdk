@@ -121,7 +121,23 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             }
         });
         setupSearchFiltersHeader();
+        // Select folder button shall be disabled during search
+        updateSelectFolderButtonState(false);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Restore select folder button
+        updateSelectFolderButtonState(true);
+    }
+
+    private void updateSelectFolderButtonState(boolean enabled) {
+        View selectFolderButton = getActivity().findViewById(R.id.box_browsesdk_select_folder_button);
+        if(selectFolderButton != null) {
+            selectFolderButton.setEnabled(enabled);
+        }
     }
 
     @Override
