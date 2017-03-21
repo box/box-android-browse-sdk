@@ -15,7 +15,7 @@ Maven:
 <dependency>
     <groupId>com.box</groupId>
     <artifactId>box-android-browse-sdk</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -73,7 +73,7 @@ To receive the result from the file picker after you picked a folder, implement 
 
 Sample App
 --------------
-A sample app can be found in the [box-share-sample](https://github.com/box/box-android-share-sdk) folder.
+A sample app can be found in the [box-browse-sample](https://github.com/box/box-android-browse-sdk/tree/master/box-browse-sample) folder.
 
 Copyright and License
 --------------
