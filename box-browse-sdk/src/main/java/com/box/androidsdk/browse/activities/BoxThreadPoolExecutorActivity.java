@@ -17,9 +17,11 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
+import com.box.androidsdk.content.BoxConfig;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.auth.BoxAuthentication;
 import com.box.androidsdk.content.models.BoxItem;
@@ -72,6 +74,9 @@ public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (BoxConfig.IS_FLAG_SECURE){
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         mDialogHandler = new LastRunnableHandler();
         String userId = null;
         if (savedInstanceState != null && savedInstanceState.getSerializable(EXTRA_ITEM) != null){
