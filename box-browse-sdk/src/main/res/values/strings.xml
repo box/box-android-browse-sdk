@@ -55,4 +55,14 @@
     <string name="item_size_25_to_100" description="Label for setting to search for files with size in given range">25-100 MB</string>
     <string name="item_size_100_to_1000" description="Label for setting to search for files with size in given range">100 MB - 1 GB</string>
     <string name="search_filter_label_delimiter" desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter">,&#160;</string>
+
+    <string name="box_browsesdk_0_byte" description="">0 bytes</string>
+    <string name="box_browsesdk_bytes" description="abbreviation for bytes">B</string>
+    <string name="box_browsesdk_kilobytes" description="a binary kiloabyte  1024 bytes">KB</string>
+    <string name="box_browsesdk_megabytes" description="a binary megabyte  1024 * 1024 bytes">MB</string>
+    <string name="box_browsesdk_gigabytes" description="a binary gigaabyte  1024 * 1024 bytes">GB</string>
+
+
+
+
 </resources>
