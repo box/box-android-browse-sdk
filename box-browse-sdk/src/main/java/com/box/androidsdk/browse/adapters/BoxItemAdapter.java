@@ -56,6 +56,12 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
     static final int DELAY = 50;
 
 
+    protected String SIZE_0_BYTES = "0 bytes";
+    protected String SIZE_BYTES = "B";
+    protected String SIZE_KILOBYTES = "KB";
+    protected String SIZE_MEGABYTES = "MB";
+    protected String SIZE_GIGABYTES = "GB";
+
     /**
      * Instantiates a new Box item adapter.
      *
@@ -68,6 +74,15 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
         mController = controller;
         mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
+
+        if (mContext != null) {
+            SIZE_0_BYTES = mContext.getResources().getString(R.string.box_browsesdk_0_byte);
+            SIZE_BYTES = mContext.getResources().getString(R.string.box_browsesdk_bytes);
+            SIZE_KILOBYTES = mContext.getResources().getString(R.string.box_browsesdk_kilobytes);
+            SIZE_MEGABYTES = mContext.getResources().getString(R.string.box_browsesdk_megabytes);
+            SIZE_GIGABYTES = mContext.getResources().getString(R.string.box_browsesdk_gigabytes);
+        }
+
     }
 
 
@@ -591,31 +606,36 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
          * @return String Short human readable String e.g. 2.5 MB
          */
         private String localFileSizeToDisplay(final double numSize) {
+            if (numSize == 0){
+                return SIZE_0_BYTES;
+            }
             final int constKB = 1024;
             final int constMB = constKB * constKB;
             final int constGB = constMB * constKB;
             final double floatKB = 1024.0f;
             final double floatMB = floatKB * floatKB;
             final double floatGB = floatMB * floatKB;
-            final String BYTES = "B";
-            String textSize = "0 bytes";
+            String textSize = SIZE_0_BYTES;
             String strSize = Double.toString(numSize);
             double size;
 
             if (numSize < constKB) {
-                textSize = strSize + " " + BYTES;
+                textSize = strSize + " " + SIZE_BYTES;
             } else if ((numSize >= constKB) && (numSize < constMB)) {
                 size = numSize / floatKB;
-                textSize = String.format(Locale.getDefault(), "%4.1f KB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f ", size) + SIZE_KILOBYTES;
             } else if ((numSize >= constMB) && (numSize < constGB)) {
                 size = numSize / floatMB;
-                textSize = String.format(Locale.getDefault(), "%4.1f MB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f ", size) + SIZE_MEGABYTES;
             } else if (numSize >= constGB) {
                 size = numSize / floatGB;
-                textSize = String.format(Locale.getDefault(), "%4.1f GB", size);
+                textSize = String.format(Locale.getDefault(), "%4.1f ", size) + SIZE_GIGABYTES;
             }
             return textSize;
         }
+
+
+
 
         /**
          * Gets check box from the view represented by this view holder
