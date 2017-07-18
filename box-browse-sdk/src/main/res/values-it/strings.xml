@@ -43,7 +43,7 @@
     <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Vedi altro...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Data di modifica</string>
     <string description="Label for setting to search for files modified at any time" name="any_time">In qualsiasi momento</string>
-    <string description="Label for setting to search for files modified in last day" name="past_day">Il giorno passato</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Ieri</string>
     <string description="Label for setting to search for files modified in last week" name="past_week">La settimana scorsa</string>
     <string description="Label for setting to search for files modified in last month" name="past_month">Il mese scorso</string>
     <string description="Label for setting to search for files modified in last year" name="past_year">Nell\'ultimo anno</string>

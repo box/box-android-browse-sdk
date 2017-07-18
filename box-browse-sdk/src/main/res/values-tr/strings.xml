@@ -1,6 +1,6 @@
 <resources>
     <string description="Default title for the Browse SDK" name="box_browsesdk_title">Tara</string>
-    <string name="box_browsesdk_problem_fetching_folder">Dosya getirilirken sorun meydana geldi.</string>
+    <string name="box_browsesdk_problem_fetching_folder">Klasör getirilirken bir sorun oluştu.</string>
     <string name="box_browsesdk_problem_performing_search">Arama yapılırken sorun meydana geldi.</string>
     <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">Bu klasördeki öğeleri görüntüleyemezsiniz.</string>
     <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Ağ hatası. Lütfen tekrar deneyin.</string>
@@ -14,7 +14,7 @@
     <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Klasör Oluştur</string>
     <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Bu klasörü seç</string>
     <string name="box_browsesdk_dialog_ok">Tamam</string>
-    <string name="box_browsesdk_dialog_cancel">İPTAL ET</string>
+    <string name="box_browsesdk_dialog_cancel">İPTAL</string>
 
     <string name="box_browsesdk_create_folder_conflict">Bu ada sahip klasör zaten mevcut.</string>
     <string name="box_browsesdk_error_retrieving_items">Öğeleri getirirken hata meydana geldi</string>
@@ -53,6 +53,6 @@
     <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1-5 MB</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1-25 MB</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25-100 MB</string>
-    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB - 1 GB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB-1 GB</string>
     <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,</string>
 </resources>

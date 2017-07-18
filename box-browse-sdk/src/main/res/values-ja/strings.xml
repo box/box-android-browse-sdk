@@ -26,10 +26,10 @@
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b>の結果</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s内の検索</string>
-    <string description="Label for button that launches screen to filter search results" name="filter_results_header">フィルタ結果</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">検索結果にフィルタを適用</string>
     <string description="Header text for refine search results activity" name="filter_search_results">検索結果の絞り込み</string>
     <string description="label for apply button in refine search results activity" name="apply">適用</string>
-    <string description="label for clear filters button in refine search results activity" name="clear_filters">フィルタのクリア</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">フィルタをクリア</string>
     <string description="Header for section that let you select file types to search for" name="file_type_label">ファイルの種類</string>
     <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
     <string description="File type to search for" name="search_filter_file_type_spreadsheet">スプレッドシート</string>
@@ -53,6 +53,6 @@
     <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1~5 MB</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1~25 MB</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25~100 MB</string>
-    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100MB~1GB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB~1 GB</string>
     <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,</string>
 </resources>
