@@ -43,10 +43,10 @@
     <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Se mer ...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Datoen ble endret</string>
     <string description="Label for setting to search for files modified at any time" name="any_time">Når som helst</string>
-    <string description="Label for setting to search for files modified in last day" name="past_day">I går</string>
-    <string description="Label for setting to search for files modified in last week" name="past_week">Forrige uke</string>
-    <string description="Label for setting to search for files modified in last month" name="past_month">Forrige måned</string>
-    <string description="Label for setting to search for files modified in last year" name="past_year">I fjor</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Den siste dagen</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">Den siste uken</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">Den siste måneden</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">Det siste året</string>
     <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">Størrelse</string>
     <string name="item_size_any">Hvilken som helst størrelse</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0–1 MB</string>

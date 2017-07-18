@@ -43,7 +43,7 @@
     <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Se mere...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Modificeringsdato</string>
     <string description="Label for setting to search for files modified at any time" name="any_time">Ethvert tidspunkt</string>
-    <string description="Label for setting to search for files modified in last day" name="past_day">Sidste dag</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Seneste døgn</string>
     <string description="Label for setting to search for files modified in last week" name="past_week">Sidste uge</string>
     <string description="Label for setting to search for files modified in last month" name="past_month">Sidste måned</string>
     <string description="Label for setting to search for files modified in last year" name="past_year">Sidste år</string>
