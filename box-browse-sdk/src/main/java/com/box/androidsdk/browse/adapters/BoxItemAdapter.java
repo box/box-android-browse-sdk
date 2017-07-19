@@ -22,6 +22,7 @@ import com.box.androidsdk.browse.service.BrowseController;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
+import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -535,7 +536,7 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                         DateFormat.getDateInstance(DateFormat.MEDIUM).format(itemToBind.getModifiedAt()) :
                         "";
                 String size = itemToBind.getSize() != null ?
-                        localFileSizeToDisplay(itemToBind.getSize()) :
+                        SdkUtils.getLocalizedFileSize(mContext, itemToBind.getSize()) :
                         "";
                 String description = String.format(Locale.ENGLISH, DESCRIPTION_TEMPLATE, modifiedAt, size);
                 holder.getMetaDescription().setText(description);
@@ -580,41 +581,6 @@ public class BoxItemAdapter extends RecyclerView.Adapter<BoxItemAdapter.BoxItemV
                 }
             }
 
-        }
-
-        /**
-         * Java version of routine to turn a long into a short user readable string.
-         * <p/>
-         * This routine is used if the JNI native C version is not available.
-         *
-         * @param numSize the number of bytes in the file.
-         * @return String Short human readable String e.g. 2.5 MB
-         */
-        private String localFileSizeToDisplay(final double numSize) {
-            final int constKB = 1024;
-            final int constMB = constKB * constKB;
-            final int constGB = constMB * constKB;
-            final double floatKB = 1024.0f;
-            final double floatMB = floatKB * floatKB;
-            final double floatGB = floatMB * floatKB;
-            final String BYTES = "B";
-            String textSize = "0 bytes";
-            String strSize = Double.toString(numSize);
-            double size;
-
-            if (numSize < constKB) {
-                textSize = strSize + " " + BYTES;
-            } else if ((numSize >= constKB) && (numSize < constMB)) {
-                size = numSize / floatKB;
-                textSize = String.format(Locale.getDefault(), "%4.1f KB", size);
-            } else if ((numSize >= constMB) && (numSize < constGB)) {
-                size = numSize / floatMB;
-                textSize = String.format(Locale.getDefault(), "%4.1f MB", size);
-            } else if (numSize >= constGB) {
-                size = numSize / floatGB;
-                textSize = String.format(Locale.getDefault(), "%4.1f GB", size);
-            }
-            return textSize;
         }
 
         /**
