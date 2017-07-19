@@ -7,9 +7,9 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 20001
-        versionName "2.0.1"
-        version "2.0.1"
+        versionCode 20002
+        versionName "2.0.2"
+        version "2.0.2"
         group "com.box"
     }
     buildTypes {
