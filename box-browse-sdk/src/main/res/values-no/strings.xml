@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="null"?>
 <resources>
     <string description="Default title for the Browse SDK" name="box_browsesdk_title">Bla gjennom</string>
     <string name="box_browsesdk_problem_fetching_folder">Kan ikke hente mappen.</string>
@@ -24,7 +23,7 @@
     <string name="box_browsesdk_see_additional_results">Se flere resultater</string>
     <string name="box_browsesdk_search_hint">Søk</string>
     <string name="box_browsesdk_recent_searches_header">Siste søk</string>
-    <string name="box_browsesdk_search_results_header">Resultater i <![CDATA[<b>%1$s</b>]]></string>
+    <string name="box_browsesdk_search_results_header">Resultater i &lt;b>%1$s&lt;/b></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Søk i %1$s</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Filtrer resultatene</string>
@@ -44,10 +43,10 @@
     <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Se mer ...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Datoen ble endret</string>
     <string description="Label for setting to search for files modified at any time" name="any_time">Når som helst</string>
-    <string description="Label for setting to search for files modified in last day" name="past_day">I går</string>
-    <string description="Label for setting to search for files modified in last week" name="past_week">Forrige uke</string>
-    <string description="Label for setting to search for files modified in last month" name="past_month">Forrige måned</string>
-    <string description="Label for setting to search for files modified in last year" name="past_year">I fjor</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Den siste dagen</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">Den siste uken</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">Den siste måneden</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">Det siste året</string>
     <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">Størrelse</string>
     <string name="item_size_any">Hvilken som helst størrelse</string>
     <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0–1 MB</string>
