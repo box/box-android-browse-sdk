@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/boxItemMain"
+    style="@style/BoxListItem"
+    android:orientation="horizontal">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" >
+        <ImageView
+            android:id="@+id/box_browsesdk_thumb_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            />
+        <ProgressBar
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/secondaryContainer"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            >
+            <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/boxItemCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:clickable="false"
+                style="@style/BoxListItem_Checkbox"
+                android:visibility="gone"
+                />
+            <ImageButton
+                android:id="@+id/secondaryAction"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                style="@style/BoxListItem_SecondaryAction"
+                android:src="@drawable/ic_box_browsesdk_more_vert_grey_24dp"
+                android:visibility="gone"
+                />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="@style/BoxListItem_Description"
+            android:gravity="start"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical" >
+            <TextView
+                android:id="@+id/box_browsesdk_name_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/BoxLabelText"
+                android:textSize="@dimen/box_browsesdk_list_item_text_size"
+                android:layout_gravity="start"
+                android:gravity="start"
+                android:paddingLeft="0dp"
+                android:baselineAlignBottom="true"
+                android:ellipsize="end"
+                android:singleLine="true"/>
+            <TextView
+                android:id="@+id/metaline_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:textSize="@dimen/box_browsesdk_list_item_description_size"
+                android:gravity="start"
+                android:textColor="@color/box_browsesdk_list_item_color"
+                android:ellipsize="middle"
+                android:singleLine="true" />
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

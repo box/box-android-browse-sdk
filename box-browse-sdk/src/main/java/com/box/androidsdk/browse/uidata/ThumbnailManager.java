@@ -56,6 +56,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     /** Controller used for all requests */
     private final BrowseController mController;
 
+    public static String TYPE_MEDIA = "MEDIA";
+
     /**
      * Maps the target image view to the thumbnail task. Provides ability to cancel tasks
      */
@@ -287,6 +289,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
      * @param targetImage the target image
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
+        boolean isMediaType = targetImage.getTag() != null && targetImage.getTag().equals(TYPE_MEDIA);
         targetImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if (item instanceof BoxFile
                 && item.getPermissions() != null
@@ -306,18 +309,20 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
             }
 
             Bitmap placeHolderBitmap = null;
-            int iconResId = getDefaultIconResource(item);
-            if (mController.getIconResourceCache() != null){
-                placeHolderBitmap = mController.getIconResourceCache().get(iconResId);
-            }
-            if (placeHolderBitmap == null) {
-                if (targetImage.getMeasuredWidth() > 0 && targetImage.getMeasuredHeight() > 0) {
-                    placeHolderBitmap = SdkUtils.decodeSampledBitmapFromFile(targetImage.getResources(), iconResId, targetImage.getMeasuredWidth(), targetImage.getMeasuredHeight());
-                } else {
-                    placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), iconResId);
+            if (! isMediaType) {
+                int iconResId = getDefaultIconResource(item);
+                if (mController.getIconResourceCache() != null) {
+                    placeHolderBitmap = mController.getIconResourceCache().get(iconResId);
                 }
-                if ( mController.getIconResourceCache() != null) {
-                    mController.getIconResourceCache().put(iconResId, placeHolderBitmap);
+                if (placeHolderBitmap == null) {
+                    if (targetImage.getMeasuredWidth() > 0 && targetImage.getMeasuredHeight() > 0) {
+                        placeHolderBitmap = SdkUtils.decodeSampledBitmapFromFile(targetImage.getResources(), iconResId, targetImage.getMeasuredWidth(), targetImage.getMeasuredHeight());
+                    } else {
+                        placeHolderBitmap = BitmapFactory.decodeResource(targetImage.getResources(), iconResId);
+                    }
+                    if (mController.getIconResourceCache() != null) {
+                        mController.getIconResourceCache().put(iconResId, placeHolderBitmap);
+                    }
                 }
             }
 
@@ -331,11 +336,21 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 mController.getThumbnailExecutor().execute(thumbnailTask);
             }
         } else {
-            targetImage.setImageResource(getDefaultIconResource(item));
+            if (!isMediaType) {
+                targetImage.setImageResource(getDefaultIconResource(item));
+            }
         }
     }
 
-    @Override
+    public void loadMediaThumbnail(final BoxItem item, final ImageView targetImage) {
+        if (targetImage.getTag() == null){
+            targetImage.setTag(TYPE_MEDIA);
+        }
+        loadThumbnail(item, targetImage);
+    }
+
+
+        @Override
     public void onImageReady(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view) {
         if (bitmap == null || bitmapSourceFile == null || view == null){
             return;
