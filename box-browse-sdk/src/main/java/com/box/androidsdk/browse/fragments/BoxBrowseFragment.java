@@ -217,12 +217,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         }
 
         mItemsView = (RecyclerView) mRootView.findViewById(R.id.box_browsesdk_items_recycler_view);
-        mItemsView.addItemDecoration(new BoxItemDividerDecoration(getResources()));
-        mItemsView.addItemDecoration(new FooterDecoration(getResources()));
-        mItemsView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        if (mItemsView.getItemAnimator() instanceof SimpleItemAnimator) {
-            ((SimpleItemAnimator) mItemsView.getItemAnimator()).setSupportsChangeAnimations(false);
-        }
+        initRecyclerView(mItemsView);
         mProgress = (ProgressBar) mRootView.findViewById(R.id.box_browsesdk_progress_bar);
         mAdapter = createAdapter();
 
@@ -249,6 +244,15 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             getMultiSelectHandler().setItemAdapter(mAdapter);
         }
         return mRootView;
+    }
+
+    protected void initRecyclerView(RecyclerView view){
+        view.addItemDecoration(new BoxItemDividerDecoration(getResources()));
+        view.addItemDecoration(new FooterDecoration(getResources()));
+        view.setLayoutManager(new LinearLayoutManager(getActivity()));
+        if (view.getItemAnimator() instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) view.getItemAnimator()).setSupportsChangeAnimations(false);
+        }
     }
 
     /**

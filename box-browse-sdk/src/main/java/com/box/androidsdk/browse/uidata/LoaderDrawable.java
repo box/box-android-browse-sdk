@@ -132,12 +132,12 @@ public class LoaderDrawable extends BitmapDrawable {
          *
          * @param request            the request
          * @param boxItem            the box item
-         * @param target             the target
+         * @param targetView             the target
          * @param imageReadyListener the image ready listener
          * @return the thumbnail task
          */
-        public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView target, final ImageReadyListener imageReadyListener) {
-            final WeakReference<ImageView> targetRef = new WeakReference<ImageView>(target);
+        public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView targetView, final ImageReadyListener imageReadyListener) {
+            final WeakReference<ImageView> targetRef = new WeakReference<ImageView>(targetView);
             Callable<BoxResponse<BoxDownload>> callable = new Callable<BoxResponse<BoxDownload>>() {
                 @Override
                 public BoxResponse<BoxDownload> call() throws Exception {
@@ -162,7 +162,11 @@ public class LoaderDrawable extends BitmapDrawable {
                     } catch (Exception e) {
                         ex = e;
                     }
-                    return new BoxResponse<BoxDownload>(ret, ex, request);
+                    BoxResponse response = new BoxResponse<BoxDownload>(ret, ex, request);
+                    if (ex != null){
+                        imageReadyListener.onImageException(response, targetRef.get());
+                    }
+                    return response;
                 }
             };
             return new ThumbnailTask(callable, request, boxItem);
@@ -185,5 +189,11 @@ public class LoaderDrawable extends BitmapDrawable {
          */
         void onImageReady(File bitmapSourceFile, BoxRequest request, Bitmap bitmap, ImageView view);
 
+        /**
+         * An exception occurred trying to load image.
+         * @param response the server response containing request and exception info
+         * @param view the view
+         */
+        void onImageException(BoxResponse response, ImageView view);
     }
 }
