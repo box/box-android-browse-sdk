@@ -10,10 +10,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.view.View;
 
+import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
 import com.box.androidsdk.browse.adapters.BoxMediaItemAdapter;
+import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.service.BoxResponseIntent;
+import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxIterator;
 import com.box.androidsdk.content.models.BoxIteratorItems;
 import com.box.androidsdk.content.models.BoxSession;
@@ -21,6 +25,8 @@ import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.utils.SdkUtils;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+
+import java.io.Serializable;
 
 /**
  * Fragment to browse a box folder
@@ -69,6 +75,11 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
     protected BoxItemAdapter createAdapter() {
         return new BoxMediaItemAdapter(getActivity(), getController(), this);
     }
+
+    protected int getLayout() {
+        return R.layout.box_browsesdk_fragment_browse_media;
+    }
+
 
 
     @Override
@@ -144,6 +155,10 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
         }
     }
 
+    @Override
+    public BoxItemFilter getItemFilter() {
+        return super.getItemFilter();
+    }
 
     /**
      * Convenience method that returns a folder object without its item collection. This is done to ensure
@@ -187,7 +202,7 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
         public Builder(String folderId, String userId) {
             mArgs.putString(ARG_ID, folderId);
             mArgs.putString(ARG_USER_ID, userId);
-
+            setBoxItemFilter(new MediaItemFilter());
         }
 
         /**
@@ -200,6 +215,7 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
             mArgs.putString(ARG_ID, folder.getId());
             mArgs.putString(ARG_NAME, folder.getName());
             mArgs.putString(ARG_USER_ID, session.getUserId());
+            setBoxItemFilter(new MediaItemFilter());
         }
 
         /**
@@ -214,6 +230,19 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
         @Override
         protected BoxBrowseFolderGridFragment getInstance() {
             return new BoxBrowseFolderGridFragment();
+        }
+
+        public static class MediaItemFilter implements BoxItemFilter, Serializable{
+
+            @Override
+            public boolean accept(BoxItem item) {
+                return ThumbnailManager.isThumbnailAvailable(item) || ThumbnailManager.isVideo(item);
+            }
+
+            @Override
+            public boolean isEnabled(BoxItem item) {
+                return true;
+            }
         }
     }
 

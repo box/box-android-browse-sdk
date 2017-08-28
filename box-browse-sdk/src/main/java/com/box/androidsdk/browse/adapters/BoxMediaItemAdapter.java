@@ -19,6 +19,7 @@ import com.box.androidsdk.browse.activities.BoxBrowseActivity;
 import com.box.androidsdk.browse.filters.BoxItemFilter;
 import com.box.androidsdk.browse.fragments.BoxBrowseFragment;
 import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.models.BoxSession;
@@ -142,6 +143,13 @@ public class BoxMediaItemAdapter extends BoxItemAdapter {
                 } else {
                     getView().setAlpha(.5f);
                 }
+            }
+
+            //show video icon
+            if (ThumbnailManager.isVideo(itemToBind)){
+                holder.getNameView().setVisibility(View.VISIBLE);
+            } else {
+                holder.getNameView().setVisibility(View.GONE);
             }
 
         }

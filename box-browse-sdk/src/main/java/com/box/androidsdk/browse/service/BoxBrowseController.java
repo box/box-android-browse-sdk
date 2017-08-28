@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -120,17 +121,10 @@ public class BoxBrowseController implements BrowseController {
 
     @Override
     public BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile) {
-        DisplayMetrics metrics = mSession.getApplicationContext().getResources().getDisplayMetrics();
-        int thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_128;
-        if (metrics.density <= DisplayMetrics.DENSITY_MEDIUM) {
-            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-        } else if (metrics.density <= DisplayMetrics.DENSITY_HIGH) {
-            thumbSize = BoxRequestsFile.DownloadThumbnail.SIZE_64;
-        }
         try {
             return mFileApi.getDownloadThumbnailRequest(downloadFile, fileId)
-                    .setMinWidth(thumbSize)
-                    .setMinHeight(thumbSize);
+                    .setFormat(BoxRequestsFile.DownloadThumbnail.Format.JPG).
+                            setMinSize(BoxRequestsFile.DownloadThumbnail.SIZE_160);
         } catch (IOException e) {
             BoxLogUtils.e(TAG, e);
         }
@@ -280,7 +274,7 @@ public class BoxBrowseController implements BrowseController {
     @Override
     public ThreadPoolExecutor getThumbnailExecutor() {
         if (mThumbnailExecutor == null || mThumbnailExecutor.isShutdown()) {
-            mThumbnailExecutor = new ThreadPoolExecutor(1, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+            mThumbnailExecutor = new ThreadPoolExecutor(5, 10, 3600, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
         }
         return mThumbnailExecutor;
     }

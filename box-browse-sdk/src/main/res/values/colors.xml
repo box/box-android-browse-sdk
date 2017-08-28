@@ -9,6 +9,12 @@
     <color name="box_browsesdk_divider">#14bdc3c7</color>
     <color name="box_browsesdk_shadow">#88333333</color>
     <color name="box_browsesdk_list_background">#ffffff</color>
+
+    <color name="box_browsesdk_media_list_background">@color/box_browsesdk_list_background</color>
+    <color name="box_browsesdk_media_list_item_background">@color/box_browsesdk_primary</color>
+    <color name="box_browsesdk_dark_translucent">#cc000000</color>
+
+
     <color name="box_browsesdk_list_item_color">#737F8B</color>
     <color name="primary">#1992D4</color>
     <color name="primary_disabled">#341992D4</color>

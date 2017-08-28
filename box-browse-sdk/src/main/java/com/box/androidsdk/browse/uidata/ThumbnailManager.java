@@ -40,6 +40,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
@@ -87,7 +88,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     public static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif", "ico"};
     public static final String[] PDF_EXTENSIONS_ARRAY = {"pdf"};
 
-    protected static final ArrayList<String> IMAGE_EXTENSIONS = new ArrayList<String>();
+    protected static final HashSet<String> IMAGE_EXTENSIONS = new HashSet<String>();
+    protected static final HashSet<String> VIDEO_EXTENSIONS = new HashSet<String>();
 
 
     static {
@@ -118,6 +120,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         }
         for (String ext : VIDEO_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_movie);
+            VIDEO_EXTENSIONS.add(ext);
         }
         for (String ext : INDESIGN_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_indesign);
@@ -282,6 +285,19 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         return false;
     }
 
+
+    public static boolean isVideo(BoxItem item){
+        if (item == null || SdkUtils.isBlank(item.getName())) {
+            return false;
+        }
+
+        int index = item.getName().lastIndexOf(".");
+        if (index > 0) {
+            return VIDEO_EXTENSIONS.contains(item.getName().substring(index + 1).toLowerCase());
+        }
+        return false;
+    }
+
     /**
      * Loads the thumbnail for the provided BoxItem (if available) into the target image view
      *
@@ -295,6 +311,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 && item.getPermissions() != null
                 && item.getPermissions().contains(BoxItem.Permission.CAN_PREVIEW)
                 && isThumbnailAvailable(item)) {
+
             // Cancel pending task upon recycle.
             BoxFutureTask task = mTargetToTask.remove(targetImage);
             if (task != null) {
@@ -350,7 +367,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     }
 
 
-        @Override
+    @Override
     public void onImageReady(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view) {
         if (bitmap == null || bitmapSourceFile == null || view == null){
             return;
@@ -370,6 +387,11 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         if (scaledBitmap != null && isRequestStillApplicable(request, view)){
             loadThumbnail(scaledBitmap, view);
         }
+    }
+
+    @Override
+    public void onImageException(BoxResponse response, ImageView view) {
+        response.getException().printStackTrace();
     }
 
     /**
@@ -437,7 +459,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 }
             }
         }
-        if (isScrolling){
+        boolean isMediaType = imageView.getTag() != null && imageView.getTag().equals(TYPE_MEDIA);
+        if (isScrolling && !isMediaType){
             // do nothing we will handle this with the scroll listener.
         } else {
             imageView.post(new Runnable() {
