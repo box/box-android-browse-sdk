@@ -280,7 +280,9 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
         int index = item.getName().lastIndexOf(".");
         if (index > 0) {
-            return IMAGE_EXTENSIONS.contains(item.getName().substring(index + 1).toLowerCase());
+            String extension = item.getName().substring(index + 1).toLowerCase();
+            return IMAGE_EXTENSIONS.contains(extension)
+                    || VIDEO_EXTENSIONS.contains(extension);
         }
         return false;
     }

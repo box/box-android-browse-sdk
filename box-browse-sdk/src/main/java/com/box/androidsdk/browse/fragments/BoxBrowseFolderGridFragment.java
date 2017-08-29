@@ -49,7 +49,7 @@ public class BoxBrowseFolderGridFragment extends BoxBrowseFragment {
         }
     }
 
-    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
+    public static class SpacesItemDecoration extends RecyclerView.ItemDecoration {
 
         private int halfSpace;
 
