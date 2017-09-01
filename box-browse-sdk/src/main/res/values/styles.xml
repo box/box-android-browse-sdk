@@ -34,6 +34,12 @@
         <item name="android:background">@drawable/boxsdk_list_item_selector</item>
     </style>
 
+    <style name="BoxMediaListItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/box_browsesdk_media_list_item_height</item>
+        <item name="android:background">@drawable/boxsdk_list_item_selector</item>
+    </style>
+
     <style name="BoxListItem_Description">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/box_browsesdk_list_item_height</item>
