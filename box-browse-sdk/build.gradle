@@ -7,10 +7,21 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 20003
-        versionName "2.0.3"
-        version "2.0.3"
         group "com.box"
+
+
+        // Set version code and name
+        def env = System.getenv()
+        def git_count = env['GIT_COUNT'] as Integer
+        if (git_count != null) {
+            versionCode git_count + 20000
+            versionName "2.99." + git_count + "-SNAPSHOT"
+            version "2.99." + git_count + "-SNAPSHOT"
+        } else {
+            versionCode 20003
+            versionName "2.0.3"
+            version "2.0.3"
+        }
     }
     buildTypes {
         release {
