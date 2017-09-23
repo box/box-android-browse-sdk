@@ -88,24 +88,33 @@ public class BoxSearchView extends SearchView {
         this.setOnSearchClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                isExpanded = true;
-                if (mOnBoxSearchListener != null) {
-                    mOnBoxSearchListener.onSearchExpanded();
-                }
+                expandSearch();
             }
         });
 
         this.setOnCloseListener(new OnCloseListener() {
             @Override
             public boolean onClose() {
-                isExpanded = false;
-                if (mOnBoxSearchListener != null) {
-                    mOnBoxSearchListener.onSearchCollapsed();
-                }
+                collapseSearch();
                 return false;
             }
         });
     }
+
+    public void expandSearch() {
+        isExpanded = true;
+        if (mOnBoxSearchListener != null) {
+            mOnBoxSearchListener.onSearchExpanded();
+        }
+    }
+
+    public void collapseSearch() {
+        isExpanded = false;
+        if (mOnBoxSearchListener != null) {
+            mOnBoxSearchListener.onSearchCollapsed();
+        }
+    }
+
 
     /**
      * Is expanded boolean. returns true if the search view is expanded
@@ -114,6 +123,10 @@ public class BoxSearchView extends SearchView {
      */
     public boolean isExpanded() {
         return isExpanded;
+    }
+
+    public void setExpanded(boolean isSearchViewExpanded) {
+        isExpanded = isSearchViewExpanded;
     }
 
     /**
