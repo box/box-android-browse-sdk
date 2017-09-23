@@ -147,6 +147,10 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
         super.onStop();
     }
 
+    public void scrollToTop() {
+        mItemsView.smoothScrollToPosition(0);
+    }
+
     /**
      * Init box receivers.
      */
