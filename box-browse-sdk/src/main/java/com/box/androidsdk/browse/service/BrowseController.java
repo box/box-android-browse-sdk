@@ -6,13 +6,13 @@ import android.support.v4.util.LruCache;
 
 import com.box.androidsdk.browse.uidata.ThumbnailManager;
 import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.models.BoxRepresentation;
 import com.box.androidsdk.content.models.BoxUser;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
-import com.eclipsesource.json.JsonArray;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,6 +48,16 @@ public interface BrowseController {
      */
     BoxRequestsFile.DownloadThumbnail getThumbnailRequest(String fileId, File downloadFile);
 
+    /***
+     * Retrieves a representation thumbnail for a file/Representation.
+     * @param fileId          the file id
+     * @param representation  the image representation to download
+     * @param downloadFile    the file where the image will be saved
+     * @return  a representation thumbnail request
+     */
+    BoxRequestsFile.DownloadRepresentation getRepresentationThumbnailRequest(String fileId,
+                                                                             BoxRepresentation representation,
+                                                                             File downloadFile);
 
     /***
      * Executes the request using the appropriate executor
