@@ -26,6 +26,7 @@ public class BoxSearchView extends SearchView {
     // but it is updated after code is executed in OnCloseListener call
     // Keeping a local property to ensure we know the state
     private boolean isExpanded;
+    private int closeIconResource;
 
     /**
      * Instantiates a new Box search view.
@@ -46,17 +47,26 @@ public class BoxSearchView extends SearchView {
     public BoxSearchView(final Context context, final AttributeSet attrs){
         super(context, attrs);
         initSearchView(context);
+        closeIconResource = R.drawable.ic_clear_gray_24dp;
+    }
+
+    /**
+     * Optional: Set your custom drawable for close button. Clicking on the button will remove
+     * focus from the searchview
+     * @param drawable Custom drawable
+     */
+    public void setCloseIconResource(int drawable) {
+        closeIconResource = drawable;
     }
 
     private void initSearchView(final Context context){
-
         isExpanded = false;
 
         LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
 
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
-        searchCloseButton.setImageResource(R.drawable.ic_clear_gray_24dp);
+        searchCloseButton.setImageResource(closeIconResource);
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             EditText editText = ((EditText) findViewById(R.id.search_src_text));
@@ -79,6 +89,16 @@ public class BoxSearchView extends SearchView {
             public boolean onQueryTextChange(String newText) {
                 if (mOnBoxSearchListener != null) {
                     mOnBoxSearchListener.onQueryTextChange(newText);
+                }
+                LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
+                final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
+
+                if (!newText.isEmpty()) {
+                    searchCloseButton.setImageResource(closeIconResource);
+                    searchCloseButton.setClickable(true);
+                } else {
+                    searchCloseButton.setImageResource(android.R.color.transparent);
+                    searchCloseButton.setClickable(false);
                 }
                 // Don't perform default action, return true
                 return true;
