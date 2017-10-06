@@ -51,8 +51,8 @@ public class BoxSearchView extends SearchView {
     }
 
     /**
-     * Optional: Set your custom drawable for close button. Clicking on the button will remove
-     * focus from the searchview
+     * Optional: Set your custom drawable for clear/cancel button. Clicking on the button will clear
+     * the query text.
      * @param drawable Custom drawable
      */
     public void setCloseIconResource(int drawable) {
