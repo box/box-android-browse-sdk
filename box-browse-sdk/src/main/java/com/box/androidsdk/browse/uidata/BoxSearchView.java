@@ -26,7 +26,7 @@ public class BoxSearchView extends SearchView {
     // but it is updated after code is executed in OnCloseListener call
     // Keeping a local property to ensure we know the state
     private boolean isExpanded;
-    private int closeIconResource;
+    private int mClearIconDrawable;
 
     /**
      * Instantiates a new Box search view.
@@ -47,16 +47,16 @@ public class BoxSearchView extends SearchView {
     public BoxSearchView(final Context context, final AttributeSet attrs){
         super(context, attrs);
         initSearchView(context);
-        closeIconResource = R.drawable.ic_clear_gray_24dp;
+        mClearIconDrawable = R.drawable.ic_clear_gray_24dp;
     }
 
     /**
-     * Optional: Set your custom drawable for clear/cancel button. Clicking on the button will clear
+     * Optional: Set your custom drawable for clear button. Clicking on the button will clear
      * the query text.
      * @param drawable Custom drawable
      */
     public void setCloseIconResource(int drawable) {
-        closeIconResource = drawable;
+        mClearIconDrawable = drawable;
     }
 
     private void initSearchView(final Context context){
@@ -66,7 +66,7 @@ public class BoxSearchView extends SearchView {
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
 
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
-        searchCloseButton.setImageResource(closeIconResource);
+        searchCloseButton.setImageResource(mClearIconDrawable);
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             EditText editText = ((EditText) findViewById(R.id.search_src_text));
@@ -94,7 +94,7 @@ public class BoxSearchView extends SearchView {
                 final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
 
                 if (!newText.isEmpty()) {
-                    searchCloseButton.setImageResource(closeIconResource);
+                    searchCloseButton.setImageResource(mClearIconDrawable);
                     searchCloseButton.setClickable(true);
                 } else {
                     searchCloseButton.setImageResource(android.R.color.transparent);
