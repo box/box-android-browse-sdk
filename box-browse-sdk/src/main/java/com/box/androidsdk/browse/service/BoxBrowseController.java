@@ -3,7 +3,6 @@ package com.box.androidsdk.browse.service;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
-import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
@@ -15,6 +14,7 @@ import com.box.androidsdk.content.BoxConfig;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxFolder;
+import com.box.androidsdk.content.models.BoxRepresentation;
 import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.models.BoxUser;
 import com.box.androidsdk.content.requests.BoxCacheableRequest;
@@ -61,7 +61,6 @@ public class BoxBrowseController implements BrowseController {
 
     protected BitmapLruCache mThumbnailCache = new BitmapLruCache(BITMAP_CACHE_DEFAULT_SIZE);
     protected LruCache<Integer, Bitmap> mIconResCache = new LruCache<Integer, Bitmap>(10);
-
 
     /**
      * Instantiates a new Box browse controller.
@@ -129,6 +128,11 @@ public class BoxBrowseController implements BrowseController {
             BoxLogUtils.e(TAG, e);
         }
         return null;
+    }
+
+    @Override
+    public BoxRequestsFile.DownloadRepresentation getRepresentationThumbnailRequest(String fileId, BoxRepresentation representation, File downloadFile) {
+        return mFileApi.getDownloadRepresentationRequest(fileId, downloadFile, representation);
     }
 
     @Override

@@ -17,6 +17,7 @@ import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxItem;
 import com.box.androidsdk.content.requests.BoxRequest;
+import com.box.androidsdk.content.requests.BoxRequestDownload;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.SdkUtils;
@@ -57,6 +58,10 @@ public class LoaderDrawable extends BitmapDrawable {
      * @return loader drawable
      */
     public static LoaderDrawable create(BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView imageView, Bitmap placeHolder, final ImageReadyListener imageReadyListener) {
+        return new LoaderDrawable(ThumbnailTask.create(request, boxItem, imageView, imageReadyListener),imageView.getResources(), placeHolder);
+    }
+
+    public static LoaderDrawable create(BoxRequestsFile.DownloadRepresentation request, final BoxItem boxItem, ImageView imageView, Bitmap placeHolder, final ImageReadyListener imageReadyListener) {
         return new LoaderDrawable(ThumbnailTask.create(request, boxItem, imageView, imageReadyListener),imageView.getResources(), placeHolder);
     }
 
@@ -105,6 +110,9 @@ public class LoaderDrawable extends BitmapDrawable {
             if (req instanceof BoxRequestsFile.DownloadThumbnail) {
                 return ((BoxRequestsFile.DownloadThumbnail) req).getId();
             }
+            if(req instanceof BoxRequestsFile.DownloadRepresentation) {
+                return ((BoxRequestsFile.DownloadRepresentation) req).getId();
+            }
             return Integer.toString(req.hashCode());
         }
 
@@ -136,7 +144,7 @@ public class LoaderDrawable extends BitmapDrawable {
          * @param imageReadyListener the image ready listener
          * @return the thumbnail task
          */
-        public static ThumbnailTask create(final BoxRequestsFile.DownloadThumbnail request, final BoxItem boxItem, ImageView targetView, final ImageReadyListener imageReadyListener) {
+        public static ThumbnailTask create(final BoxRequestDownload request, final BoxItem boxItem, ImageView targetView, final ImageReadyListener imageReadyListener) {
             final WeakReference<ImageView> targetRef = new WeakReference<ImageView>(targetView);
             Callable<BoxResponse<BoxDownload>> callable = new Callable<BoxResponse<BoxDownload>>() {
                 @Override
@@ -148,7 +156,7 @@ public class LoaderDrawable extends BitmapDrawable {
                         boolean isCached = imageFile.exists() && imageFile.length() > 0;
                         if (!isCached) {
                             // If the image has not been cached we make the remote call
-                            ret = request.send();
+                            ret = (BoxDownload)request.send();
                         }
                         final ImageView target = targetRef.get();
                         Bitmap bm = BitmapFactory.decodeFile(imageFile.getAbsolutePath());

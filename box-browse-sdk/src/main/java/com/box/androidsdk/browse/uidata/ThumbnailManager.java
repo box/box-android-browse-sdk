@@ -21,12 +21,15 @@ import android.widget.ListView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
+import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxBookmark;
 import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
+import com.box.androidsdk.content.models.BoxIteratorRepresentations;
+import com.box.androidsdk.content.models.BoxRepresentation;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxResponse;
@@ -57,7 +60,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     /** Controller used for all requests */
     private final BrowseController mController;
 
-    public static String TYPE_MEDIA = "MEDIA";
+    public static final String TYPE_MEDIA = "MEDIA";
+    public static final String TYPE_REPRESENTATION = "REPS";
 
     /**
      * Maps the target image view to the thumbnail task. Provides ability to cancel tasks
@@ -244,6 +248,17 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         return String.format(Locale.ENGLISH, "%s_%s%s", boxFile.getId(), boxFile.getSha1(), THUMBNAIL_FILE_EXTENSION);
     }
 
+    private String getRepCacheName(BoxFile boxFile, BoxRepresentation representation) {
+        if (boxFile == null || SdkUtils.isBlank(boxFile.getId()) || SdkUtils.isBlank(boxFile.getSha1()) ||
+            representation == null) {
+            throw new IllegalArgumentException("BoxFile argument must not be null and must also contain an id, sha1 and representation");
+        }
+        return String.format(Locale.ENGLISH, "%s_%s_%s.%s", boxFile.getId(), boxFile.getSha1(),
+                             representation.getProperties().getDimension(),
+                             representation.getRepresentationType());
+    }
+
+
     /**
      * Gets thumbnail directory.
      *
@@ -368,22 +383,77 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         loadThumbnail(item, targetImage);
     }
 
+    /**
+     * Load a file image representation into an ImageView.
+     * @param file the file to get the image representation
+     * @param targetImage the ImageView where it should draw
+     * @return true in case it was able to find a representation, false in case of failure
+     */
+    public boolean loadThumbnailRepresentation(final BoxFile file, final ImageView targetImage) {
+        if (targetImage.getTag() == null){
+            targetImage.setTag(TYPE_REPRESENTATION);
+        }
+        BoxIteratorRepresentations reps = file.getRepresentations();
+        if(reps != null) {
+            // Check whether we have some thumbnail representation for this file
+            for(BoxRepresentation rep : reps) {
+                String repType = rep.getRepresentationType();
+                // In order to load thumbnails, we need a JPG or a PNG representation
+                if(BoxRepresentation.TYPE_PNG.equalsIgnoreCase(repType) ||
+                   BoxRepresentation.TYPE_JPG.equalsIgnoreCase(repType)) {
+                    BoxRepresentation.BoxRepContent contentLink = rep.getContent();
+                    if(contentLink != null) {
+                        String url = contentLink.getUrl();
+                        if(url != null) {
+                            File f = new File(mController.getThumbnailCacheDir(), getRepCacheName(file, rep));
+                            Bitmap b = mController.getThumbnailCache().get(f);
+                            if(b != null) {
+                                loadThumbnail(b, targetImage);
+                                return true;
+                            }
+                            try {
+                                f.createNewFile();
+                            } catch (IOException e) {
+                                BoxLogUtils.e(getClass().getSimpleName(), "Could not create rep file:" + f.getName());
+                            }
+                            BoxRequestsFile.DownloadRepresentation request = mController.getRepresentationThumbnailRequest(file.getId(), rep, f);
+                            LoaderDrawable loaderDrawable = LoaderDrawable.create(request, file, targetImage, null, this);
+                            targetImage.setImageDrawable(loaderDrawable);
+                            BoxFutureTask thumbnailTask = loaderDrawable.getTask();
+                            if (thumbnailTask != null) {
+                                mTargetToTask.put(targetImage, thumbnailTask);
+                                mController.getThumbnailExecutor().execute(thumbnailTask);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public void onImageReady(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view) {
         if (bitmap == null || bitmapSourceFile == null || view == null){
             return;
         }
-        if (view.getMeasuredWidth() > 0 && view.getMeasuredHeight() > 0){
-            Bitmap resizedBitmap =  ThumbnailUtils.extractThumbnail(bitmap, view.getMeasuredWidth(), view.getMeasuredHeight());
-            mController.getThumbnailCache().put(bitmapSourceFile, resizedBitmap);
-            if (resizedBitmap != bitmap){
-                bitmap.recycle();
-            }
+        if(view.getTag() != null && view.getTag().equals(TYPE_REPRESENTATION)) {
+            // No resizing for representation images
+            mController.getThumbnailCache().put(bitmapSourceFile, bitmap);
         } else {
-            postLaterToView(bitmapSourceFile, request, bitmap, view);
-            return;
+            if (view.getMeasuredWidth() > 0 && view.getMeasuredHeight() > 0) {
+                Bitmap resizedBitmap = ThumbnailUtils.extractThumbnail(bitmap, view.getMeasuredWidth(), view.getMeasuredHeight());
+                mController.getThumbnailCache().put(bitmapSourceFile, resizedBitmap);
+                if (resizedBitmap != bitmap) {
+                    bitmap.recycle();
+                }
+            } else {
+                postLaterToView(bitmapSourceFile, request, bitmap, view);
+                return;
 
+            }
         }
         Bitmap scaledBitmap = mController.getThumbnailCache().get(bitmapSourceFile);
         if (scaledBitmap != null && isRequestStillApplicable(request, view)){
@@ -451,7 +521,11 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                                 ImageView view = imageViewRef.get();
                                 if (view != null && view.getDrawable() instanceof LoaderDrawable) {
-                                    loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                    if (TYPE_REPRESENTATION.equals(imageView.getTag())) {
+                                        loadThumbnailRepresentation((BoxFile)((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                    } else{
+                                        loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                    }
                                 }
                                 recyclerView.removeOnScrollListener(this);
 
