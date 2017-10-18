@@ -1,0 +1,58 @@
+<resources>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">Browse</string>
+    <string name="box_browsesdk_problem_fetching_folder">Problem fetching folder.</string>
+    <string name="box_browsesdk_problem_performing_search">Problem performing search.</string>
+    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">You cannot view the items in this folder.</string>
+    <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Network error. Please try again.</string>
+    <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">Session is not authenticated</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">No item selected</string>
+
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">All Files</string>
+
+    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">Settings</string>
+    <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">Search</string>
+    <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Create Folder</string>
+    <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Select this folder</string>
+    <string name="box_browsesdk_dialog_ok">OK</string>
+    <string name="box_browsesdk_dialog_cancel">CANCEL</string>
+
+    <string name="box_browsesdk_create_folder_conflict">A folder with that name has already been created.</string>
+    <string name="box_browsesdk_error_retrieving_items">Error retrieving items</string>
+    <string name="box_browsesdk_tap_to_retry">Tap to retry</string>
+    <string name="box_browsesdk_performing_search">Performing search…</string>
+    <string name="box_browsesdk_see_additional_results">See additional results</string>
+    <string name="box_browsesdk_search_hint">Search</string>
+    <string name="box_browsesdk_recent_searches_header">Recent Searches</string>
+    <string name="box_browsesdk_search_results_header">Results in &lt;b>%1$s&lt;/b></string>
+
+    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Search in %1$s</string>
+    <string description="Label for button that launches screen to filter search results" name="filter_results_header">Filter Results</string>
+    <string description="Header text for refine search results activity" name="filter_search_results">Refine Search Results</string>
+    <string description="label for apply button in refine search results activity" name="apply">Apply</string>
+    <string description="label for clear filters button in refine search results activity" name="clear_filters">Clear Filters</string>
+    <string description="Header for section that let you select file types to search for" name="file_type_label">File Type</string>
+    <string description="File type to search for" name="search_filter_file_type_pdf">PDF</string>
+    <string description="File type to search for" name="search_filter_file_type_spreadsheet">Spreadsheet</string>
+    <string description="File type to search for" name="search_filter_file_type_presentation">Presentation</string>
+    <string description="File type to search for" name="search_filter_file_type_image">Image</string>
+    <string description="File type to search for" name="search_filter_file_type_folder">Folder</string>
+    <string description="File type to search for" name="search_filter_file_type_document">Document</string>
+    <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
+    <string description="File type to search for" name="search_filter_file_type_video">Video</string>
+    <string description="File type to search for" name="search_filter_file_type_audio">Audio</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">See more...</string>
+    <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Date Modified</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">Any Time</string>
+    <string description="Label for setting to search for files modified in last day" name="past_day">Past Day</string>
+    <string description="Label for setting to search for files modified in last week" name="past_week">Past Week</string>
+    <string description="Label for setting to search for files modified in last month" name="past_month">Past Month</string>
+    <string description="Label for setting to search for files modified in last year" name="past_year">Past Year</string>
+    <string description="Header for section that limit search based on size of the files and folders" name="item_size_label">Size</string>
+    <string name="item_size_any">Any Size</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_0_to_1">0-1 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_1_to_5">1-5 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_5_to_25">1-25 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_25_to_100">25-100 MB</string>
+    <string description="Label for setting to search for files with size in given range" name="item_size_100_to_1000">100 MB - 1 GB</string>
+    <string desctiption="If user has selected some search filters, we show the same as a string. This is the delimiter for the same. For example this may be shown as 'PDF, Image, Audio, Last Week, 1-5 MB'. ', ' is picked from this string as a delimiter" name="search_filter_label_delimiter">,&#x00a0;</string>
+</resources>
