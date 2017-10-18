@@ -29,3 +29,6 @@ env:
   global:
   - secure: g0gOzb+4L+jK7n1WQHwGqFlptf8PvPMOeo3sP26ckVBfnKk++1v1m86viYnQflMv+WyQXOxC8hJikS3r+TUByrk7nQcPTwm1gqUsxBAjFy5lIivKnWsN2PV+koINJXIWpKFyXEPfkOv9muEFmzrWxSHhTFgHNGzI961K5pCFJ1Y=
   - secure: ZPUqvWIx4CNnYVRwms8kPYXIduHbQBfyFUR5fo6ws71zDQejKZf3XBkKM9I3GU6lnqDTEaVUAnLNAtvGIUCch2GbMy/vHR/wDSdDJ6PZAPW5irhGwDQxsPyqoqzdRXS5HA60I5LbAXQhlbPfpKJyHUMaqhkPdNivs56pH6Uyabs=
+
+git:
+  depth: 9999999
