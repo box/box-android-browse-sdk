@@ -26,6 +26,7 @@
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b> 中的结果</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">在 %1$s 中搜索</string>
+    <string description="hint text for top level Search View" name="global_search_hint">在 Box 中搜索</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">筛选结果</string>
     <string description="Header text for refine search results activity" name="filter_search_results">优化搜索结果</string>
     <string description="label for apply button in refine search results activity" name="apply">应用</string>

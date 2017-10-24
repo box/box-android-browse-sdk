@@ -26,6 +26,7 @@
     <string name="box_browsesdk_search_results_header">Resultater i &lt;b>%1$s&lt;/b></string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Søg i %1$s</string>
+    <string description="hint text for top level Search View" name="global_search_hint">Søg i Box</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Filtrér resultater</string>
     <string description="Header text for refine search results activity" name="filter_search_results">Præcisér søgeresultaterne</string>
     <string description="label for apply button in refine search results activity" name="apply">Anvend</string>
