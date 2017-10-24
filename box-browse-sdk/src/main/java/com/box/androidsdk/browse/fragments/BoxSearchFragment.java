@@ -1,7 +1,6 @@
 package com.box.androidsdk.browse.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -9,8 +8,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.box.androidsdk.browse.R;
@@ -52,10 +49,10 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     // Current search term
     private static final String OUT_QUERY = "outQuery";
 
-    private static final int DEFAULT_LIMIT = 200;
-
+    private static final int DEFAULT_LIMIT = 20;
+    private int mLimit;
     protected int mOffset = 0;
-    protected int mLimit;
+
 
     protected String mSearchQuery;
     protected BoxRequestsSearch.Search mRequest;
