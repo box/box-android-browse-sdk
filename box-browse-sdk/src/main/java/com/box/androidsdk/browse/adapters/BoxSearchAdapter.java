@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.adapters;
 
 import android.content.Context;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,6 @@ import com.eclipsesource.json.JsonObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adapter that is used to display search results
@@ -174,7 +174,10 @@ public class BoxSearchAdapter extends BoxItemAdapter {
 
         @Override
         protected void onBindBoxItemViewHolder(BoxItemViewHolder holder, BoxItem itemToBind) {
-            ((TextView)holder.getView().findViewById(R.id.text)).setText(Html.fromHtml(String.format(mContext.getResources().getString(R.string.box_browsesdk_search_results_header), itemToBind.getName())));
+            String header = mContext.getResources().getString(R.string.box_browsesdk_search_results_header,
+                    TextUtils.isEmpty(itemToBind.getName()) ?
+                            mContext.getResources().getString(R.string.box_browsesdk_all_files) : itemToBind.getName());
+            ((TextView)holder.getView().findViewById(R.id.text)).setText(Html.fromHtml(header));
         }
     }
 }
