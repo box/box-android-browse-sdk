@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.SearchView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -26,7 +27,6 @@ public class BoxSearchView extends SearchView {
     // but it is updated after code is executed in OnCloseListener call
     // Keeping a local property to ensure we know the state
     private boolean isExpanded;
-    private int mClearIconDrawable;
 
     /**
      * Instantiates a new Box search view.
@@ -35,7 +35,7 @@ public class BoxSearchView extends SearchView {
      */
     public BoxSearchView(final Context context){
         super(context);
-        initSearchView(context);
+        initSearchView();
     }
 
     /**
@@ -46,27 +46,18 @@ public class BoxSearchView extends SearchView {
      */
     public BoxSearchView(final Context context, final AttributeSet attrs){
         super(context, attrs);
-        initSearchView(context);
-        mClearIconDrawable = R.drawable.ic_clear_gray_24dp;
+        initSearchView();
     }
 
-    /**
-     * Optional: Set your custom drawable for clear button. Clicking on the button will clear
-     * the query text.
-     * @param drawable Custom drawable
-     */
-    public void setCloseIconResource(int drawable) {
-        mClearIconDrawable = drawable;
-    }
-
-    private void initSearchView(final Context context){
+    private void initSearchView(){
         isExpanded = false;
-
         LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
         searchPlate.setBackgroundColor(Color.TRANSPARENT);
 
+        // Hide the search clear button
         final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
-        searchCloseButton.setImageResource(mClearIconDrawable);
+        searchCloseButton.setImageResource(android.R.color.transparent);
+        searchCloseButton.setClickable(false);
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             EditText editText = ((EditText) findViewById(R.id.search_src_text));
@@ -74,36 +65,7 @@ public class BoxSearchView extends SearchView {
         }
 
         setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_SEARCH| EditorInfo.IME_FLAG_NO_FULLSCREEN);
-        setQueryHint(context.getString(R.string.box_browsesdk_search_hint));
-        this.setOnQueryTextListener(new OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if (mOnBoxSearchListener != null) {
-                    mOnBoxSearchListener.onQueryTextSubmit(query);
-                }
-                // Don't perform default action, return true
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (mOnBoxSearchListener != null) {
-                    mOnBoxSearchListener.onQueryTextChange(newText);
-                }
-                LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
-                final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
-
-                if (!newText.isEmpty()) {
-                    searchCloseButton.setImageResource(mClearIconDrawable);
-                    searchCloseButton.setClickable(true);
-                } else {
-                    searchCloseButton.setImageResource(android.R.color.transparent);
-                    searchCloseButton.setClickable(false);
-                }
-                // Don't perform default action, return true
-                return true;
-            }
-        });
+        setOnQueryTextListener(new SearchQueryTextListener());
 
         this.setOnSearchClickListener(new OnClickListener() {
             @Override
@@ -134,6 +96,15 @@ public class BoxSearchView extends SearchView {
      */
     public boolean isExpanded() {
         return isExpanded;
+    }
+
+    /**
+     * Returns the listener implementing {@link OnBoxSearchListener}
+     * @return the search listener
+     */
+    @Nullable
+    public OnBoxSearchListener getSearchListener() {
+        return mOnBoxSearchListener;
     }
 
     /**
@@ -201,5 +172,41 @@ public class BoxSearchView extends SearchView {
          * @param text the text
          */
         void onQueryTextSubmit(String text);
+    }
+
+    /**
+     * Provides implementation of {@link OnQueryTextListener} interface. The default
+     * implementation takes care of visibility of the clear button based on the user input.
+     */
+    private class SearchQueryTextListener implements OnQueryTextListener {
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            if (mOnBoxSearchListener != null) {
+                mOnBoxSearchListener.onQueryTextSubmit(query);
+            }
+            // Don't perform default action, return true
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            if (mOnBoxSearchListener != null) {
+                mOnBoxSearchListener.onQueryTextChange(newText);
+            }
+            LinearLayout searchPlate = (LinearLayout)findViewById(R.id.search_plate);
+            final ImageView searchCloseButton = (ImageView) searchPlate.findViewById(R.id.search_close_btn);
+
+            if (searchCloseButton != null) {
+                if (!newText.isEmpty()) {
+                    searchCloseButton.setImageResource(R.drawable.ic_searchclear);
+                    searchCloseButton.setClickable(true);
+                } else {
+                    searchCloseButton.setImageResource(android.R.color.transparent);
+                    searchCloseButton.setClickable(false);
+                }
+            }
+            // Don't perform default action, return true
+            return true;
+        }
     }
 }

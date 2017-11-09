@@ -91,4 +91,11 @@
         <item name="android:clickable">true</item>
         <item name="android:background">@drawable/button_settings_states2</item>
     </style>
+
+    <style name="Browse_SearchView" parent="Widget.AppCompat.Light.SearchView">
+        <item name="actionModeBackground">@android:color/white</item>
+        <item name="closeIcon">@drawable/ic_searchclear</item>
+        <item name="queryHint">@string/default_search_hint</item>
+    </style>
+
 </resources>
