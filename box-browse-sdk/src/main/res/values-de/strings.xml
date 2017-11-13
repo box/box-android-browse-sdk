@@ -41,7 +41,7 @@
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">Video</string>
     <string description="File type to search for" name="search_filter_file_type_audio">Audio</string>
-    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Mehr anzeigen...</string>
+    <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">Mehr anzeigen ...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">Änderungsdatum</string>
     <string description="Label for setting to search for files modified at any time" name="any_time">Jederzeit</string>
     <string description="Label for setting to search for files modified in last day" name="past_day">Gestern</string>
