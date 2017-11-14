@@ -3,6 +3,7 @@
         <item name="colorPrimary">@color/box_browsesdk_primary</item>
         <item name="colorPrimaryDark">@color/box_browsesdk_primary_dark</item>
         <item name="colorAccent">@color/box_browsesdk_accent</item>
+        <item name="searchViewStyle">@style/BoxBrowse_SearchView</item>
     </style>
 
     <style name="BoxDialogTitle" parent="@style/TextAppearance.AppCompat.Title">
@@ -92,7 +93,7 @@
         <item name="android:background">@drawable/button_settings_states2</item>
     </style>
 
-    <style name="Browse_SearchView" parent="Widget.AppCompat.Light.SearchView">
+    <style name="BoxBrowse_SearchView" parent="Widget.AppCompat.Light.SearchView">
         <item name="actionModeBackground">@android:color/white</item>
         <item name="closeIcon">@drawable/ic_searchclear</item>
         <item name="queryHint">@string/default_search_hint</item>
