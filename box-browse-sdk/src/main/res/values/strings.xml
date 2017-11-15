@@ -26,7 +26,7 @@
     <string name="box_browsesdk_search_results_header">Results in <![CDATA[<b>%1$s</b>]]></string>
 
     <string name="search_hint" description="hint text for Search View. Argument represents a folder name">Search in %1$s</string>
-    <string name="global_search_hint" description="hint text for top level Search View">Search in Box</string>
+    <string name="default_search_hint" description="Default hint text for Search View">Search</string>
     <string name="filter_results_header" description="Label for button that launches screen to filter search results">Filter Results</string>
     <string name="filter_search_results" description="Header text for refine search results activity">Refine Search Results</string>
     <string name="apply" description="label for apply button in refine search results activity">Apply</string>

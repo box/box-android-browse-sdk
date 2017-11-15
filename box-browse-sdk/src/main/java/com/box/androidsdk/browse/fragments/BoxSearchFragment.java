@@ -150,7 +150,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         startActivityForResult(FilterSearchResults.newFilterSearchResultsIntent(getActivity(), mSearchFilters), REQUEST_FILTER_SEARCH_RESULTS);
     }
 
-    private void setupSearchFiltersHeader() {
+    protected void setupSearchFiltersHeader() {
         if (mSearchFiltersHeader == null || mSearchFilters == null) {
             return;
         }
