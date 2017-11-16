@@ -26,7 +26,7 @@
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b> konumundaki sonuçlar</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s klasöründe ara</string>
-    <string description="hint text for top level Search View" name="global_search_hint">Box içinde ara</string>
+    <string description="Default hint text for Search View" name="default_search_hint">Ara</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Sonuçları Filtrele</string>
     <string description="Header text for refine search results activity" name="filter_search_results">Arama Sonuçlarını İyileştir</string>
     <string description="label for apply button in refine search results activity" name="apply">Uygula</string>
