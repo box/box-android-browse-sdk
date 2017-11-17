@@ -66,7 +66,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     // Size of 1MB as per search API
     private final static long ONE_MB = 1000000;
 
-    protected BoxFolder mParentFolder;
+    private BoxFolder mParentFolder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
