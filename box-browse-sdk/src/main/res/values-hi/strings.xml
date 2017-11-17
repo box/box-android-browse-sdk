@@ -26,7 +26,7 @@
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b> में परिणाम</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s में खोजें</string>
-    <string description="hint text for top level Search View" name="global_search_hint">Box में खोजें</string>
+    <string description="Default hint text for Search View" name="default_search_hint">खोजें</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">परिणाम फ़िल्टर करें</string>
     <string description="Header text for refine search results activity" name="filter_search_results">खोज परिणाम परिशुद्ध करें</string>
     <string description="label for apply button in refine search results activity" name="apply">लागू करें</string>

@@ -26,7 +26,7 @@
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b>の結果</string>
 
     <string description="hint text for Search View. Argument represents a folder name" name="search_hint">%1$s内の検索</string>
-    <string description="hint text for top level Search View" name="global_search_hint">Boxで検索</string>
+    <string description="Default hint text for Search View" name="default_search_hint">検索</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">検索結果にフィルタを適用</string>
     <string description="Header text for refine search results activity" name="filter_search_results">検索結果の絞り込み</string>
     <string description="label for apply button in refine search results activity" name="apply">適用</string>
