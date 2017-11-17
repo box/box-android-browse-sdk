@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.activities.FilterSearchResults;
 import com.box.androidsdk.browse.adapters.BoxItemAdapter;
-
 import com.box.androidsdk.browse.adapters.BoxSearchAdapter;
 import com.box.androidsdk.browse.adapters.ResultsHeader;
 import com.box.androidsdk.browse.models.BoxSearchFilters;
@@ -67,7 +66,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
     // Size of 1MB as per search API
     private final static long ONE_MB = 1000000;
 
-    protected BoxFolder mParentFolder;
+    private BoxFolder mParentFolder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +76,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mLimit = getArguments().getInt(ARG_LIMIT, DEFAULT_LIMIT);
             mSearchQuery = getArguments().getString(OUT_QUERY, null);
             mParentFolder = (BoxFolder) getArguments().getSerializable(EXTRA_PARENT_FOLDER);
+            mSearchFilters = (BoxSearchFilters) getArguments().getSerializable(EXTRA_SEARCH_FILTERS);
         }
         if (savedInstanceState != null) {
             mOffset = savedInstanceState.getInt(OUT_OFFSET);
@@ -197,6 +197,14 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             setupSearchFiltersHeader();
             search();
         }
+    }
+
+    /**
+     * Returns the parent folder in which the search should be performed
+     * @return parent folder in which the search should be performed
+     */
+    public BoxFolder getParentFolder() {
+        return mParentFolder;
     }
 
     @Override
@@ -498,6 +506,21 @@ public class BoxSearchFragment extends BoxBrowseFragment {
             mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
         }
 
+        /**
+         * Instantiates a new Builder.
+         *
+         * @param session      the session
+         * @param searchQuery  the search query
+         * @param parentFolder the parent folder in which the search should be performed
+         * @param boxSearchFilters Filters to fine tune the search results based on file types, modification times etc.
+         */
+        public Builder(BoxSession session, String searchQuery, BoxFolder parentFolder, BoxSearchFilters boxSearchFilters) {
+            mArgs.putString(ARG_USER_ID, session.getUserId());
+            mArgs.putInt(ARG_LIMIT, DEFAULT_LIMIT);
+            mArgs.putString(OUT_QUERY, searchQuery);
+            mArgs.putSerializable(EXTRA_PARENT_FOLDER, BoxFolder.createFromIdAndName(parentFolder.getId(), parentFolder.getName()));
+            mArgs.putSerializable(EXTRA_SEARCH_FILTERS, boxSearchFilters);
+        }
 
         /**
          * Instantiates a new Builder.
