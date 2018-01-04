@@ -1,30 +1,18 @@
 package com.box.androidsdk.browse.uidata;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.media.ThumbnailUtils;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.util.LruCache;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.view.ViewParent;
-import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.service.BrowseController;
-import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.models.BoxBookmark;
-import com.box.androidsdk.content.models.BoxDownload;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
 import com.box.androidsdk.content.models.BoxItem;
@@ -40,13 +28,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.WeakHashMap;
-import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -149,6 +134,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         DEFAULT_ICON_RESORCE_MAP.put("ai", R.drawable.ic_box_browsesdk_illustrator);
     }
 
+    // Main thread looper for posting runnable to UI
+    private Handler mHandler = new Handler(Looper.getMainLooper());
 
     /**
      * Constructor.
@@ -322,7 +309,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
      * @param targetImage the target image
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
-        boolean isMediaType = targetImage.getTag() != null && targetImage.getTag().equals(TYPE_MEDIA);
+        boolean isMediaType = TYPE_MEDIA.equals(targetImage.getTag());
         targetImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if (item instanceof BoxFile
                 && item.getPermissions() != null
@@ -439,7 +426,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         if (bitmap == null || bitmapSourceFile == null || view == null){
             return;
         }
-        if(view.getTag() != null && view.getTag().equals(TYPE_REPRESENTATION)) {
+        if(TYPE_REPRESENTATION.equals(view.getTag())) {
             // No resizing for representation images
             mController.getThumbnailCache().put(bitmapSourceFile, bitmap);
         } else {
@@ -476,8 +463,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
      * @param view             the view
      */
     protected void postLaterToView(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view){
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 view.post(new Runnable() {
@@ -510,7 +496,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
             if (parent instanceof RecyclerView){
                 isScrolling = ((RecyclerView) parent).getScrollState() != RecyclerView.SCROLL_STATE_IDLE;
                 if (isScrolling) {
-                    final WeakReference<ImageView> imageViewRef = new WeakReference(imageView);
+                    final WeakReference<ImageView> imageViewRef = new WeakReference<>(imageView);
                     ((RecyclerView) parent).addOnScrollListener(new RecyclerView.OnScrollListener() {
                         @Override
                         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -521,10 +507,10 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                                 ImageView view = imageViewRef.get();
                                 if (view != null && view.getDrawable() instanceof LoaderDrawable) {
-                                    if (TYPE_REPRESENTATION.equals(imageView.getTag())) {
-                                        loadThumbnailRepresentation((BoxFile)((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                    if (TYPE_REPRESENTATION.equals(view.getTag())) {
+                                        loadThumbnailRepresentation((BoxFile)((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), view);
                                     } else{
-                                        loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), imageView);
+                                        loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), view);
                                     }
                                 }
                                 recyclerView.removeOnScrollListener(this);
@@ -535,11 +521,11 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 }
             }
         }
-        boolean isMediaType = imageView.getTag() != null && imageView.getTag().equals(TYPE_MEDIA);
+        boolean isMediaType = TYPE_MEDIA.equals(imageView.getTag());
         if (isScrolling && !isMediaType){
             // do nothing we will handle this with the scroll listener.
         } else {
-            imageView.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     //TODO decide whether to use two views for crossfading animation.
@@ -552,11 +538,9 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
 
 
-    private boolean isRequestStillApplicable(final BoxRequest request, final ImageView view){
-        if (view.getDrawable() instanceof LoaderDrawable){
-            return ((LoaderDrawable) view.getDrawable()).matchesRequest(request);
-        }
-        return false;
+    private boolean isRequestStillApplicable(final BoxRequest request, final ImageView view) {
+        return view.getDrawable() instanceof LoaderDrawable &&
+               ((LoaderDrawable) view.getDrawable()).matchesRequest(request);
 
     }
 
