@@ -309,7 +309,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
      * @param targetImage the target image
      */
     public void loadThumbnail(final BoxItem item, final ImageView targetImage) {
-        boolean isMediaType = TYPE_MEDIA.equals(targetImage.getTag());
+        boolean isMediaType = TYPE_MEDIA.equals(ViewData.getImageType(targetImage));
         targetImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if (item instanceof BoxFile
                 && item.getPermissions() != null
@@ -365,7 +365,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     public void loadMediaThumbnail(final BoxItem item, final ImageView targetImage) {
         if (targetImage.getTag() == null){
-            targetImage.setTag(TYPE_MEDIA);
+            ViewData data = new ViewData(TYPE_MEDIA, null);
+            targetImage.setTag(data);
         }
         loadThumbnail(item, targetImage);
     }
@@ -374,11 +375,13 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
      * Load a file image representation into an ImageView.
      * @param file the file to get the image representation
      * @param targetImage the ImageView where it should draw
+     * @param loadListener the listener to get notified when the image finishes loading or fails
      * @return true in case it was able to find a representation, false in case of failure
      */
-    public boolean loadThumbnailRepresentation(final BoxFile file, final ImageView targetImage) {
-        if (targetImage.getTag() == null){
-            targetImage.setTag(TYPE_REPRESENTATION);
+    public boolean loadThumbnailRepresentation(final BoxFile file, final ImageView targetImage, ImageLoadListener loadListener) {
+        if (targetImage.getTag() == null) {
+            ViewData data = new ViewData(TYPE_REPRESENTATION, loadListener);
+            targetImage.setTag(data);
         }
         BoxIteratorRepresentations reps = file.getRepresentations();
         if(reps != null) {
@@ -424,9 +427,10 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     @Override
     public void onImageReady(final File bitmapSourceFile, final BoxRequest request, final Bitmap bitmap, final ImageView view) {
         if (bitmap == null || bitmapSourceFile == null || view == null){
+            ViewData.getImageLoadListener(view).onError();
             return;
         }
-        if(TYPE_REPRESENTATION.equals(view.getTag())) {
+        if(TYPE_REPRESENTATION.equals(ViewData.getImageType(view))) {
             // No resizing for representation images
             mController.getThumbnailCache().put(bitmapSourceFile, bitmap);
         } else {
@@ -451,6 +455,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     @Override
     public void onImageException(BoxResponse response, ImageView view) {
         response.getException().printStackTrace();
+        ViewData.getImageLoadListener(view).onError();
     }
 
     /**
@@ -507,8 +512,8 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                                 ImageView view = imageViewRef.get();
                                 if (view != null && view.getDrawable() instanceof LoaderDrawable) {
-                                    if (TYPE_REPRESENTATION.equals(view.getTag())) {
-                                        loadThumbnailRepresentation((BoxFile)((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), view);
+                                    if (TYPE_REPRESENTATION.equals(ViewData.getImageType(view))) {
+                                        loadThumbnailRepresentation((BoxFile)((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), view, null);
                                     } else{
                                         loadThumbnail(((LoaderDrawable) view.getDrawable()).getTask().getBoxItem(), view);
                                     }
@@ -521,7 +526,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 }
             }
         }
-        boolean isMediaType = TYPE_MEDIA.equals(imageView.getTag());
+        boolean isMediaType = TYPE_MEDIA.equals(ViewData.getImageType(imageView));
         if (isScrolling && !isMediaType){
             // do nothing we will handle this with the scroll listener.
         } else {
@@ -530,13 +535,12 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
                 public void run() {
                     //TODO decide whether to use two views for crossfading animation.
                     imageView.setImageBitmap(bitmap);
+                    ViewData.getImageLoadListener(imageView).onSuccess();
                 }
             });
         }
 
     }
-
-
 
     private boolean isRequestStillApplicable(final BoxRequest request, final ImageView view) {
         return view.getDrawable() instanceof LoaderDrawable &&
@@ -544,4 +548,54 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     }
 
+    /**
+     * Interface to listen for Image load, so that the calling component can
+     *  act upon error or success
+     */
+    public interface ImageLoadListener {
+        void onSuccess();
+        void onError();
+    }
+
+    /**
+     * Internal class to keep ImageView data information, like type of thumbnail to show, and image load listener
+     */
+    private static class ViewData {
+        private ImageLoadListener mListener;
+        private String mImageType;
+
+        // Dummy listener (Null object pattern)
+        private static final ImageLoadListener NULL_LISTENER = new ImageLoadListener() {
+            @Override
+            public void onSuccess() {}
+            @Override
+            public void onError() {}
+        };
+
+        ViewData(String type, ImageLoadListener listener) {
+            mImageType = type;
+            mListener = listener;
+        }
+
+        static ImageLoadListener getImageLoadListener(ImageView view) {
+            if(view != null) {
+                ViewData data = (ViewData) view.getTag();
+                if(data != null) {
+                    return data.mListener;
+                }
+            }
+            return NULL_LISTENER;
+        }
+
+        static String getImageType(ImageView view) {
+            if(view != null) {
+                ViewData data = (ViewData) view.getTag();
+                if(data != null) {
+                    return data.mImageType;
+                }
+            }
+            return null;
+        }
+
+    }
 }
