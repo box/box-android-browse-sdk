@@ -580,7 +580,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         static ImageLoadListener getImageLoadListener(ImageView view) {
             if(view != null) {
                 ViewData data = (ViewData) view.getTag();
-                if(data != null) {
+                if(data != null && data.mListener != null) {
                     return data.mListener;
                 }
             }
