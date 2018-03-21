@@ -2,14 +2,12 @@
     <string description="Default title for the Browse SDK" name="box_browsesdk_title">Обзор</string>
     <string name="box_browsesdk_problem_fetching_folder">Проблема при получении папки.</string>
     <string name="box_browsesdk_problem_performing_search">Проблема при выполнении поиска.</string>
-    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">Невозможно просмотреть элементы в этой папке.</string>
     <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">Ошибка сети. Повторите попытку.</string>
     <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">Сеанс не прошел проверку подлинности</string>
     <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">Нет выбранных элементов</string>
 
     <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">Все файлы</string>
 
-    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">Настройки</string>
     <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">Поиск</string>
     <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">Создать папку</string>
     <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">Выбрать папку</string>
@@ -19,16 +17,11 @@
     <string name="box_browsesdk_create_folder_conflict">Папка с таким именем уже создана.</string>
     <string name="box_browsesdk_error_retrieving_items">Ошибка при получении элементов</string>
     <string name="box_browsesdk_tap_to_retry">Коснитесь, чтобы повторить попытку</string>
-    <string name="box_browsesdk_performing_search">Выполняется поиск…</string>
-    <string name="box_browsesdk_see_additional_results">Посмотреть другие результаты</string>
-    <string name="box_browsesdk_search_hint">Поиск</string>
     <string name="box_browsesdk_recent_searches_header">Предыдущие поисковые запросы</string>
     <string name="box_browsesdk_search_results_header">Результаты из &lt;b>%1$s&lt;/b></string>
 
-    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">Поиск в %1$s</string>
     <string description="Default hint text for Search View" name="default_search_hint">Поиск</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">Фильтрация результатов</string>
-    <string description="Header text for refine search results activity" name="filter_search_results">Уточнение поиска</string>
     <string description="label for apply button in refine search results activity" name="apply">Применить</string>
     <string description="label for clear filters button in refine search results activity" name="clear_filters">Очистить фильтры</string>
     <string description="Header for section that let you select file types to search for" name="file_type_label">Тип файла</string>

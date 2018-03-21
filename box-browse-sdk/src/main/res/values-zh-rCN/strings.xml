@@ -2,14 +2,12 @@
     <string description="Default title for the Browse SDK" name="box_browsesdk_title">浏览</string>
     <string name="box_browsesdk_problem_fetching_folder">获取文件夹时出现问题。</string>
     <string name="box_browsesdk_problem_performing_search">执行搜索时出现问题。</string>
-    <string description="Error message shown when the user does not have sufficient permissions to view the items in the folder or it is not available" name="box_browsesdk_cannot_view_folder">无法查看本文件夹中的项目。</string>
     <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">网络出错。请重试。</string>
     <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">会话未经验证</string>
     <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">未选择项目</string>
 
     <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">所有文件</string>
 
-    <string description="Accessibility title for the settings menu action in the toolbar" name="box_browsesdk_action_settings">设置</string>
     <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">搜索</string>
     <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">创建文件夹</string>
     <string description="Button text shown at the bottom of the activity to allow the user to select the current folder as the folder that should be returned" name="box_browsesdk_select_folder">选择此文件夹</string>
@@ -19,16 +17,11 @@
     <string name="box_browsesdk_create_folder_conflict">已创建相同名称的文件夹。</string>
     <string name="box_browsesdk_error_retrieving_items">检索项目时出错</string>
     <string name="box_browsesdk_tap_to_retry">点按以重试</string>
-    <string name="box_browsesdk_performing_search">正在执行搜索…</string>
-    <string name="box_browsesdk_see_additional_results">查看更多结果</string>
-    <string name="box_browsesdk_search_hint">搜索</string>
     <string name="box_browsesdk_recent_searches_header">近期搜索</string>
     <string name="box_browsesdk_search_results_header">&lt;b>%1$s&lt;/b> 中的结果</string>
 
-    <string description="hint text for Search View. Argument represents a folder name" name="search_hint">在 %1$s 中搜索</string>
     <string description="Default hint text for Search View" name="default_search_hint">搜索</string>
     <string description="Label for button that launches screen to filter search results" name="filter_results_header">筛选结果</string>
-    <string description="Header text for refine search results activity" name="filter_search_results">优化搜索结果</string>
     <string description="label for apply button in refine search results activity" name="apply">应用</string>
     <string description="label for clear filters button in refine search results activity" name="clear_filters">清除筛选</string>
     <string description="Header for section that let you select file types to search for" name="file_type_label">文件类型</string>
