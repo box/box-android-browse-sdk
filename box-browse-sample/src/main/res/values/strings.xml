@@ -2,5 +2,5 @@
     <string name="app_name">BoxBrowseSample</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="box_browsesdk_action_settings" description="Accessibility title for the settings menu action in the toolbar">Settings</string>
 </resources>
