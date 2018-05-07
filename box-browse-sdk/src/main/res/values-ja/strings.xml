@@ -1,5 +1,5 @@
 <resources>
-    <string description="Default title for the Browse SDK" name="box_browsesdk_title">ブラウズ</string>
+    <string description="Default title for the Browse SDK" name="box_browsesdk_title">ブラウザ</string>
     <string name="box_browsesdk_problem_fetching_folder">フォルダの取得で問題がありました。</string>
     <string name="box_browsesdk_problem_performing_search">検索の実行で問題がありました。</string>
     <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">ネットワークエラーが発生しました。もう一度やり直してください。</string>
