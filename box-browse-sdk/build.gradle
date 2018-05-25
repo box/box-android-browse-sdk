@@ -32,7 +32,7 @@ android {
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -47,6 +47,7 @@ android {
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
