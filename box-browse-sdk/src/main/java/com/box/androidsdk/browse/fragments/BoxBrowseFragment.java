@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.box.androidsdk.browse.R;
@@ -61,8 +60,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     protected static final String EXTRA_SECONDARY_ACTION_LISTENER = "com.box.androidsdk.browse.SECONDARYACTIONLISTENER";
     protected static final String EXTRA_MULTI_SELECT_HANDLER = "com.box.androidsdk.browse.MULTI_SELECT_HANDLER";
-    protected static final String EXTRA_TITLE = "com.box.androidsdk.browse.TITLE";
-    protected static final String EXTRA_COLLECTION = "com.box.androidsdk.browse.COLLECTION";
 
     protected ArrayList<BoxItem> mItems;
 
@@ -78,7 +75,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     private boolean mWaitingForConnection;
     private boolean mIsConnected;
     protected BrowseController mController;
-    private Set<OnUpdateListener> mUpdateListeners = new HashSet<OnUpdateListener>();
+    private Set<OnUpdateListener> mUpdateListeners = new HashSet<>();
     protected BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -115,6 +112,7 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             String userId = getArguments().getString(ARG_USER_ID);
             if (SdkUtils.isBlank(userId)) {
@@ -123,7 +121,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
             mBoxItemFilter = (BoxItemFilter) getArguments().getSerializable(ARG_BOX_ITEM_FILTER);
         }
         if (savedInstanceState != null) {
-            mItems = (ArrayList<BoxItem>) savedInstanceState.getSerializable(EXTRA_COLLECTION);
             if (savedInstanceState.containsKey(EXTRA_SECONDARY_ACTION_LISTENER)) {
                 mSecondaryActionListener = (OnSecondaryActionListener) savedInstanceState.getSerializable(EXTRA_SECONDARY_ACTION_LISTENER);
             }
@@ -176,7 +173,6 @@ public abstract class BoxBrowseFragment extends Fragment implements SwipeRefresh
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(EXTRA_COLLECTION, mItems);
         if (mSecondaryActionListener instanceof Serializable) {
             outState.putSerializable(EXTRA_SECONDARY_ACTION_LISTENER, (Serializable) mSecondaryActionListener);
         }
