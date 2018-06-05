@@ -2,7 +2,6 @@ package com.box.androidsdk.sample;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -12,14 +11,10 @@ import android.widget.Toast;
 import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
 import com.box.androidsdk.browse.activities.BoxBrowseFolderActivity;
 import com.box.androidsdk.browse.service.BoxSimpleLocalCache;
-import com.box.androidsdk.content.BoxApiFile;
 import com.box.androidsdk.content.BoxConfig;
-import com.box.androidsdk.content.models.BoxDownload;
-import com.box.androidsdk.content.models.BoxSession;
 import com.box.androidsdk.content.models.BoxFile;
 import com.box.androidsdk.content.models.BoxFolder;
-
-import java.io.File;
+import com.box.androidsdk.content.models.BoxSession;
 
 
 public class SampleBrowseActivity extends AppCompatActivity {

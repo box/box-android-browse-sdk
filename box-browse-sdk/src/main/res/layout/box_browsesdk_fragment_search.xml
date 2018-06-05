@@ -17,8 +17,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_gravity="center"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/box_browsesdk_horizontal_margin"
+                android:paddingRight="@dimen/box_browsesdk_horizontal_margin"
                 android:paddingTop="@dimen/box_browsesdk_vertical_margin_small"
                 android:paddingBottom="@dimen/box_browsesdk_vertical_margin_small"
                 android:id="@+id/filterResultsHeaderUnset">
@@ -28,7 +28,7 @@
                     android:text="@string/filter_results_header"
                     android:textSize="16sp"
                     android:textColor="#FF737F8B"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/box_browsesdk_horizontal_margin"
                     android:ellipsize="end"
                     android:maxLines="1"/>
                 <ImageView
@@ -40,8 +40,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/filterResultsHeaderSet"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/box_browsesdk_horizontal_margin"
+                android:paddingRight="@dimen/box_browsesdk_horizontal_margin"
                 android:paddingTop="@dimen/box_browsesdk_vertical_margin_small"
                 android:paddingBottom="@dimen/box_browsesdk_vertical_margin_small">
                 <TextView
@@ -52,7 +52,7 @@
                     android:textColor="#1992D4"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/box_browsesdk_horizontal_margin"
                     android:textSize="16sp"
                     android:layout_toLeftOf="@+id/filterIcon"/>
                 <ImageView
