@@ -6,7 +6,7 @@
     <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">セッションが認証されていません</string>
     <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">選択済みアイテムなし</string>
 
-    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">すべての\nファイル</string>
+    <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">すべてのファイル</string>
 
     <string description="Accessibility title for the search menu action in the toolbar" name="box_browsesdk_action_search">検索</string>
     <string description="Accessibility title for the create folder menu action in the toolbar" name="box_browsesdk_create_folder">フォルダを作成</string>
