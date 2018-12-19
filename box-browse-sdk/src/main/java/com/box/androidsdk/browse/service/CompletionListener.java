@@ -1,10 +1,10 @@
 package com.box.androidsdk.browse.service;
 
-import android.support.v4.content.LocalBroadcastManager;
-
 import com.box.androidsdk.content.BoxFutureTask;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class CompletionListener implements BoxFutureTask.OnCompletedListener {
 

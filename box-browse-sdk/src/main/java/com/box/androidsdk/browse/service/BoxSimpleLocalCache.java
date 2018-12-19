@@ -1,7 +1,5 @@
 package com.box.androidsdk.browse.service;
 
-import android.support.v4.util.LruCache;
-
 import com.box.androidsdk.content.BoxCache;
 import com.box.androidsdk.content.BoxException;
 import com.box.androidsdk.content.models.BoxFolder;
@@ -10,6 +8,8 @@ import com.box.androidsdk.content.requests.BoxCacheableRequest;
 import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestsFolder;
 import com.box.androidsdk.content.requests.BoxResponse;
+
+import androidx.collection.LruCache;
 
 /***
  * A very simple implementation of BoxCache that caches some folder responses in memory for faster retrieval.
@@ -21,7 +21,6 @@ public class BoxSimpleLocalCache implements BoxCache {
      */
     public BoxSimpleLocalCache(){
     }
-
 
     /**
      * The full folder cache.

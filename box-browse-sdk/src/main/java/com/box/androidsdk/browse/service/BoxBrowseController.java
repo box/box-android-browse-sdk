@@ -2,7 +2,6 @@ package com.box.androidsdk.browse.service;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
@@ -36,6 +35,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import androidx.collection.LruCache;
 
 /***
  * Default implementation for the {@link BrowseController}.
@@ -292,7 +293,6 @@ public class BoxBrowseController implements BrowseController {
      * The type Bitmap lru cache.
      */
     protected class BitmapLruCache extends LruCache<File, Bitmap> {
-
         /**
          * Instantiates a new Bitmap lru cache.
          *

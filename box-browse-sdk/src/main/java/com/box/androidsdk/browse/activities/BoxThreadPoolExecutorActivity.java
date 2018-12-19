@@ -8,10 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -34,13 +30,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 /**
  * Base class for all activities that make API requests through the Box Content SDK. This class is responsible for
  * showing a loading spinner while a request is executing and then hiding it when the request is complete.
  * All BoxRequest tasks should be submitted to getApiExecutor and then handled by overriding handleBoxResponse
  */
 public abstract class BoxThreadPoolExecutorActivity extends AppCompatActivity {
-
     public static final String EXTRA_ITEM = "extraItem";
     public static final String EXTRA_USER_ID = "extraUserId";
 

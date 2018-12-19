@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 16
@@ -49,13 +49,18 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
+ext{
+    support_version = '1.0.0-beta01'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     api 'com.box:box-android-sdk:4.2.0'
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:recyclerview-v7:26.1.0'
-    implementation 'com.android.support:support-v4:26.1.0'
+    implementation "androidx.appcompat:appcompat:$support_version"
+    implementation "androidx.recyclerview:recyclerview:$support_version"
+    implementation "androidx.legacy:legacy-support-v4:$support_version"
     implementation 'org.apache.commons:commons-lang3:3.1'
 }
 

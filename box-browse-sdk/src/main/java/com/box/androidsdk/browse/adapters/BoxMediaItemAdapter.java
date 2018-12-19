@@ -2,10 +2,6 @@ package com.box.androidsdk.browse.adapters;
 
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +33,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.recyclerview.widget.RecyclerView;
+
 /**
  * Adapter for Media items used in the RecyclerView of a BrowseFragment
  */
 public class BoxMediaItemAdapter extends BoxItemAdapter {
-
     /**
      * Instantiates a new Box item adapter.
      *

@@ -3,8 +3,6 @@ package com.box.androidsdk.browse.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +18,9 @@ import com.box.androidsdk.browse.R;
 import com.box.androidsdk.browse.models.BoxSearchFilters;
 
 import java.util.HashMap;
+
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.fragment.app.Fragment;
 
 /**
  * This Fragment allows users to set filters on search parameters.

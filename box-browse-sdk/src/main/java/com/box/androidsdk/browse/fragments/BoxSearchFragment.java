@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import androidx.fragment.app.FragmentActivity;
 
 /**
  * Use the {@link com.box.androidsdk.browse.fragments.BoxSearchFragment.Builder} factory method to

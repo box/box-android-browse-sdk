@@ -3,14 +3,7 @@ package com.box.androidsdk.browse.uidata;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.ThumbnailUtils;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.v4.util.LruCache;
-import android.view.ViewPropertyAnimator;
 import android.widget.ImageView;
 
 import com.box.androidsdk.content.BoxFutureTask;
@@ -20,7 +13,6 @@ import com.box.androidsdk.content.requests.BoxRequest;
 import com.box.androidsdk.content.requests.BoxRequestDownload;
 import com.box.androidsdk.content.requests.BoxRequestsFile;
 import com.box.androidsdk.content.requests.BoxResponse;
-import com.box.androidsdk.content.utils.SdkUtils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
