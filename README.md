@@ -8,19 +8,21 @@ The SDK can be obtained by adding it as a maven dependency, cloning the source i
 
 Gradle: 
 ```groovy 
-compile 'com.box:box-android-browse-sdk:2.0.0'
+implementation 'com.box:box-android-browse-sdk:3.0.0'
 ```
 Maven: 
 ```xml
 <dependency>
     <groupId>com.box</groupId>
     <artifactId>box-android-browse-sdk</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 If not using Gradle or Maven, this SDK has the following dependencies and will need to be included in your project:
-* [box-android-sdk](https://github.com/box/box-android-sdk) (maven: `com.box:box-android-sdk:3.0.2`)
+* [box-android-sdk](https://github.com/box/box-android-sdk) (maven: `com.box:box-android-sdk:5.0.0`)
+
+The SDK was migrated to AndroidX in version 3.0.0. Latest stable version with support library is 2.1.0.
 
 Quickstart
 --------------

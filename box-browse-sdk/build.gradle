@@ -13,13 +13,13 @@ android {
         def env = System.getenv()
         def git_count = env['GIT_COUNT'] as Integer
         if (git_count != null) {
-            versionCode git_count + 20000
-            versionName "2.99." + git_count + "-SNAPSHOT"
-            version "2.99." + git_count + "-SNAPSHOT"
+            versionCode git_count + 30000
+            versionName "3.99." + git_count + "-SNAPSHOT"
+            version "3.99." + git_count + "-SNAPSHOT"
         } else {
-            versionCode 20100
-            versionName "2.1.0"
-            version "2.1.0"
+            versionCode 30000
+            versionName "3.0.0"
+            version "3.0.0"
         }
         vectorDrawables.useSupportLibrary = true
     }
