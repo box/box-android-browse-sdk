@@ -2,11 +2,10 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion 28
         group "com.box"
 
 
@@ -31,7 +30,7 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
@@ -50,17 +49,12 @@ repositories {
     jcenter()
 }
 
-ext{
-    support_version = '1.0.0-beta01'
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.box:box-android-sdk:4.2.0'
-    implementation "androidx.appcompat:appcompat:$support_version"
-    implementation "androidx.recyclerview:recyclerview:$support_version"
-    implementation "androidx.legacy:legacy-support-v4:$support_version"
+    api 'com.box:box-android-sdk:4.2.3'
+    implementation "androidx.appcompat:appcompat:1.0.2"
+    implementation "androidx.recyclerview:recyclerview:1.0.0"
 }
 
 apply from: '../maven_push.gradle'
