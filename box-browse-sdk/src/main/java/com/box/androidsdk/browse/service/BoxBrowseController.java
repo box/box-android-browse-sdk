@@ -2,6 +2,7 @@ package com.box.androidsdk.browse.service;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.box.androidsdk.browse.R;
@@ -24,8 +25,6 @@ import com.box.androidsdk.content.requests.BoxRequestsSearch;
 import com.box.androidsdk.content.requests.BoxResponse;
 import com.box.androidsdk.content.utils.BoxLogUtils;
 import com.eclipsesource.json.JsonArray;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -239,7 +238,7 @@ public class BoxBrowseController implements BrowseController {
     public ArrayList<String> addToRecentSearches(Context context, BoxUser user, String recentSearch) {
         ArrayList<String> recentSearches = getRecentSearches(context, user);
 
-        if (StringUtils.isEmpty(recentSearch)) {
+        if (TextUtils.isEmpty(recentSearch)) {
             return recentSearches;
         }
 
