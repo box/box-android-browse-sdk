@@ -52,7 +52,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.box:box-android-sdk:4.2.3'
+    api 'com.box:box-android-sdk:5.0.0'
     implementation "androidx.appcompat:appcompat:1.0.2"
     implementation "androidx.recyclerview:recyclerview:1.0.0"
 }
