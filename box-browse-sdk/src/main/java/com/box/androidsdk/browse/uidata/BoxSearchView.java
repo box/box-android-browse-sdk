@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -15,6 +14,7 @@ import android.widget.LinearLayout;
 
 import com.box.androidsdk.browse.R;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 
 /**
