@@ -1,12 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion 28
         group "com.box"
 
 
@@ -14,13 +13,13 @@ android {
         def env = System.getenv()
         def git_count = env['GIT_COUNT'] as Integer
         if (git_count != null) {
-            versionCode git_count + 20000
-            versionName "2.99." + git_count + "-SNAPSHOT"
-            version "2.99." + git_count + "-SNAPSHOT"
+            versionCode git_count + 30000
+            versionName "3.99." + git_count + "-SNAPSHOT"
+            version "3.99." + git_count + "-SNAPSHOT"
         } else {
-            versionCode 20100
-            versionName "2.1.0"
-            version "2.1.0"
+            versionCode 30000
+            versionName "3.0.0"
+            version "3.0.0"
         }
         vectorDrawables.useSupportLibrary = true
     }
@@ -31,7 +30,7 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
@@ -49,14 +48,13 @@ repositories {
     mavenCentral()
     jcenter()
 }
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.box:box-android-sdk:4.2.0'
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:recyclerview-v7:26.1.0'
-    implementation 'com.android.support:support-v4:26.1.0'
-    implementation 'org.apache.commons:commons-lang3:3.1'
+    api 'com.box:box-android-sdk:5.0.0'
+    implementation "androidx.appcompat:appcompat:1.0.2"
+    implementation "androidx.recyclerview:recyclerview:1.0.0"
 }
 
 apply from: '../maven_push.gradle'

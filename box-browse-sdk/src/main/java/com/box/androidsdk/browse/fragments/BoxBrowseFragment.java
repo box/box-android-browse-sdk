@@ -11,14 +11,14 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
-import android.support.v7.widget.SimpleItemAnimator;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,8 +50,8 @@ import java.util.Set;
  */
 public abstract class BoxBrowseFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
         BoxItemAdapter.OnInteractionListener {
-
     public static final String TAG = BoxBrowseFragment.class.getName();
+
     protected static final String ARG_ID = "argId";
     protected static final String ARG_USER_ID = "argUserId";
     protected static final String ARG_NAME = "argName";
