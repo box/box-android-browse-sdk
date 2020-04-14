@@ -17,9 +17,9 @@ android {
             versionName "3.99." + git_count + "-SNAPSHOT"
             version "3.99." + git_count + "-SNAPSHOT"
         } else {
-            versionCode 30001
-            versionName "3.0.1"
-            version "3.0.1"
+            versionCode 30002
+            versionName "3.0.2"
+            version "3.0.2"
         }
         vectorDrawables.useSupportLibrary = true
     }
