@@ -57,6 +57,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
 
     public static final String[] DOCUMENTS_EXTENSIONS_ARRAY = {"csv", "doc", "docx", "gdoc", "gsheet", "htm", "html", "msg", "odp", "odt", "ods", "pdf",
             "ppt", "pptx", "rtf", "tsv", "wpd", "xhtml", "xls", "xlsm", "xlsx", "xml", "xsd", "xsl", "txt"};
+    public static final String[] AUTOCAD_EXTENSIONS_ARRAY = {"dwg"};
     public static final String[] PRESENTATION_EXTENSIONS_ARRAY = {"ppt", "pptx"};
     public static final String[] SPREADSHEET_EXTENSIONS_ARRAY = {"csv", "gsheet", "xls", "xlsm", "xlsx", "xsd", "xsl"};
     public static final String[] WORD_EXTENSIONS_ARRAY = {"doc", "docx"};
@@ -85,6 +86,9 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
         for (String ext : IMAGE_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_image);
             IMAGE_EXTENSIONS.add(ext);
+        }
+        for (String ext : AUTOCAD_EXTENSIONS_ARRAY){
+            DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_dwg);
         }
         for (String ext : DOCUMENTS_EXTENSIONS_ARRAY){
             DEFAULT_ICON_RESORCE_MAP.put(ext, R.drawable.ic_box_browsesdk_doc);

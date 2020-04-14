@@ -31,6 +31,7 @@
     <string name="search_filter_file_type_image" description="File type to search for">Image</string>
     <string name="search_filter_file_type_folder" description="File type to search for">Folder</string>
     <string name="search_filter_file_type_document" description="File type to search for">Document</string>
+    <string name="search_filter_file_type_autocad" description="File type to search for">Autocad</string>
     <string name="search_filter_file_type_boxnote" description="File type to search for">Box Note</string>
     <string name="search_filter_file_type_video" description="File type to search for">Video</string>
     <string name="search_filter_file_type_audio" description="File type to search for">Audio</string>

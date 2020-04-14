@@ -30,6 +30,10 @@ public class BoxSearchFilters implements Serializable {
          */
         Document(R.id.documentFileTypeContainer, R.drawable.ic_box_browsesdk_doc, R.string.search_filter_file_type_document),
         /**
+         * Document item type.
+         */
+        Autocad(R.id.documentFileTypeContainer, R.drawable.ic_box_browsesdk_dwg, R.string.search_filter_file_type_autocad),
+        /**
          * Folder item type.
          */
         Folder(R.id.folderFileTypeContainer, R.drawable.ic_box_browsesdk_folder_shared, R.string.search_filter_file_type_folder),
