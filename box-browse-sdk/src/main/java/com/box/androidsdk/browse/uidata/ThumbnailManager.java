@@ -75,7 +75,7 @@ public class ThumbnailManager implements LoaderDrawable.ImageReadyListener{
     public static final String[] PHOTOSHOP_EXTENSIONS_ARRAY = {"psd", "psb"};
     public static final String[] VECTOR_EXTENSIONS_ARRAY = {"eps", "svg"};
     public static final String[] BOXNOTE_EXTENSIONS_ARRAY = {"boxnote"};
-    public static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif", "ico"};
+    public static final String[] IMAGE_EXTENSIONS_ARRAY = {"ai", "bmp", "dcm", "eps", "jpeg", "jpg", "png", "ps", "psd", "tif", "tiff", "svg", "gif", "ico", "cr2", "dng", "nef", "raf", "raw", "crw" };
     public static final String[] PDF_EXTENSIONS_ARRAY = {"pdf"};
 
     protected static final HashSet<String> IMAGE_EXTENSIONS = new HashSet<String>();
