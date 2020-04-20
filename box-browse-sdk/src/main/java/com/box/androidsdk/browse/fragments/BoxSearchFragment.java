@@ -98,6 +98,7 @@ public class BoxSearchFragment extends BoxBrowseFragment {
         mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Presentation, ThumbnailManager.PRESENTATION_EXTENSIONS_ARRAY);
         mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Spreadsheet, ThumbnailManager.SPREADSHEET_EXTENSIONS_ARRAY);
         mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Video, ThumbnailManager.VIDEO_EXTENSIONS_ARRAY);
+        mItemTypeToExtensions.put(BoxSearchFilters.ItemType.Autocad, ThumbnailManager.AUTOCAD_EXTENSIONS_ARRAY);
 
         mRequest = null;
     }
