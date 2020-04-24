@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">Изображение</string>
     <string description="File type to search for" name="search_filter_file_type_folder">Папка</string>
     <string description="File type to search for" name="search_filter_file_type_document">Документ</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">Видео</string>
     <string description="File type to search for" name="search_filter_file_type_audio">Аудио</string>

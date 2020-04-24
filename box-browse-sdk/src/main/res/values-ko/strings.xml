@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">이미지</string>
     <string description="File type to search for" name="search_filter_file_type_folder">폴더</string>
     <string description="File type to search for" name="search_filter_file_type_document">문서</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">AutoCAD</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">비디오</string>
     <string description="File type to search for" name="search_filter_file_type_audio">오디오</string>

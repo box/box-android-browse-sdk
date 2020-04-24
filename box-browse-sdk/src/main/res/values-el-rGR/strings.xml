@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">Εικόνα</string>
     <string description="File type to search for" name="search_filter_file_type_folder">Φάκελος</string>
     <string description="File type to search for" name="search_filter_file_type_document">Έγγραφο</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">Βίντεο</string>
     <string description="File type to search for" name="search_filter_file_type_audio">Ήχος</string>
