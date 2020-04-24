@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">影像</string>
     <string description="File type to search for" name="search_filter_file_type_folder">資料夾</string>
     <string description="File type to search for" name="search_filter_file_type_document">文件</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">影片</string>
     <string description="File type to search for" name="search_filter_file_type_audio">音訊</string>

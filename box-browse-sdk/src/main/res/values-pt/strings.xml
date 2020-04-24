@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">Imagem</string>
     <string description="File type to search for" name="search_filter_file_type_folder">Pasta</string>
     <string description="File type to search for" name="search_filter_file_type_document">Documento</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">Vídeo</string>
     <string description="File type to search for" name="search_filter_file_type_audio">Áudio</string>

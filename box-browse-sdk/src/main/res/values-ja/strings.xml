@@ -4,7 +4,7 @@
     <string name="box_browsesdk_problem_performing_search">検索の実行で問題がありました。</string>
     <string description="Toast message that indicates that an error occurred while performing an action" name="box_browsesdk_network_error">ネットワークエラーが発生しました。もう一度やり直してください。</string>
     <string description="Toast message that indicates that the provided authentication session is not valid" name="box_browsesdk_session_is_not_authenticated">セッションが認証されていません</string>
-    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">選択済みアイテムなし</string>
+    <string description="Toast message that indicates that an invalid item was provided to browse on" name="box_browsesdk_no_item_selected">選択済み項目なし</string>
 
     <string description="Title shown for the parent folder when it is at the root level" name="box_browsesdk_all_files">すべてのファイル</string>
 
@@ -31,6 +31,7 @@
     <string description="File type to search for" name="search_filter_file_type_image">画像</string>
     <string description="File type to search for" name="search_filter_file_type_folder">フォルダ</string>
     <string description="File type to search for" name="search_filter_file_type_document">ドキュメント</string>
+    <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
     <string description="File type to search for" name="search_filter_file_type_video">動画</string>
     <string description="File type to search for" name="search_filter_file_type_audio">音声</string>
