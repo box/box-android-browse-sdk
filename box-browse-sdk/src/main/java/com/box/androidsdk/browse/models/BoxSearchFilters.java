@@ -32,7 +32,7 @@ public class BoxSearchFilters implements Serializable {
         /**
          * Autocad item type.
          */
-        Autocad(R.id.documentFileTypeContainer, R.drawable.ic_box_browsesdk_dwg, R.string.search_filter_file_type_autocad),
+        Autocad(R.id.autocadFileTypeContainer, R.drawable.ic_box_browsesdk_dwg, R.string.search_filter_file_type_autocad),
         /**
          * Folder item type.
          */
