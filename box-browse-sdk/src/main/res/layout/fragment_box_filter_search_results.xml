@@ -41,6 +41,10 @@
                         layout="@layout/filter_search_results_file_type_item" />
 
                     <include
+                        android:id="@+id/autocadFileTypeContainer"
+                        layout="@layout/filter_search_results_file_type_item" />
+
+                    <include
                         android:id="@+id/boxnoteFileTypeContainer"
                         layout="@layout/filter_search_results_file_type_item" />
 
