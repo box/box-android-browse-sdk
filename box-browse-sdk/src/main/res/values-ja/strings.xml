@@ -33,11 +33,11 @@
     <string description="File type to search for" name="search_filter_file_type_document">ドキュメント</string>
     <string description="File type to search for" name="search_filter_file_type_autocad">Autocad</string>
     <string description="File type to search for" name="search_filter_file_type_boxnote">Box Note</string>
-    <string description="File type to search for" name="search_filter_file_type_video">動画</string>
+    <string description="File type to search for" name="search_filter_file_type_video">ビデオ</string>
     <string description="File type to search for" name="search_filter_file_type_audio">音声</string>
     <string desctiption="Hyperlink to show hidden file types" name="search_filter_file_type_see_more">もっと見る...</string>
     <string description="Header for section that limit search based on last modified date of the files and folders" name="date_modified_label">変更日</string>
-    <string description="Label for setting to search for files modified at any time" name="any_time">すべての期間</string>
+    <string description="Label for setting to search for files modified at any time" name="any_time">指定なし</string>
     <string description="Label for setting to search for files modified in last day" name="past_day">過去1日</string>
     <string description="Label for setting to search for files modified in last week" name="past_week">過去1週間</string>
     <string description="Label for setting to search for files modified in last month" name="past_month">過去1か月</string>
